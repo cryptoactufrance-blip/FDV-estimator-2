@@ -440,7 +440,7 @@
             // 4. Mettre à jour l'affichage
             addLog('🎨 Mise à jour de l\'interface...', 'info');
             updateTable();
-            updateChart(regression);
+            await updateChart(regression);
             
             // Mettre à jour la date
             document.getElementById('lastUpdate').textContent = new Date().toLocaleString('fr-FR');
@@ -559,7 +559,115 @@
         // MISE À JOUR DU GRAPHIQUE
         // =====================================================
         
-        function updateChart(regression) {
+        // Cache pour les images des logos
+        let logoImages = {};
+        
+        // Précharger les images des logos
+        async function preloadLogos(projects) {
+            const promises = projects.map(p => {
+                return new Promise((resolve) => {
+                    if (!p.logo) {
+                        resolve();
+                        return;
+                    }
+                    
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = () => {
+                        logoImages[p.name] = img;
+                        addLog(`🖼️ Logo chargé: ${p.name}`, 'success');
+                        resolve();
+                    };
+                    img.onerror = () => {
+                        addLog(`⚠️ Erreur chargement logo: ${p.name}`, 'warning');
+                        resolve();
+                    };
+                    img.src = p.logo;
+                });
+            });
+            
+            await Promise.all(promises);
+        }
+        
+        // Plugin personnalisé pour dessiner les logos
+        const logoPlugin = {
+            id: 'logoPlugin',
+            afterDatasetsDraw: function(chart) {
+                const ctx = chart.ctx;
+                
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    // Ignorer la ligne de régression (dataset 0)
+                    if (datasetIndex === 0) return;
+                    
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    
+                    meta.data.forEach((point, index) => {
+                        const data = dataset.data[index];
+                        if (!data || !data.name) return;
+                        
+                        const x = point.x;
+                        const y = point.y;
+                        const logoImg = logoImages[data.name];
+                        const size = 28; // Taille du logo
+                        const hasToken = datasetIndex === 1;
+                        
+                        ctx.save();
+                        
+                        if (logoImg) {
+                            // Dessiner un cercle de fond (bordure colorée)
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2 + 3, 0, Math.PI * 2);
+                            ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.9)' : 'rgba(249, 115, 22, 0.9)';
+                            ctx.fill();
+                            
+                            // Dessiner un cercle blanc derrière le logo
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2 + 1, 0, Math.PI * 2);
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fill();
+                            
+                            // Créer un clip circulaire pour le logo
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                            ctx.clip();
+                            
+                            // Dessiner le logo
+                            ctx.drawImage(logoImg, x - size / 2, y - size / 2, size, size);
+                        } else {
+                            // Fallback: dessiner un cercle coloré avec initiales
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2 + 2, 0, Math.PI * 2);
+                            ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.9)' : 'rgba(249, 115, 22, 0.9)';
+                            ctx.fill();
+                            
+                            // Cercle intérieur blanc
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fill();
+                            
+                            // Cercle intérieur coloré
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2 - 2, 0, Math.PI * 2);
+                            ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)';
+                            ctx.fill();
+                            
+                            // Initiales du projet
+                            ctx.fillStyle = hasToken ? '#3b82f6' : '#f97316';
+                            ctx.font = 'bold 10px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            const initials = data.name.substring(0, 2).toUpperCase();
+                            ctx.fillText(initials, x, y);
+                        }
+                        
+                        ctx.restore();
+                    });
+                });
+            }
+        };
+        
+        async function updateChart(regression) {
             const ctx = document.getElementById('scatterChart').getContext('2d');
             
             // Détruire le graphique existant
@@ -569,6 +677,10 @@
 
             // Filtrer les projets valides pour le graphique
             const validProjects = projectsData.filter(p => p.annualRevenue > 0 && p.fdv > 0);
+            
+            // Précharger les logos
+            addLog('🖼️ Chargement des logos pour le graphique...', 'info');
+            await preloadLogos(validProjects);
             
             // Préparer les données
             const liveTokens = validProjects.filter(p => p.hasToken);
@@ -617,13 +729,13 @@
                                 x: p.annualRevenue,
                                 y: p.fdv,
                                 name: p.name,
-                                ratio: p.ratio
+                                ratio: p.ratio,
+                                logo: p.logo
                             })),
-                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 2,
-                            pointRadius: 10,
-                            pointHoverRadius: 12,
+                            backgroundColor: 'transparent',
+                            borderColor: 'transparent',
+                            pointRadius: 18, // Hitbox pour le tooltip
+                            pointHoverRadius: 20,
                             order: 1
                         },
                         // FDV estimées
@@ -633,13 +745,13 @@
                                 x: p.annualRevenue,
                                 y: p.fdv,
                                 name: p.name,
-                                ratio: p.ratio
+                                ratio: p.ratio,
+                                logo: p.logo
                             })),
-                            backgroundColor: 'rgba(249, 115, 22, 0.8)',
-                            borderColor: 'rgba(249, 115, 22, 1)',
-                            borderWidth: 2,
-                            pointRadius: 10,
-                            pointHoverRadius: 12,
+                            backgroundColor: 'transparent',
+                            borderColor: 'transparent',
+                            pointRadius: 18,
+                            pointHoverRadius: 20,
                             order: 0
                         }
                     ]
@@ -732,7 +844,7 @@
                                 return context.datasetIndex > 0;
                             },
                             align: 'top',
-                            offset: 8,
+                            offset: 18,
                             color: function(context) {
                                 return context.datasetIndex === 1 ? '#3b82f6' : '#f97316';
                             },
@@ -746,7 +858,7 @@
                         }
                     }
                 },
-                plugins: [ChartDataLabels]
+                plugins: [ChartDataLabels, logoPlugin]
             });
         }
 
