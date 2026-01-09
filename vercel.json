@@ -15,6 +15,10 @@
     {
       "source": "/api/variational",
       "destination": "/api/variational.js"
+    },
+    {
+      "source": "/api/01exchange",
+      "destination": "/api/01exchange.js"
     }
   ],
   "headers": [
