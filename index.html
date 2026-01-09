@@ -856,7 +856,25 @@
                     },
                     plugins: {
                         tooltip: {
-                            enabled: false
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].raw.name || '';
+                                },
+                                label: function(context) {
+                                    if (!context.raw.name) return '';
+                                    return [
+                                        `Revenu Annuel: ${formatUSD(context.raw.x)}`,
+                                        `FDV: ${formatUSD(context.raw.y)}`,
+                                        `Ratio: ${formatRatio(context.raw.ratio)}`
+                                    ];
+                                }
+                            }
                         },
                         legend: {
                             display: false
