@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto FDV Estimator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js v4 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Chart.js Datalabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+        }
+        .log-entry {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+        }
+        .log-info { color: #3b82f6; }
+        .log-success { color: #22c55e; }
+        .log-warning { color: #f59e0b; }
+        .log-error { color: #ef4444; }
+        .log-calc { color: #8b5cf6; }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen py-8 px-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">📊 Crypto FDV Estimator</h1>
+            <p class="text-gray-600">Estimation de la Fully Diluted Valuation basée sur les revenus</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <span class="text-sm text-gray-500">Dernière mise à jour :</span>
+                    <span id="lastUpdate" class="text-sm font-medium text-gray-700">-</span>
+                </div>
+                <button id="refreshBtn" onclick="loadAllData()" 
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
+                    <svg id="refreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span id="refreshText">Actualiser les données</span>
+                </button>
+            </div>
+            <!-- Loading Progress -->
+            <div id="loadingProgress" class="hidden mt-4">
+                <div class="flex items-center gap-3">
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                    <span id="loadingText" class="text-sm text-gray-600">Chargement...</span>
+                </div>
+                <div class="mt-2 bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Graphique Revenu vs FDV (Échelle Logarithmique)</h2>
+            <div class="relative" style="height: 500px;">
+                <canvas id="scatterChart"></canvas>
+            </div>
+            <div class="flex gap-6 mt-4 justify-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full bg-blue-500"></div>
+                    <span class="text-sm text-gray-600">Token Live</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full bg-orange-500"></div>
+                    <span class="text-sm text-gray-600">FDV Estimée</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-0.5 bg-orange-500 border-dashed border-t-2 border-orange-500"></div>
+                    <span class="text-sm text-gray-600">Régression pondérée</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6 overflow-x-auto">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Tableau des Données</h2>
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b-2 border-gray-200">
+                        <th class="text-left py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('name')">
+                            Projet <span id="sort-name" class="text-gray-400">↕</span>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fees7d')">
+                            Moy. 7j <span id="sort-fees7d" class="text-gray-400">↕</span>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('annualRevenue')">
+                            Revenu Annuel <span id="sort-annualRevenue" class="text-gray-400">↕</span>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fdv')">
+                            FDV <span id="sort-fdv" class="text-gray-400">↕</span>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('ratio')">
+                            Ratio <span id="sort-ratio" class="text-gray-400">↕</span>
+                        </th>
+                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('hasToken')">
+                            Statut <span id="sort-hasToken" class="text-gray-400">↕</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable">
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-gray-500">
+                            Chargement des données...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Debug Logs -->
+        <div class="bg-white rounded-xl shadow-lg mb-6">
+            <button onclick="toggleLogs()" class="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 rounded-xl">
+                <span class="font-semibold text-gray-800">🔧 Logs de Debug</span>
+                <svg id="logsArrow" class="w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div id="logsContainer" class="hidden border-t border-gray-200">
+                <div class="p-4 max-h-96 overflow-y-auto bg-gray-900 rounded-b-xl">
+                    <pre id="logs" class="log-entry text-gray-300 whitespace-pre-wrap"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-gray-500 text-sm">
+            <p>Données fournies par DeFiLlama & CoinGecko</p>
+            <p class="mt-1">Actualisation automatique toutes les 24h</p>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================
+        // CONFIGURATION DES PROJETS
+        // =====================================================
+        const PROJECTS = {
+            // Projets avec token (slug DeFiLlama / id CoinGecko)
+            withToken: [
+                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid' },
+                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter' },
+                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2' },
+                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain' },
+                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis' },
+                { name: 'Orderly', llamaSlug: 'orderly-network', coingeckoId: 'orderly-network' },
+            ],
+            // Projets sans token (FDV estimée)
+            withoutToken: [
+                { name: 'Extended', llamaSlug: 'extended' },
+                { name: 'Paradex', llamaSlug: 'paradex' },
+                { name: 'EdgeX', llamaSlug: 'edgex' },
+                { name: 'Ethereal', llamaSlug: 'ethereal-dex' },
+                { name: 'Ostium', llamaSlug: 'ostium' },
+                { name: 'Unit', llamaSlug: 'unit' },
+                { name: 'tradeXYZ', llamaSlug: 'tradexyz' },
+            ]
+        };
+
+        // =====================================================
+        // VARIABLES GLOBALES
+        // =====================================================
+        let projectsData = [];
+        let currentSort = { column: 'hasToken', direction: 'desc' };
+        let chart = null;
+
+        // =====================================================
+        // FONCTIONS UTILITAIRES
+        // =====================================================
+        
+        // Formatage des nombres en USD avec B/M/K
+        function formatUSD(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-';
+            if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
+            if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
+            if (value >= 1e3) return '$' + (value / 1e3).toFixed(2) + 'K';
+            return '$' + value.toFixed(2);
+        }
+
+        // Formatage du ratio
+        function formatRatio(value) {
+            if (value === null || value === undefined || isNaN(value) || !isFinite(value)) return '-';
+            return value.toFixed(1) + 'x';
+        }
+
+        // Ajouter un log
+        function addLog(message, type = 'info') {
+            const logsEl = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString('fr-FR');
+            const colorClass = {
+                info: 'log-info',
+                success: 'log-success',
+                warning: 'log-warning',
+                error: 'log-error',
+                calc: 'log-calc'
+            }[type] || 'log-info';
+            
+            logsEl.innerHTML += `<span class="${colorClass}">[${timestamp}] ${message}</span>\n`;
+            logsEl.scrollTop = logsEl.scrollHeight;
+        }
+
+        // Basculer l'affichage des logs
+        function toggleLogs() {
+            const container = document.getElementById('logsContainer');
+            const arrow = document.getElementById('logsArrow');
+            container.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+        }
+
+        // =====================================================
+        // APPELS API
+        // =====================================================
+        
+        // Récupérer les fees depuis DeFiLlama via notre Edge Function
+        async function fetchFees(protocol) {
+            try {
+                addLog(`📡 Appel API fees pour: ${protocol}`, 'info');
+                const response = await fetch(`/api/fees?protocol=${encodeURIComponent(protocol)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                addLog(`✅ Fees ${protocol}: 24h=${formatUSD(data.total24h)}, 7d=${formatUSD(data.total7d)}`, 'success');
+                return data;
+            } catch (error) {
+                addLog(`❌ Erreur fees ${protocol}: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        // Récupérer la FDV depuis CoinGecko via notre Edge Function
+        async function fetchFDV(coinId) {
+            try {
+                addLog(`📡 Appel API CoinGecko pour: ${coinId}`, 'info');
+                const response = await fetch(`/api/coingecko?coinId=${encodeURIComponent(coinId)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                addLog(`✅ FDV ${coinId}: ${formatUSD(data.fdv)}, MC=${formatUSD(data.marketCap)}`, 'success');
+                return data;
+            } catch (error) {
+                addLog(`❌ Erreur CoinGecko ${coinId}: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        // =====================================================
+        // RÉGRESSION LINÉAIRE PONDÉRÉE
+        // =====================================================
+        
+        function calculateWeightedRegression(data) {
+            // Filtrer les projets avec token et données valides
+            const validData = data.filter(p => p.hasToken && p.annualRevenue > 0 && p.fdv > 0);
+            
+            if (validData.length < 2) {
+                addLog('⚠️ Pas assez de données pour la régression (min 2 projets avec token)', 'warning');
+                return null;
+            }
+
+            addLog(`📊 Calcul de régression pondérée avec ${validData.length} projets`, 'calc');
+
+            // Utiliser le log pour la régression (car échelle log)
+            const logData = validData.map(p => ({
+                x: Math.log10(p.annualRevenue),
+                y: Math.log10(p.fdv),
+                weight: p.annualRevenue // Poids = revenu du projet
+            }));
+
+            // Normaliser les poids
+            const totalWeight = logData.reduce((sum, d) => sum + d.weight, 0);
+            logData.forEach(d => d.weight = d.weight / totalWeight);
+
+            // Régression pondérée: y = a*x + b
+            let sumWX = 0, sumWY = 0, sumWXX = 0, sumWXY = 0, sumW = 0;
+            
+            logData.forEach(d => {
+                sumW += d.weight;
+                sumWX += d.weight * d.x;
+                sumWY += d.weight * d.y;
+                sumWXX += d.weight * d.x * d.x;
+                sumWXY += d.weight * d.x * d.y;
+            });
+
+            const denominator = sumW * sumWXX - sumWX * sumWX;
+            if (Math.abs(denominator) < 1e-10) {
+                addLog('⚠️ Erreur de calcul de régression (dénominateur nul)', 'warning');
+                return null;
+            }
+
+            const a = (sumW * sumWXY - sumWX * sumWY) / denominator;
+            const b = (sumWY * sumWXX - sumWX * sumWXY) / denominator;
+
+            addLog(`📈 Régression: log(FDV) = ${a.toFixed(4)} * log(Revenue) + ${b.toFixed(4)}`, 'calc');
+            addLog(`📈 Équivalent: FDV = 10^${b.toFixed(2)} * Revenue^${a.toFixed(2)}`, 'calc');
+
+            return { a, b };
+        }
+
+        // Estimer la FDV basée sur le revenu
+        function estimateFDV(annualRevenue, regression) {
+            if (!regression || annualRevenue <= 0) return null;
+            const logRevenue = Math.log10(annualRevenue);
+            const logFDV = regression.a * logRevenue + regression.b;
+            return Math.pow(10, logFDV);
+        }
+
+        // =====================================================
+        // CHARGEMENT DES DONNÉES
+        // =====================================================
+        
+        async function loadAllData() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            const refreshIcon = document.getElementById('refreshIcon');
+            const refreshText = document.getElementById('refreshText');
+            const loadingProgress = document.getElementById('loadingProgress');
+            const loadingText = document.getElementById('loadingText');
+            const progressBar = document.getElementById('progressBar');
+            
+            // UI de chargement
+            refreshBtn.disabled = true;
+            refreshBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            refreshIcon.classList.add('animate-spin');
+            refreshText.textContent = 'Chargement...';
+            loadingProgress.classList.remove('hidden');
+            
+            // Effacer les logs précédents
+            document.getElementById('logs').innerHTML = '';
+            addLog('🚀 Début du chargement des données...', 'info');
+            
+            projectsData = [];
+            const allProjects = [
+                ...PROJECTS.withToken.map(p => ({ ...p, hasToken: true })),
+                ...PROJECTS.withoutToken.map(p => ({ ...p, hasToken: false }))
+            ];
+            
+            const totalSteps = allProjects.length + PROJECTS.withToken.length;
+            let currentStep = 0;
+
+            // 1. Récupérer les fees pour tous les projets
+            addLog('📥 Étape 1: Récupération des fees (DeFiLlama)...', 'info');
+            
+            for (const project of allProjects) {
+                loadingText.textContent = `Chargement fees: ${project.name}...`;
+                const feesData = await fetchFees(project.llamaSlug);
+                
+                const daily7dAvg = feesData?.total7d ? feesData.total7d / 7 : 0;
+                const annualRevenue = daily7dAvg * 365;
+                
+                projectsData.push({
+                    name: project.name,
+                    llamaSlug: project.llamaSlug,
+                    coingeckoId: project.coingeckoId || null,
+                    hasToken: project.hasToken,
+                    fees24h: feesData?.total24h || 0,
+                    fees7d: feesData?.total7d || 0,
+                    fees7dAvg: daily7dAvg,
+                    annualRevenue: annualRevenue,
+                    fdv: null,
+                    fdvEstimated: false,
+                    ratio: null,
+                    logo: feesData?.logo || null
+                });
+                
+                currentStep++;
+                progressBar.style.width = `${(currentStep / totalSteps) * 100}%`;
+                
+                // Petite pause pour éviter le rate limiting
+                await new Promise(r => setTimeout(r, 100));
+            }
+
+            // 2. Récupérer les FDV pour les projets avec token
+            addLog('📥 Étape 2: Récupération des FDV (CoinGecko)...', 'info');
+            
+            for (const project of PROJECTS.withToken) {
+                loadingText.textContent = `Chargement FDV: ${project.name}...`;
+                const fdvData = await fetchFDV(project.coingeckoId);
+                
+                const projectData = projectsData.find(p => p.llamaSlug === project.llamaSlug);
+                if (projectData && fdvData) {
+                    projectData.fdv = fdvData.fdv;
+                    if (projectData.fdv > 0 && projectData.annualRevenue > 0) {
+                        projectData.ratio = projectData.fdv / projectData.annualRevenue;
+                    }
+                }
+                
+                currentStep++;
+                progressBar.style.width = `${(currentStep / totalSteps) * 100}%`;
+                
+                // Petite pause pour éviter le rate limiting
+                await new Promise(r => setTimeout(r, 300));
+            }
+
+            // 3. Calculer la régression et estimer les FDV
+            addLog('📥 Étape 3: Calcul des estimations...', 'info');
+            loadingText.textContent = 'Calcul de la régression...';
+            
+            const regression = calculateWeightedRegression(projectsData);
+            
+            // Appliquer les estimations aux projets sans token
+            for (const project of projectsData) {
+                if (!project.hasToken && project.annualRevenue > 0) {
+                    const estimatedFDV = estimateFDV(project.annualRevenue, regression);
+                    if (estimatedFDV) {
+                        project.fdv = estimatedFDV;
+                        project.fdvEstimated = true;
+                        project.ratio = project.fdv / project.annualRevenue;
+                        addLog(`💡 Estimation ${project.name}: FDV=${formatUSD(estimatedFDV)}, Ratio=${formatRatio(project.ratio)}`, 'calc');
+                    }
+                }
+            }
+
+            // Identifier les projets exclus
+            const excluded = projectsData.filter(p => p.annualRevenue <= 0);
+            if (excluded.length > 0) {
+                addLog(`⚠️ Projets exclus du graphique (revenus ≤ 0): ${excluded.map(p => p.name).join(', ')}`, 'warning');
+            }
+
+            // 4. Mettre à jour l'affichage
+            addLog('🎨 Mise à jour de l\'interface...', 'info');
+            updateTable();
+            await updateChart(regression);
+            
+            // Mettre à jour la date
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('fr-FR');
+            
+            // Reset UI
+            refreshBtn.disabled = false;
+            refreshBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            refreshIcon.classList.remove('animate-spin');
+            refreshText.textContent = 'Actualiser les données';
+            loadingProgress.classList.add('hidden');
+            
+            addLog('✅ Chargement terminé!', 'success');
+        }
+
+        // =====================================================
+        // MISE À JOUR DU TABLEAU
+        // =====================================================
+        
+        function updateTable() {
+            const tbody = document.getElementById('dataTable');
+            
+            // Tri des données
+            const sortedData = [...projectsData].sort((a, b) => {
+                let valA, valB;
+                
+                switch (currentSort.column) {
+                    case 'name':
+                        valA = a.name.toLowerCase();
+                        valB = b.name.toLowerCase();
+                        break;
+                    case 'fees7d':
+                        valA = a.fees7dAvg || 0;
+                        valB = b.fees7dAvg || 0;
+                        break;
+                    case 'annualRevenue':
+                        valA = a.annualRevenue || 0;
+                        valB = b.annualRevenue || 0;
+                        break;
+                    case 'fdv':
+                        valA = a.fdv || 0;
+                        valB = b.fdv || 0;
+                        break;
+                    case 'ratio':
+                        valA = a.ratio || 0;
+                        valB = b.ratio || 0;
+                        break;
+                    case 'hasToken':
+                        valA = a.hasToken ? 1 : 0;
+                        valB = b.hasToken ? 1 : 0;
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                if (typeof valA === 'string') {
+                    return currentSort.direction === 'asc' 
+                        ? valA.localeCompare(valB) 
+                        : valB.localeCompare(valA);
+                }
+                
+                return currentSort.direction === 'asc' ? valA - valB : valB - valA;
+            });
+
+            // Générer le HTML du tableau
+            tbody.innerHTML = sortedData.map(project => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-2">
+                            ${project.logo ? `<img src="${project.logo}" alt="${project.name}" class="w-6 h-6 rounded-full">` : ''}
+                            <span class="font-medium text-gray-800">${project.name}</span>
+                        </div>
+                    </td>
+                    <td class="text-right py-3 px-4 text-gray-600">${formatUSD(project.fees7dAvg)}</td>
+                    <td class="text-right py-3 px-4 text-gray-600">${formatUSD(project.annualRevenue)}</td>
+                    <td class="text-right py-3 px-4">
+                        <span class="${project.fdvEstimated ? 'text-orange-600' : 'text-gray-800'} font-medium">
+                            ${formatUSD(project.fdv)}${project.fdvEstimated ? '*' : ''}
+                        </span>
+                    </td>
+                    <td class="text-right py-3 px-4 text-gray-600">${formatRatio(project.ratio)}</td>
+                    <td class="text-center py-3 px-4">
+                        ${project.hasToken 
+                            ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Live</span>'
+                            : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">⏳ Estimé</span>'
+                        }
+                    </td>
+                </tr>
+            `).join('');
+
+            // Mettre à jour les indicateurs de tri
+            document.querySelectorAll('[id^="sort-"]').forEach(el => {
+                el.textContent = '↕';
+                el.classList.remove('text-indigo-600');
+                el.classList.add('text-gray-400');
+            });
+            
+            const currentSortEl = document.getElementById(`sort-${currentSort.column}`);
+            if (currentSortEl) {
+                currentSortEl.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
+                currentSortEl.classList.remove('text-gray-400');
+                currentSortEl.classList.add('text-indigo-600');
+            }
+        }
+
+        function sortTable(column) {
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'desc';
+            }
+            updateTable();
+        }
+
+        // =====================================================
+        // MISE À JOUR DU GRAPHIQUE
+        // =====================================================
+        
+        // Cache pour les images des logos
+        let logoImages = {};
+        
+        // Précharger les images des logos
+        async function preloadLogos(projects) {
+            const promises = projects.map(p => {
+                return new Promise((resolve) => {
+                    if (!p.logo) {
+                        resolve();
+                        return;
+                    }
+                    
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = () => {
+                        logoImages[p.name] = img;
+                        addLog(`🖼️ Logo chargé: ${p.name}`, 'success');
+                        resolve();
+                    };
+                    img.onerror = () => {
+                        addLog(`⚠️ Erreur chargement logo: ${p.name}`, 'warning');
+                        resolve();
+                    };
+                    img.src = p.logo;
+                });
+            });
+            
+            await Promise.all(promises);
+        }
+        
+        // Plugin personnalisé pour dessiner les logos
+        const logoPlugin = {
+            id: 'logoPlugin',
+            afterDatasetsDraw: function(chart) {
+                const ctx = chart.ctx;
+                
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    // Ignorer la ligne de régression (dataset 0)
+                    if (datasetIndex === 0) return;
+                    
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    
+                    meta.data.forEach((point, index) => {
+                        const data = dataset.data[index];
+                        if (!data || !data.name) return;
+                        
+                        const x = point.x;
+                        const y = point.y;
+                        const logoImg = logoImages[data.name];
+                        const size = 28; // Taille du logo
+                        const hasToken = datasetIndex === 1;
+                        
+                        ctx.save();
+                        
+                        if (logoImg) {
+                            // Dessiner un cercle de fond (bordure colorée)
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2 + 3, 0, Math.PI * 2);
+                            ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.9)' : 'rgba(249, 115, 22, 0.9)';
+                            ctx.fill();
+                            
+                            // Dessiner un cercle blanc derrière le logo
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2 + 1, 0, Math.PI * 2);
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fill();
+                            
+                            // Créer un clip circulaire pour le logo
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                            ctx.clip();
+                            
+                            // Dessiner le logo
+                            ctx.drawImage(logoImg, x - size / 2, y - size / 2, size, size);
+                        } else {
+                            // Fallback: dessiner un cercle coloré avec initiales
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2 + 2, 0, Math.PI * 2);
+                            ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.9)' : 'rgba(249, 115, 22, 0.9)';
+                            ctx.fill();
+                            
+                            // Cercle intérieur blanc
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fill();
+                            
+                            // Cercle intérieur coloré
+                            ctx.beginPath();
+                            ctx.arc(x, y, size / 2 - 2, 0, Math.PI * 2);
+                            ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)';
+                            ctx.fill();
+                            
+                            // Initiales du projet
+                            ctx.fillStyle = hasToken ? '#3b82f6' : '#f97316';
+                            ctx.font = 'bold 10px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            const initials = data.name.substring(0, 2).toUpperCase();
+                            ctx.fillText(initials, x, y);
+                        }
+                        
+                        ctx.restore();
+                    });
+                });
+            }
+        };
+        
+        async function updateChart(regression) {
+            const ctx = document.getElementById('scatterChart').getContext('2d');
+            
+            // Détruire le graphique existant
+            if (chart) {
+                chart.destroy();
+            }
+
+            // Filtrer les projets valides pour le graphique
+            const validProjects = projectsData.filter(p => p.annualRevenue > 0 && p.fdv > 0);
+            
+            // Précharger les logos
+            addLog('🖼️ Chargement des logos pour le graphique...', 'info');
+            await preloadLogos(validProjects);
+            
+            // Préparer les données
+            const liveTokens = validProjects.filter(p => p.hasToken);
+            const estimatedTokens = validProjects.filter(p => !p.hasToken);
+
+            // Préparer les données de la droite de régression
+            let regressionLine = [];
+            if (regression) {
+                // Trouver les min/max des revenus
+                const revenues = validProjects.map(p => p.annualRevenue);
+                const minRev = Math.min(...revenues);
+                const maxRev = Math.max(...revenues);
+                
+                // Créer des points pour la ligne
+                const numPoints = 50;
+                for (let i = 0; i <= numPoints; i++) {
+                    const logRev = Math.log10(minRev) + (Math.log10(maxRev) - Math.log10(minRev)) * (i / numPoints);
+                    const rev = Math.pow(10, logRev);
+                    const fdv = estimateFDV(rev, regression);
+                    regressionLine.push({ x: rev, y: fdv });
+                }
+            }
+
+            // Configuration Chart.js
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        // Droite de régression
+                        {
+                            label: 'Régression pondérée',
+                            data: regressionLine,
+                            type: 'line',
+                            borderColor: 'rgba(249, 115, 22, 0.7)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0,
+                            order: 2
+                        },
+                        // Tokens live
+                        {
+                            label: 'Token Live',
+                            data: liveTokens.map(p => ({
+                                x: p.annualRevenue,
+                                y: p.fdv,
+                                name: p.name,
+                                ratio: p.ratio,
+                                logo: p.logo
+                            })),
+                            backgroundColor: 'transparent',
+                            borderColor: 'transparent',
+                            pointRadius: 18, // Hitbox pour le tooltip
+                            pointHoverRadius: 20,
+                            order: 1
+                        },
+                        // FDV estimées
+                        {
+                            label: 'FDV Estimée',
+                            data: estimatedTokens.map(p => ({
+                                x: p.annualRevenue,
+                                y: p.fdv,
+                                name: p.name,
+                                ratio: p.ratio,
+                                logo: p.logo
+                            })),
+                            backgroundColor: 'transparent',
+                            borderColor: 'transparent',
+                            pointRadius: 18,
+                            pointHoverRadius: 20,
+                            order: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Revenu Annuel (USD)',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    // Afficher uniquement 1, 5, 10 et leurs puissances
+                                    const log = Math.log10(value);
+                                    const mantissa = value / Math.pow(10, Math.floor(log));
+                                    if (Math.abs(mantissa - 1) < 0.01 || 
+                                        Math.abs(mantissa - 5) < 0.01 || 
+                                        Math.abs(mantissa - 10) < 0.01) {
+                                        return formatUSD(value);
+                                    }
+                                    return '';
+                                },
+                                maxTicksLimit: 10
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        y: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'FDV (USD)',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    const log = Math.log10(value);
+                                    const mantissa = value / Math.pow(10, Math.floor(log));
+                                    if (Math.abs(mantissa - 1) < 0.01 || 
+                                        Math.abs(mantissa - 5) < 0.01 || 
+                                        Math.abs(mantissa - 10) < 0.01) {
+                                        return formatUSD(value);
+                                    }
+                                    return '';
+                                },
+                                maxTicksLimit: 10
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            padding: 12,
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].raw.name || '';
+                                },
+                                label: function(context) {
+                                    if (!context.raw.name) return '';
+                                    return [
+                                        `Revenu Annuel: ${formatUSD(context.raw.x)}`,
+                                        `FDV: ${formatUSD(context.raw.y)}`,
+                                        `Ratio: ${formatRatio(context.raw.ratio)}`
+                                    ];
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        },
+                        datalabels: {
+                            display: function(context) {
+                                // N'afficher que pour les datasets de points (pas la ligne)
+                                return context.datasetIndex > 0;
+                            },
+                            align: 'top',
+                            offset: 18,
+                            color: function(context) {
+                                return context.datasetIndex === 1 ? '#3b82f6' : '#f97316';
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 11
+                            },
+                            formatter: function(value) {
+                                return value.name || '';
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels, logoPlugin]
+            });
+        }
+
+        // =====================================================
+        // INITIALISATION
+        // =====================================================
+        
+        // Charger les données au démarrage
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllData();
+            
+            // Actualisation automatique toutes les 24h
+            setInterval(loadAllData, 24 * 60 * 60 * 1000);
+        });
+    </script>
+</body>
+</html>
