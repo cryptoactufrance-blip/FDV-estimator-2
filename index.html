@@ -77,7 +77,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="w-3 h-0.5 bg-orange-500 border-dashed border-t-2 border-orange-500"></div>
-                    <span class="text-sm text-gray-600">Régression pondérée</span>
+                    <span class="text-sm text-gray-600">Ratio moyen pondéré</span>
                 </div>
             </div>
         </div>
@@ -273,63 +273,47 @@
         }
 
         // =====================================================
-        // RÉGRESSION LINÉAIRE PONDÉRÉE
+        // CALCUL DU RATIO MOYEN PONDÉRÉ
         // =====================================================
         
-        function calculateWeightedRegression(data) {
+        function calculateWeightedAverageRatio(data) {
             // Filtrer les projets avec token et données valides
             const validData = data.filter(p => p.hasToken && p.annualRevenue > 0 && p.fdv > 0);
             
-            if (validData.length < 2) {
-                addLog('⚠️ Pas assez de données pour la régression (min 2 projets avec token)', 'warning');
+            if (validData.length < 1) {
+                addLog('⚠️ Pas assez de données pour calculer le ratio moyen', 'warning');
                 return null;
             }
 
-            addLog(`📊 Calcul de régression pondérée avec ${validData.length} projets`, 'calc');
+            addLog(`📊 Calcul du ratio moyen pondéré avec ${validData.length} projets`, 'calc');
 
-            // Utiliser le log pour la régression (car échelle log)
-            const logData = validData.map(p => ({
-                x: Math.log10(p.annualRevenue),
-                y: Math.log10(p.fdv),
-                weight: p.annualRevenue // Poids = revenu du projet
-            }));
-
-            // Normaliser les poids
-            const totalWeight = logData.reduce((sum, d) => sum + d.weight, 0);
-            logData.forEach(d => d.weight = d.weight / totalWeight);
-
-            // Régression pondérée: y = a*x + b
-            let sumWX = 0, sumWY = 0, sumWXX = 0, sumWXY = 0, sumW = 0;
-            
-            logData.forEach(d => {
-                sumW += d.weight;
-                sumWX += d.weight * d.x;
-                sumWY += d.weight * d.y;
-                sumWXX += d.weight * d.x * d.x;
-                sumWXY += d.weight * d.x * d.y;
+            // Calculer le ratio de chaque projet
+            validData.forEach(p => {
+                const ratio = p.fdv / p.annualRevenue;
+                addLog(`   - ${p.name}: FDV=${formatUSD(p.fdv)} / Rev=${formatUSD(p.annualRevenue)} = ${ratio.toFixed(1)}x (poids: ${formatUSD(p.annualRevenue)})`, 'calc');
             });
 
-            const denominator = sumW * sumWXX - sumWX * sumWX;
-            if (Math.abs(denominator) < 1e-10) {
-                addLog('⚠️ Erreur de calcul de régression (dénominateur nul)', 'warning');
-                return null;
-            }
+            // Ratio moyen pondéré par le revenu
+            // Formule: Σ(ratio_i × revenu_i) / Σ(revenu_i)
+            const totalWeightedRatio = validData.reduce((sum, p) => {
+                const ratio = p.fdv / p.annualRevenue;
+                return sum + (ratio * p.annualRevenue);
+            }, 0);
+            
+            const totalRevenue = validData.reduce((sum, p) => sum + p.annualRevenue, 0);
+            
+            const weightedAverageRatio = totalWeightedRatio / totalRevenue;
 
-            const a = (sumW * sumWXY - sumWX * sumWY) / denominator;
-            const b = (sumWY * sumWXX - sumWX * sumWXY) / denominator;
+            addLog(`📈 Ratio moyen pondéré: ${weightedAverageRatio.toFixed(1)}x`, 'calc');
+            addLog(`📈 Formule d'estimation: FDV = Revenu × ${weightedAverageRatio.toFixed(1)}`, 'calc');
 
-            addLog(`📈 Régression: log(FDV) = ${a.toFixed(4)} * log(Revenue) + ${b.toFixed(4)}`, 'calc');
-            addLog(`📈 Équivalent: FDV = 10^${b.toFixed(2)} * Revenue^${a.toFixed(2)}`, 'calc');
-
-            return { a, b };
+            return weightedAverageRatio;
         }
 
-        // Estimer la FDV basée sur le revenu
-        function estimateFDV(annualRevenue, regression) {
-            if (!regression || annualRevenue <= 0) return null;
-            const logRevenue = Math.log10(annualRevenue);
-            const logFDV = regression.a * logRevenue + regression.b;
-            return Math.pow(10, logFDV);
+        // Estimer la FDV basée sur le revenu et le ratio moyen
+        function estimateFDV(annualRevenue, ratio) {
+            if (!ratio || annualRevenue <= 0) return null;
+            return annualRevenue * ratio;
         }
 
         // =====================================================
@@ -422,16 +406,16 @@
                 await new Promise(r => setTimeout(r, 300));
             }
 
-            // 3. Calculer la régression et estimer les FDV
+            // 3. Calculer le ratio moyen et estimer les FDV
             addLog('📥 Étape 3: Calcul des estimations...', 'info');
-            loadingText.textContent = 'Calcul de la régression...';
+            loadingText.textContent = 'Calcul du ratio moyen...';
             
-            const regression = calculateWeightedRegression(projectsData);
+            const avgRatio = calculateWeightedAverageRatio(projectsData);
             
             // Appliquer les estimations aux projets sans token
             for (const project of projectsData) {
                 if (!project.hasToken && project.annualRevenue > 0) {
-                    const estimatedFDV = estimateFDV(project.annualRevenue, regression);
+                    const estimatedFDV = estimateFDV(project.annualRevenue, avgRatio);
                     if (estimatedFDV) {
                         project.fdv = estimatedFDV;
                         project.fdvEstimated = true;
@@ -450,7 +434,7 @@
             // 4. Mettre à jour l'affichage
             addLog('🎨 Mise à jour de l\'interface...', 'info');
             updateTable();
-            await updateChart(regression);
+            await updateChart(avgRatio);
             
             // Mettre à jour la date
             document.getElementById('lastUpdate').textContent = new Date().toLocaleString('fr-FR');
@@ -789,7 +773,7 @@
             }
         };
         
-        async function updateChart(regression) {
+        async function updateChart(avgRatio) {
             const ctx = document.getElementById('scatterChart').getContext('2d');
             
             // Détruire le graphique existant
@@ -808,21 +792,21 @@
             const liveTokens = validProjects.filter(p => p.hasToken);
             const estimatedTokens = validProjects.filter(p => !p.hasToken);
 
-            // Préparer les données de la droite de régression
-            let regressionLine = [];
-            if (regression) {
+            // Préparer les données de la ligne du ratio moyen
+            let ratioLine = [];
+            if (avgRatio) {
                 // Trouver les min/max des revenus
                 const revenues = validProjects.map(p => p.annualRevenue);
                 const minRev = Math.min(...revenues);
                 const maxRev = Math.max(...revenues);
                 
-                // Créer des points pour la ligne
+                // Créer des points pour la ligne (FDV = Revenu × Ratio)
                 const numPoints = 50;
                 for (let i = 0; i <= numPoints; i++) {
                     const logRev = Math.log10(minRev) + (Math.log10(maxRev) - Math.log10(minRev)) * (i / numPoints);
                     const rev = Math.pow(10, logRev);
-                    const fdv = estimateFDV(rev, regression);
-                    regressionLine.push({ x: rev, y: fdv });
+                    const fdv = rev * avgRatio;
+                    ratioLine.push({ x: rev, y: fdv });
                 }
             }
 
@@ -831,10 +815,10 @@
                 type: 'scatter',
                 data: {
                     datasets: [
-                        // Droite de régression
+                        // Ligne du ratio moyen
                         {
-                            label: 'Régression pondérée',
-                            data: regressionLine,
+                            label: 'Ratio moyen pondéré',
+                            data: ratioLine,
                             type: 'line',
                             borderColor: 'rgba(249, 115, 22, 0.7)',
                             borderWidth: 2,
