@@ -7,6 +7,10 @@
     {
       "source": "/api/coingecko",
       "destination": "/api/coingecko.js"
+    },
+    {
+      "source": "/api/logo",
+      "destination": "/api/logo.js"
     }
   ],
   "headers": [
