@@ -598,111 +598,223 @@
         
         // Variable pour stocker l'index du point survolé
         let hoveredPoint = null;
+        // Position de la souris pour l'effet d'explosion
+        let mousePos = { x: 0, y: 0 };
+        // Points proches du curseur (pour l'explosion)
+        let nearbyPoints = [];
         
-        // Plugin personnalisé pour dessiner les logos avec animation hover
+        // Fonction pour calculer la distance entre deux points
+        function getDistance(x1, y1, x2, y2) {
+            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        }
+        
+        // Fonction pour détecter et résoudre les collisions statiques
+        function resolveStaticCollisions(points, baseSize) {
+            const minDistance = baseSize + 10; // Distance minimale entre les centres
+            const offsets = points.map(() => ({ x: 0, y: 0 }));
+            
+            // Plusieurs passes pour résoudre les collisions
+            for (let pass = 0; pass < 5; pass++) {
+                for (let i = 0; i < points.length; i++) {
+                    for (let j = i + 1; j < points.length; j++) {
+                        const p1 = points[i];
+                        const p2 = points[j];
+                        
+                        const x1 = p1.x + offsets[i].x;
+                        const y1 = p1.y + offsets[i].y;
+                        const x2 = p2.x + offsets[j].x;
+                        const y2 = p2.y + offsets[j].y;
+                        
+                        const dist = getDistance(x1, y1, x2, y2);
+                        
+                        if (dist < minDistance && dist > 0) {
+                            // Calculer le vecteur de séparation
+                            const overlap = (minDistance - dist) / 2;
+                            const dx = (x2 - x1) / dist;
+                            const dy = (y2 - y1) / dist;
+                            
+                            // Décaler les deux points
+                            offsets[i].x -= dx * overlap * 0.5;
+                            offsets[i].y -= dy * overlap * 0.5;
+                            offsets[j].x += dx * overlap * 0.5;
+                            offsets[j].y += dy * overlap * 0.5;
+                        }
+                    }
+                }
+            }
+            
+            return offsets;
+        }
+        
+        // Plugin personnalisé pour dessiner les logos avec animation hover et anti-collision
         const logoPlugin = {
             id: 'logoPlugin',
             afterDatasetsDraw: function(chart) {
                 const ctx = chart.ctx;
+                const baseSize = 28;
+                const explosionRadius = 70; // Rayon de détection pour l'explosion
+                const explosionStrength = 50; // Force de l'explosion
+                
+                // Collecter tous les points des datasets 1 et 2
+                let allPoints = [];
                 
                 chart.data.datasets.forEach((dataset, datasetIndex) => {
-                    // Ignorer la ligne de régression (dataset 0)
                     if (datasetIndex === 0) return;
-                    
                     const meta = chart.getDatasetMeta(datasetIndex);
                     
                     meta.data.forEach((point, index) => {
                         const data = dataset.data[index];
                         if (!data || !data.name) return;
                         
-                        const x = point.x;
-                        const y = point.y;
-                        const logoImg = logoImages[data.name];
-                        const hasToken = datasetIndex === 1;
+                        allPoints.push({
+                            x: point.x,
+                            y: point.y,
+                            data: data,
+                            datasetIndex: datasetIndex,
+                            index: index,
+                            logoImg: logoImages[data.name],
+                            hasToken: datasetIndex === 1
+                        });
+                    });
+                });
+                
+                // Calculer les décalages statiques pour éviter les superpositions
+                const staticOffsets = resolveStaticCollisions(allPoints, baseSize);
+                
+                // Appliquer les offsets statiques et calculer l'explosion si nécessaire
+                allPoints.forEach((point, i) => {
+                    point.staticOffsetX = staticOffsets[i].x;
+                    point.staticOffsetY = staticOffsets[i].y;
+                    
+                    // Position avec offset statique
+                    let finalX = point.x + point.staticOffsetX;
+                    let finalY = point.y + point.staticOffsetY;
+                    
+                    // Calculer la distance au curseur
+                    const distToMouse = getDistance(finalX, finalY, mousePos.x, mousePos.y);
+                    
+                    // Effet d'explosion si proche du curseur
+                    if (distToMouse < explosionRadius && distToMouse > 0) {
+                        const explosionForce = (1 - distToMouse / explosionRadius) * explosionStrength;
+                        const dx = (finalX - mousePos.x) / distToMouse;
+                        const dy = (finalY - mousePos.y) / distToMouse;
                         
-                        // Vérifier si ce point est survolé
-                        const isHovered = hoveredPoint && 
-                            hoveredPoint.datasetIndex === datasetIndex && 
-                            hoveredPoint.index === index;
+                        point.explosionOffsetX = dx * explosionForce;
+                        point.explosionOffsetY = dy * explosionForce;
+                    } else {
+                        point.explosionOffsetX = 0;
+                        point.explosionOffsetY = 0;
+                    }
+                    
+                    // Position finale
+                    point.finalX = finalX + point.explosionOffsetX;
+                    point.finalY = finalY + point.explosionOffsetY;
+                });
+                
+                // Dessiner les lignes de connexion (optionnel - montre la position réelle)
+                // allPoints.forEach(point => {
+                //     if (point.explosionOffsetX !== 0 || point.explosionOffsetY !== 0) {
+                //         ctx.save();
+                //         ctx.beginPath();
+                //         ctx.moveTo(point.x, point.y);
+                //         ctx.lineTo(point.finalX, point.finalY);
+                //         ctx.strokeStyle = 'rgba(150, 150, 150, 0.3)';
+                //         ctx.lineWidth = 1;
+                //         ctx.setLineDash([2, 2]);
+                //         ctx.stroke();
+                //         ctx.restore();
+                //     }
+                // });
+                
+                // Dessiner tous les points
+                allPoints.forEach((point) => {
+                    const x = point.finalX;
+                    const y = point.finalY;
+                    const logoImg = point.logoImg;
+                    const hasToken = point.hasToken;
+                    const data = point.data;
+                    
+                    // Vérifier si ce point est survolé
+                    const isHovered = hoveredPoint && 
+                        hoveredPoint.datasetIndex === point.datasetIndex && 
+                        hoveredPoint.index === point.index;
+                    
+                    // Taille avec animation (grossissement au hover)
+                    const size = isHovered ? baseSize * 1.3 : baseSize;
+                    
+                    ctx.save();
+                    
+                    if (logoImg) {
+                        // Dessiner un cercle de fond (bordure colorée)
+                        ctx.beginPath();
+                        ctx.arc(x, y, size / 2 + 3, 0, Math.PI * 2);
+                        ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.9)' : 'rgba(249, 115, 22, 0.9)';
+                        ctx.fill();
                         
-                        // Taille avec animation (grossissement au hover)
-                        const baseSize = 28;
-                        const size = isHovered ? baseSize * 1.3 : baseSize;
-                        
-                        ctx.save();
-                        
-                        if (logoImg) {
-                            // Dessiner un cercle de fond (bordure colorée)
-                            ctx.beginPath();
-                            ctx.arc(x, y, size / 2 + 3, 0, Math.PI * 2);
-                            ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.9)' : 'rgba(249, 115, 22, 0.9)';
-                            ctx.fill();
-                            
-                            // Ombre portée au hover
-                            if (isHovered) {
-                                ctx.shadowColor = hasToken ? 'rgba(59, 130, 246, 0.5)' : 'rgba(249, 115, 22, 0.5)';
-                                ctx.shadowBlur = 15;
-                                ctx.shadowOffsetX = 0;
-                                ctx.shadowOffsetY = 4;
-                            }
-                            
-                            // Dessiner un cercle blanc derrière le logo
-                            ctx.beginPath();
-                            ctx.arc(x, y, size / 2 + 1, 0, Math.PI * 2);
-                            ctx.fillStyle = '#ffffff';
-                            ctx.fill();
-                            
-                            // Reset shadow pour le logo
-                            ctx.shadowColor = 'transparent';
-                            ctx.shadowBlur = 0;
-                            
-                            // Créer un clip circulaire pour le logo
-                            ctx.beginPath();
-                            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-                            ctx.clip();
-                            
-                            // Dessiner le logo
-                            ctx.drawImage(logoImg, x - size / 2, y - size / 2, size, size);
-                        } else {
-                            // Fallback: dessiner un cercle coloré avec initiales
-                            ctx.beginPath();
-                            ctx.arc(x, y, size / 2 + 2, 0, Math.PI * 2);
-                            ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.9)' : 'rgba(249, 115, 22, 0.9)';
-                            ctx.fill();
-                            
-                            // Ombre portée au hover
-                            if (isHovered) {
-                                ctx.shadowColor = hasToken ? 'rgba(59, 130, 246, 0.5)' : 'rgba(249, 115, 22, 0.5)';
-                                ctx.shadowBlur = 15;
-                            }
-                            
-                            // Cercle intérieur blanc
-                            ctx.beginPath();
-                            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-                            ctx.fillStyle = '#ffffff';
-                            ctx.fill();
-                            
-                            // Reset shadow
-                            ctx.shadowColor = 'transparent';
-                            ctx.shadowBlur = 0;
-                            
-                            // Cercle intérieur coloré
-                            ctx.beginPath();
-                            ctx.arc(x, y, size / 2 - 2, 0, Math.PI * 2);
-                            ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)';
-                            ctx.fill();
-                            
-                            // Initiales du projet
-                            ctx.fillStyle = hasToken ? '#3b82f6' : '#f97316';
-                            ctx.font = `bold ${isHovered ? 13 : 10}px Arial`;
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            const initials = data.name.substring(0, 2).toUpperCase();
-                            ctx.fillText(initials, x, y);
+                        // Ombre portée au hover
+                        if (isHovered) {
+                            ctx.shadowColor = hasToken ? 'rgba(59, 130, 246, 0.5)' : 'rgba(249, 115, 22, 0.5)';
+                            ctx.shadowBlur = 15;
+                            ctx.shadowOffsetX = 0;
+                            ctx.shadowOffsetY = 4;
                         }
                         
-                        ctx.restore();
-                    });
+                        // Dessiner un cercle blanc derrière le logo
+                        ctx.beginPath();
+                        ctx.arc(x, y, size / 2 + 1, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fill();
+                        
+                        // Reset shadow pour le logo
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowBlur = 0;
+                        
+                        // Créer un clip circulaire pour le logo
+                        ctx.beginPath();
+                        ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                        ctx.clip();
+                        
+                        // Dessiner le logo
+                        ctx.drawImage(logoImg, x - size / 2, y - size / 2, size, size);
+                    } else {
+                        // Fallback: dessiner un cercle coloré avec initiales
+                        ctx.beginPath();
+                        ctx.arc(x, y, size / 2 + 2, 0, Math.PI * 2);
+                        ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.9)' : 'rgba(249, 115, 22, 0.9)';
+                        ctx.fill();
+                        
+                        // Ombre portée au hover
+                        if (isHovered) {
+                            ctx.shadowColor = hasToken ? 'rgba(59, 130, 246, 0.5)' : 'rgba(249, 115, 22, 0.5)';
+                            ctx.shadowBlur = 15;
+                        }
+                        
+                        // Cercle intérieur blanc
+                        ctx.beginPath();
+                        ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fill();
+                        
+                        // Reset shadow
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowBlur = 0;
+                        
+                        // Cercle intérieur coloré
+                        ctx.beginPath();
+                        ctx.arc(x, y, size / 2 - 2, 0, Math.PI * 2);
+                        ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)';
+                        ctx.fill();
+                        
+                        // Initiales du projet
+                        ctx.fillStyle = hasToken ? '#3b82f6' : '#f97316';
+                        ctx.font = `bold ${isHovered ? 13 : 10}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        const initials = data.name.substring(0, 2).toUpperCase();
+                        ctx.fillText(initials, x, y);
+                    }
+                    
+                    ctx.restore();
                 });
             }
         };
@@ -900,26 +1012,48 @@
                     },
                     onHover: function(event, elements) {
                         const canvas = event.native.target;
+                        const rect = canvas.getBoundingClientRect();
+                        
+                        // Mettre à jour la position de la souris
+                        mousePos.x = event.native.offsetX;
+                        mousePos.y = event.native.offsetY;
+                        
                         if (elements.length > 0 && elements[0].datasetIndex > 0) {
                             canvas.style.cursor = 'pointer';
                             const newHovered = {
                                 datasetIndex: elements[0].datasetIndex,
                                 index: elements[0].index
                             };
-                            if (!hoveredPoint || hoveredPoint.datasetIndex !== newHovered.datasetIndex || hoveredPoint.index !== newHovered.index) {
-                                hoveredPoint = newHovered;
-                                chart.draw();
-                            }
+                            hoveredPoint = newHovered;
                         } else {
                             canvas.style.cursor = 'default';
-                            if (hoveredPoint !== null) {
-                                hoveredPoint = null;
-                                chart.draw();
-                            }
+                            hoveredPoint = null;
                         }
+                        
+                        // Toujours redessiner pour l'effet d'explosion
+                        chart.draw();
                     }
                 },
                 plugins: [ChartDataLabels, logoPlugin]
+            });
+            
+            // Ajouter un listener pour mousemove sur le canvas pour un suivi plus fluide
+            const canvas = document.getElementById('scatterChart');
+            canvas.addEventListener('mousemove', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                mousePos.x = e.clientX - rect.left;
+                mousePos.y = e.clientY - rect.top;
+                if (chart) {
+                    chart.draw();
+                }
+            });
+            
+            canvas.addEventListener('mouseleave', function() {
+                mousePos.x = -1000;
+                mousePos.y = -1000;
+                if (chart) {
+                    chart.draw();
+                }
             });
         }
 
