@@ -765,6 +765,23 @@
                     
                     ctx.restore();
                 });
+                
+                // Dessiner les labels au-dessus des points (après tous les logos pour qu'ils soient au-dessus)
+                allPoints.forEach((point, i) => {
+                    const x = point.x + staticOffsets[i].x;
+                    const y = point.y + staticOffsets[i].y;
+                    const hasToken = point.hasToken;
+                    const data = point.data;
+                    const baseSize = 28;
+                    
+                    ctx.save();
+                    ctx.fillStyle = hasToken ? '#3b82f6' : '#f97316';
+                    ctx.font = 'bold 11px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText(data.name, x, y - baseSize / 2 - 8);
+                    ctx.restore();
+                });
             }
         };
         
@@ -941,22 +958,7 @@
                             display: false
                         },
                         datalabels: {
-                            display: function(context) {
-                                // N'afficher que pour les datasets de points (pas la ligne)
-                                return context.datasetIndex > 0;
-                            },
-                            align: 'top',
-                            offset: 18,
-                            color: function(context) {
-                                return context.datasetIndex === 1 ? '#3b82f6' : '#f97316';
-                            },
-                            font: {
-                                weight: 'bold',
-                                size: 11
-                            },
-                            formatter: function(value) {
-                                return value.name || '';
-                            }
+                            display: false // Désactivé car on dessine les labels dans logoPlugin
                         }
                     },
                     onHover: function(event, elements) {
