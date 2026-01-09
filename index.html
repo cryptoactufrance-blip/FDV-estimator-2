@@ -23,6 +23,47 @@
         .log-warning { color: #f59e0b; }
         .log-error { color: #ef4444; }
         .log-calc { color: #8b5cf6; }
+        
+        /* Custom tooltip */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        .tooltip-container .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            width: 220px;
+            background-color: #1f2937;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 10px;
+            position: absolute;
+            z-index: 100;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: normal;
+            line-height: 1.4;
+            transition: opacity 0.2s, visibility 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .tooltip-container .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen py-8 px-4">
@@ -560,7 +601,12 @@
                         <div class="flex items-center gap-2">
                             ${project.logo ? `<img src="${project.logo}" alt="${project.name}" class="w-6 h-6 rounded-full">` : ''}
                             <span class="font-medium text-gray-800">${project.name}</span>
-                            ${project.customApi ? '<span class="text-xs text-purple-600" title="Données via API custom (Loss Refund × 10)">ⓘ</span>' : ''}
+                            ${project.customApi ? `
+                                <span class="tooltip-container text-purple-600">
+                                    <span class="text-xs">ⓘ</span>
+                                    <span class="tooltip-text">Données via API custom<br>(Fees = Loss Refund × 10)<br>Basé sur 24h glissantes</span>
+                                </span>
+                            ` : ''}
                         </div>
                     </td>
                     <td class="text-right py-3 px-4 text-gray-600">
