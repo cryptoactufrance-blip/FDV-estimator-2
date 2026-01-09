@@ -215,7 +215,8 @@
                 { name: 'tradeXYZ', llamaSlug: 'tradexyz' },
                 { name: 'GRVT', llamaSlug: 'grvt' },
                 { name: 'Reya', llamaSlug: 'reya' },
-                { name: 'Variational', llamaSlug: 'variational', customApi: true },
+                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational' },
+                { name: '01 Exchange', llamaSlug: '01exchange', customApi: '01exchange' },
             ]
         };
 
@@ -348,6 +349,30 @@
             }
         }
 
+        // Récupérer les données 01 Exchange via notre Edge Function custom
+        async function fetch01Exchange() {
+            try {
+                addLog(`📡 Appel API 01 Exchange...`, 'info');
+                const response = await fetch('/api/01exchange');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                addLog(`✅ 01 Exchange: Volume 24h=${formatUSD(data.volume24h)}, Fees (0.02%)=${formatUSD(data.total24h)}`, 'success');
+                return data;
+            } catch (error) {
+                addLog(`❌ Erreur 01 Exchange: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
         // =====================================================
         // CALCUL DU RATIO MOYEN PONDÉRÉ
         // =====================================================
@@ -432,9 +457,11 @@
                 
                 let feesData;
                 
-                // Cas spécial pour Variational (API custom)
-                if (project.customApi && project.llamaSlug === 'variational') {
+                // Cas spécial pour les APIs custom
+                if (project.customApi === 'variational') {
                     feesData = await fetchVariational();
+                } else if (project.customApi === '01exchange') {
+                    feesData = await fetch01Exchange();
                 } else {
                     feesData = await fetchFees(project.llamaSlug);
                 }
@@ -447,7 +474,7 @@
                     llamaSlug: project.llamaSlug,
                     coingeckoId: project.coingeckoId || null,
                     hasToken: project.hasToken,
-                    customApi: project.customApi || false, // Flag pour Variational
+                    customApi: project.customApi || false, // Flag pour APIs custom
                     fees24h: feesData?.total24h || 0,
                     fees7d: feesData?.total7d || 0,
                     fees7dAvg: daily7dAvg,
@@ -595,6 +622,14 @@
                     ? (manualRatio !== null ? manualRatio : Math.round(project.ratio))
                     : Math.round(project.ratio);
                 
+                // Tooltip personnalisé selon le type d'API custom
+                let customApiTooltip = '';
+                if (project.customApi === 'variational') {
+                    customApiTooltip = 'Données via API custom<br>(Fees = Loss Refund × 10)<br>Basé sur 24h glissantes';
+                } else if (project.customApi === '01exchange') {
+                    customApiTooltip = 'Données via API custom<br>(Fees = Volume × 0.02%)<br>Basé sur 24h glissantes';
+                }
+                
                 return `
                 <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td class="py-3 px-4">
@@ -604,7 +639,7 @@
                             ${project.customApi ? `
                                 <span class="tooltip-container text-purple-600">
                                     <span class="text-xs">ⓘ</span>
-                                    <span class="tooltip-text">Données via API custom<br>(Fees = Loss Refund × 10)<br>Basé sur 24h glissantes</span>
+                                    <span class="tooltip-text">${customApiTooltip}</span>
                                 </span>
                             ` : ''}
                         </div>
