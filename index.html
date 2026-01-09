@@ -100,8 +100,15 @@
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fdv')">
                             FDV <span id="sort-fdv" class="text-gray-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('ratio')">
-                            Ratio <span id="sort-ratio" class="text-gray-400">↕</span>
+                        <th class="text-right py-3 px-4">
+                            <div class="flex items-center justify-end gap-2">
+                                <button onclick="resetRatios()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-2 py-1 rounded transition-colors" title="Réinitialiser les ratios">
+                                    ↺ Reset
+                                </button>
+                                <span class="cursor-pointer" onclick="sortTable('ratio')">
+                                    Ratio <span id="sort-ratio" class="text-gray-400">↕</span>
+                                </span>
+                            </div>
                         </th>
                         <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('hasToken')">
                             Statut <span id="sort-hasToken" class="text-gray-400">↕</span>
@@ -177,7 +184,9 @@
         let projectsData = [];
         let currentSort = { column: 'hasToken', direction: 'desc' };
         let chart = null;
-        let currentAvgRatio = null; // Stocker le ratio pour le redraw
+        let currentAvgRatio = null; // Stocker le ratio calculé automatiquement
+        let manualRatio = null; // Ratio défini manuellement par l'utilisateur
+        let originalRatios = {}; // Stocker les ratios originaux pour le reset
 
         // =====================================================
         // FONCTIONS UTILITAIRES
@@ -534,7 +543,14 @@
             });
 
             // Générer le HTML du tableau
-            tbody.innerHTML = sortedData.map(project => `
+            const displayRatio = manualRatio !== null ? manualRatio : currentAvgRatio;
+            
+            tbody.innerHTML = sortedData.map(project => {
+                const ratioValue = project.fdvEstimated 
+                    ? (manualRatio !== null ? manualRatio : Math.round(project.ratio))
+                    : Math.round(project.ratio);
+                
+                return `
                 <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
@@ -560,7 +576,18 @@
                             ${formatUSD(project.fdv)}${project.fdvEstimated ? '*' : ''}
                         </span>
                     </td>
-                    <td class="text-right py-3 px-4 text-gray-600">${formatRatio(project.ratio)}</td>
+                    <td class="text-right py-3 px-4">
+                        <div class="flex items-center justify-end">
+                            <input type="text" 
+                                value="${ratioValue || ''}" 
+                                onchange="updateRatio(this.value)"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                class="w-16 text-right px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${project.fdvEstimated ? 'bg-orange-50 text-orange-700' : 'bg-gray-50 text-gray-700'}"
+                                ${!project.fdvEstimated ? 'disabled title="Ratio calculé depuis la FDV réelle"' : 'title="Modifier pour recalculer les FDV estimées"'}
+                            />
+                            <span class="ml-1 text-gray-500">x</span>
+                        </div>
+                    </td>
                     <td class="text-center py-3 px-4">
                         ${project.hasToken 
                             ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Live</span>'
@@ -568,7 +595,7 @@
                         }
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
 
             // Mettre à jour les indicateurs de tri
             document.querySelectorAll('[id^="sort-"]').forEach(el => {
@@ -593,6 +620,54 @@
                 currentSort.direction = 'desc';
             }
             updateTable();
+        }
+
+        // Mettre à jour le ratio manuellement
+        function updateRatio(value) {
+            const newRatio = parseInt(value, 10);
+            
+            if (isNaN(newRatio) || newRatio <= 0) {
+                addLog('⚠️ Ratio invalide, veuillez entrer un nombre entier positif', 'warning');
+                updateTable(); // Rafraîchir pour remettre l'ancienne valeur
+                return;
+            }
+            
+            addLog(`📝 Ratio modifié manuellement: ${newRatio}x`, 'info');
+            manualRatio = newRatio;
+            
+            // Recalculer les FDV estimées avec le nouveau ratio
+            for (const project of projectsData) {
+                if (project.fdvEstimated && project.annualRevenue > 0) {
+                    project.fdv = project.annualRevenue * manualRatio;
+                    project.ratio = manualRatio;
+                    addLog(`💡 Recalcul ${project.name}: FDV=${formatUSD(project.fdv)}`, 'calc');
+                }
+            }
+            
+            // Mettre à jour le tableau et le graphique
+            updateTable();
+            updateChart(manualRatio);
+        }
+        
+        // Réinitialiser les ratios aux valeurs calculées automatiquement
+        function resetRatios() {
+            addLog('🔄 Réinitialisation des ratios...', 'info');
+            manualRatio = null;
+            
+            // Restaurer les ratios originaux pour les projets estimés
+            for (const project of projectsData) {
+                if (project.fdvEstimated && project.annualRevenue > 0) {
+                    // Recalculer avec le ratio moyen original
+                    project.fdv = project.annualRevenue * currentAvgRatio;
+                    project.ratio = currentAvgRatio;
+                    addLog(`🔄 Reset ${project.name}: FDV=${formatUSD(project.fdv)}, Ratio=${formatRatio(project.ratio)}`, 'calc');
+                }
+            }
+            
+            // Mettre à jour le tableau et le graphique
+            updateTable();
+            updateChart(currentAvgRatio);
+            addLog('✅ Ratios réinitialisés au ratio moyen pondéré', 'success');
         }
 
         // =====================================================
