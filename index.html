@@ -152,7 +152,7 @@
                 { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2' },
                 { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain' },
                 { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis' },
-                { name: 'Orderly', llamaSlug: 'orderly-network', coingeckoId: 'orderly-network' },
+                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network' },
             ],
             // Projets sans token (FDV estimée)
             withoutToken: [
@@ -402,6 +402,10 @@
                 const projectData = projectsData.find(p => p.llamaSlug === project.llamaSlug);
                 if (projectData && fdvData) {
                     projectData.fdv = fdvData.fdv;
+                    // Utiliser le logo CoinGecko si pas de logo DeFiLlama
+                    if (!projectData.logo && fdvData.image) {
+                        projectData.logo = fdvData.image;
+                    }
                     if (projectData.fdv > 0 && projectData.annualRevenue > 0) {
                         projectData.ratio = projectData.fdv / projectData.annualRevenue;
                     }
@@ -564,7 +568,7 @@
         // Cache pour les images des logos
         let logoImages = {};
         
-        // Précharger les images des logos
+        // Précharger les images des logos via le proxy pour éviter CORS
         async function preloadLogos(projects) {
             const promises = projects.map(p => {
                 return new Promise((resolve) => {
@@ -584,7 +588,8 @@
                         addLog(`⚠️ Erreur chargement logo: ${p.name}`, 'warning');
                         resolve();
                     };
-                    img.src = p.logo;
+                    // Utiliser le proxy pour contourner CORS
+                    img.src = `/api/logo?url=${encodeURIComponent(p.logo)}`;
                 });
             });
             
