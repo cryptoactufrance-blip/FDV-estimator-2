@@ -11,6 +11,10 @@
     {
       "source": "/api/logo",
       "destination": "/api/logo.js"
+    },
+    {
+      "source": "/api/variational",
+      "destination": "/api/variational.js"
     }
   ],
   "headers": [
