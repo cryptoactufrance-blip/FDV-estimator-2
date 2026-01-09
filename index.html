@@ -177,6 +177,7 @@
                 { name: 'tradeXYZ', llamaSlug: 'tradexyz' },
                 { name: 'GRVT', llamaSlug: 'grvt' },
                 { name: 'Reya', llamaSlug: 'reya' },
+                { name: 'Variational', llamaSlug: 'variational', customApi: true },
             ]
         };
 
@@ -313,6 +314,30 @@
             }
         }
 
+        // Récupérer les données Variational via notre Edge Function custom
+        async function fetchVariational() {
+            try {
+                addLog(`📡 Appel API Variational...`, 'info');
+                const response = await fetch('/api/variational');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                addLog(`✅ Variational: Loss Refund 24h=${formatUSD(data.lossRefund24h)}, Fees (x10)=${formatUSD(data.total24h)}`, 'success');
+                return data;
+            } catch (error) {
+                addLog(`❌ Erreur Variational: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
         // =====================================================
         // CALCUL DU RATIO MOYEN PONDÉRÉ
         // =====================================================
@@ -394,7 +419,15 @@
             
             for (const project of allProjects) {
                 loadingText.textContent = `Chargement fees: ${project.name}...`;
-                const feesData = await fetchFees(project.llamaSlug);
+                
+                let feesData;
+                
+                // Cas spécial pour Variational (API custom)
+                if (project.customApi && project.llamaSlug === 'variational') {
+                    feesData = await fetchVariational();
+                } else {
+                    feesData = await fetchFees(project.llamaSlug);
+                }
                 
                 const daily7dAvg = feesData?.total7d ? feesData.total7d / 7 : 0;
                 const annualRevenue = daily7dAvg * 365;
