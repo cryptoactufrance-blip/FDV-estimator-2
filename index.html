@@ -184,9 +184,9 @@
         let projectsData = [];
         let currentSort = { column: 'hasToken', direction: 'desc' };
         let chart = null;
-        let currentAvgRatio = null; // Stocker le ratio calculé automatiquement
+        let originalAvgRatio = null; // Ratio calculé automatiquement (ne change jamais après calcul initial)
+        let currentAvgRatio = null; // Ratio actuellement utilisé (peut être manuel)
         let manualRatio = null; // Ratio défini manuellement par l'utilisateur
-        let originalRatios = {}; // Stocker les ratios originaux pour le reset
 
         // =====================================================
         // FONCTIONS UTILITAIRES
@@ -468,6 +468,10 @@
                     }
                 }
             }
+            
+            // Stocker le ratio original (ne sera jamais modifié)
+            originalAvgRatio = avgRatio;
+            currentAvgRatio = avgRatio;
 
             // Identifier les projets exclus
             const excluded = projectsData.filter(p => p.annualRevenue <= 0);
@@ -632,8 +636,9 @@
                 return;
             }
             
-            addLog(`📝 Ratio modifié manuellement: ${newRatio}x`, 'info');
+            addLog(`📝 Ratio modifié manuellement: ${newRatio}x (original: ${Math.round(originalAvgRatio)}x)`, 'info');
             manualRatio = newRatio;
+            currentAvgRatio = newRatio;
             
             // Recalculer les FDV estimées avec le nouveau ratio
             for (const project of projectsData) {
@@ -651,22 +656,28 @@
         
         // Réinitialiser les ratios aux valeurs calculées automatiquement
         function resetRatios() {
-            addLog('🔄 Réinitialisation des ratios...', 'info');
+            if (originalAvgRatio === null) {
+                addLog('⚠️ Pas de ratio original à restaurer', 'warning');
+                return;
+            }
+            
+            addLog(`🔄 Réinitialisation des ratios au ratio original: ${Math.round(originalAvgRatio)}x`, 'info');
             manualRatio = null;
+            currentAvgRatio = originalAvgRatio;
             
             // Restaurer les ratios originaux pour les projets estimés
             for (const project of projectsData) {
                 if (project.fdvEstimated && project.annualRevenue > 0) {
                     // Recalculer avec le ratio moyen original
-                    project.fdv = project.annualRevenue * currentAvgRatio;
-                    project.ratio = currentAvgRatio;
-                    addLog(`🔄 Reset ${project.name}: FDV=${formatUSD(project.fdv)}, Ratio=${formatRatio(project.ratio)}`, 'calc');
+                    project.fdv = project.annualRevenue * originalAvgRatio;
+                    project.ratio = originalAvgRatio;
+                    addLog(`🔄 Reset ${project.name}: FDV=${formatUSD(project.fdv)}, Ratio=${Math.round(project.ratio)}x`, 'calc');
                 }
             }
             
             // Mettre à jour le tableau et le graphique
             updateTable();
-            updateChart(currentAvgRatio);
+            updateChart(originalAvgRatio);
             addLog('✅ Ratios réinitialisés au ratio moyen pondéré', 'success');
         }
 
