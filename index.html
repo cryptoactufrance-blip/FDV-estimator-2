@@ -157,6 +157,12 @@
                                 <span class="tooltip-text">Jours depuis le début de la dernière saison de points</span>
                             </div>
                         </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsMax')">
+                            <div class="tooltip-container">
+                                Max <span id="sort-pointsMax" class="text-gray-400">↕</span>
+                                <span class="tooltip-text">Points max en circulation à l'Airdrop</span>
+                            </div>
+                        </th>
                         <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('hasToken')">
                             Statut <span id="sort-hasToken" class="text-gray-400">↕</span>
                         </th>
@@ -164,7 +170,7 @@
                 </thead>
                 <tbody id="dataTable">
                     <tr>
-                        <td colspan="7" class="text-center py-8 text-gray-500">
+                        <td colspan="8" class="text-center py-8 text-gray-500">
                             Chargement des données...
                         </td>
                     </tr>
@@ -201,33 +207,33 @@
         const PROJECTS = {
             // Projets avec token (slug DeFiLlama / id CoinGecko)
             withToken: [
-                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', pointsSeasonStart: '2024-11-29', pointsInfo: 'Possible S3 en cours depuis le TGE' }, // Airdrop Genesis
-                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', pointsSeasonStart: '2025-10-02' }, // Season 2 (TGE 30 Dec 2025)
-                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', pointsSeasonStart: null },
-                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', pointsSeasonStart: null },
-                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', pointsSeasonStart: '2025-09-03' }, // Season 3
-                { name: 'ApeX', llamaSlug: 'apex-omni', coingeckoId: 'apex-token', pointsSeasonStart: '2025-10-06' }, // Ape Season 1
-                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', pointsSeasonStart: null },
-                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', pointsSeasonStart: null },
-                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', pointsSeasonStart: null },
+                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', pointsSeasonStart: '2024-11-29', pointsInfo: 'Possible S3 en cours depuis le TGE', pointsMax: null }, // Airdrop Genesis
+                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', pointsSeasonStart: '2025-10-02', pointsMax: null }, // Season 2 (TGE 30 Dec 2025)
+                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', pointsSeasonStart: null, pointsMax: null },
+                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', pointsSeasonStart: null, pointsMax: null },
+                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', pointsSeasonStart: '2025-09-03', pointsMax: null }, // Season 3
+                { name: 'ApeX', llamaSlug: 'apex-omni', coingeckoId: 'apex-token', pointsSeasonStart: '2025-10-06', pointsMax: null }, // Ape Season 1
+                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', pointsSeasonStart: null, pointsMax: null },
+                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', pointsSeasonStart: null, pointsMax: null },
+                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', pointsSeasonStart: null, pointsMax: null },
             ],
             // Projets sans token (FDV estimée)
             withoutToken: [
-                { name: 'Extended', llamaSlug: 'extended', pointsSeasonStart: '2025-04-29' }, // Season 1
-                { name: 'Paradex', llamaSlug: 'paradex', pointsSeasonStart: '2025-01-03' }, // Season 2
-                { name: 'EdgeX', llamaSlug: 'edgex', pointsSeasonStart: '2025-12-11' }, // Pre-TGE Season (après Open Season)
-                { name: 'Ethereal', llamaSlug: 'ethereal-dex', pointsSeasonStart: '2025-08-14' }, // Season 1 (après Season Zero)
-                { name: 'Ostium', llamaSlug: 'ostium', pointsSeasonStart: '2025-03-31' }, // Points Program
-                { name: 'Unit', llamaSlug: 'unit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée' }, // Date lancement estimée
-                { name: 'tradeXYZ', llamaSlug: 'tradexyz', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée' }, // Mainnet launch
-                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', pointsSeasonStart: '2025-09-23' }, // Rewards 2.0
-                { name: 'Reya', llamaSlug: 'reya', pointsSeasonStart: '2025-07-19' }, // RCP (Reya Chain Points)
-                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', pointsSeasonStart: '2025-12-17' }, // Omni Points
-                { name: 'StandX', llamaSlug: 'standx', customApi: 'standx', pointsSeasonStart: null }, // Fees = Volume × 0.025%
-                { name: 'Polynomial', llamaSlug: 'polynomial-trade', pointsSeasonStart: null }, // Points program (1M pts/day)
-                { name: 'Vest', llamaSlug: 'vest-exchange', pointsSeasonStart: null },
-                { name: 'HyENA', llamaSlug: 'hyena', pointsSeasonStart: '2025-12-09' }, // Launch date (USDe perp DEX on Hyperliquid)
-                { name: 'Nado', llamaSlug: 'nado-perps', pointsSeasonStart: '2025-11-21' }, // Launch date (Kraken/Ink DEX)
+                { name: 'Extended', llamaSlug: 'extended', pointsSeasonStart: '2025-04-29', pointsMax: 70000000 }, // Season 1 - 70M points
+                { name: 'Paradex', llamaSlug: 'paradex', pointsSeasonStart: '2025-01-03', pointsMax: 310000000 }, // S1 ~100M + S2 ~210M = ~310M XP
+                { name: 'EdgeX', llamaSlug: 'edgex', pointsSeasonStart: '2025-12-11', pointsMax: null }, // 250-300K/semaine, 1:1 token
+                { name: 'Ethereal', llamaSlug: 'ethereal-dex', pointsSeasonStart: '2025-08-14', pointsMax: null }, // Non communiqué
+                { name: 'Ostium', llamaSlug: 'ostium', pointsSeasonStart: '2025-03-31', pointsMax: 35000000 }, // S1 10M + S2 25M cap
+                { name: 'Unit', llamaSlug: 'unit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée', pointsMax: null },
+                { name: 'tradeXYZ', llamaSlug: 'tradexyz', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée', pointsMax: null },
+                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', pointsSeasonStart: '2025-09-23', pointsMax: 220000000 }, // 22% de 1B tokens = 220M
+                { name: 'Reya', llamaSlug: 'reya', pointsSeasonStart: '2025-07-19', pointsMax: 6250000 }, // ~6.25M RCP (3.25M stakers + 2.75M traders + 250K bonus)
+                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', pointsSeasonStart: '2025-12-17', pointsMax: 9000000 }, // 9M points
+                { name: 'StandX', llamaSlug: 'standx', customApi: 'standx', pointsSeasonStart: null, pointsMax: null },
+                { name: 'Polynomial', llamaSlug: 'polynomial-trade', pointsSeasonStart: null, pointsMax: null }, // 1M pts/day
+                { name: 'Vest', llamaSlug: 'vest-exchange', pointsSeasonStart: null, pointsMax: null },
+                { name: 'HyENA', llamaSlug: 'hyena', pointsSeasonStart: '2025-12-09', pointsMax: null },
+                { name: 'Nado', llamaSlug: 'nado-perps', pointsSeasonStart: '2025-11-21', pointsMax: null },
             ]
         };
 
@@ -252,6 +258,15 @@
             if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
             if (value >= 1e3) return '$' + (value / 1e3).toFixed(2) + 'K';
             return '$' + value.toFixed(2);
+        }
+
+        // Formatage des grands nombres (sans devise)
+        function formatNumber(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-';
+            if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
+            if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
+            if (value >= 1e3) return (value / 1e3).toFixed(1) + 'K';
+            return value.toString();
         }
 
         // Formatage du ratio
@@ -524,6 +539,7 @@
                     customApi: project.customApi || false, // Flag pour APIs custom
                     pointsSeasonStart: project.pointsSeasonStart || null, // Date de début de la saison de points
                     pointsInfo: project.pointsInfo || null, // Info supplémentaire sur les points
+                    pointsMax: project.pointsMax || null, // Max de points en circulation à l'Airdrop
                     fees24h: feesData?.total24h || 0,
                     fees7d: feesData?.total7d || 0,
                     fees7dAvg: daily7dAvg,
@@ -651,6 +667,11 @@
                         valA = a.pointsSeasonStart ? daysSince(a.pointsSeasonStart) : -9999;
                         valB = b.pointsSeasonStart ? daysSince(b.pointsSeasonStart) : -9999;
                         break;
+                    case 'pointsMax':
+                        // Les valeurs null vont à la fin
+                        valA = a.pointsMax || -1;
+                        valB = b.pointsMax || -1;
+                        break;
                     case 'hasToken':
                         valA = a.hasToken ? 1 : 0;
                         valB = b.hasToken ? 1 : 0;
@@ -736,6 +757,12 @@
                                     <span class="text-xs">ⓘ</span>
                                     <span class="tooltip-text">${project.pointsInfo}</span>
                                 </span>` : ''}`
+                            : '<span class="text-gray-400">-</span>'
+                        }
+                    </td>
+                    <td class="text-right py-3 px-4 text-sm">
+                        ${project.pointsMax 
+                            ? `<span class="text-purple-700 font-medium">${formatNumber(project.pointsMax)}</span>`
                             : '<span class="text-gray-400">-</span>'
                         }
                     </td>
