@@ -163,6 +163,30 @@
                                 <span class="tooltip-text">Points max en circulation à l'Airdrop</span>
                             </div>
                         </th>
+                        <th class="text-right py-3 px-4">
+                            <div class="flex items-center justify-end gap-1">
+                                <div class="tooltip-container">
+                                    <span class="cursor-pointer" onclick="sortTable('airdropPct')">
+                                        %Airdrop <span id="sort-airdropPct" class="text-gray-400">↕</span>
+                                    </span>
+                                    <span class="tooltip-text">% du supply alloué à l'airdrop au TGE</span>
+                                </div>
+                                <div class="flex items-center gap-1 ml-2 text-xs text-gray-500">
+                                    <span>(défaut:</span>
+                                    <input 
+                                        type="number" 
+                                        id="defaultAirdropInput"
+                                        value="10"
+                                        min="1" 
+                                        max="100"
+                                        class="w-10 text-center border border-gray-300 rounded px-1 py-0.5 text-xs"
+                                        onchange="updateDefaultAirdrop(this.value)"
+                                        onclick="event.stopPropagation()"
+                                    />
+                                    <span>%)</span>
+                                </div>
+                            </div>
+                        </th>
                         <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('hasToken')">
                             Statut <span id="sort-hasToken" class="text-gray-400">↕</span>
                         </th>
@@ -170,7 +194,7 @@
                 </thead>
                 <tbody id="dataTable">
                     <tr>
-                        <td colspan="8" class="text-center py-8 text-gray-500">
+                        <td colspan="9" class="text-center py-8 text-gray-500">
                             Chargement des données...
                         </td>
                     </tr>
@@ -207,33 +231,33 @@
         const PROJECTS = {
             // Projets avec token (slug DeFiLlama / id CoinGecko)
             withToken: [
-                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', pointsSeasonStart: '2024-11-29', pointsInfo: 'Possible S3 en cours depuis le TGE', pointsMax: null }, // Airdrop Genesis
-                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', pointsSeasonStart: '2025-10-02', pointsMax: null }, // Season 2 (TGE 30 Dec 2025)
-                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', pointsSeasonStart: null, pointsMax: null },
-                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', pointsSeasonStart: null, pointsMax: null },
-                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', pointsSeasonStart: '2025-09-03', pointsMax: null }, // Season 3
-                { name: 'ApeX', llamaSlug: 'apex-omni', coingeckoId: 'apex-token', pointsSeasonStart: '2025-10-06', pointsMax: null }, // Ape Season 1
-                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', pointsSeasonStart: null, pointsMax: null },
-                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', pointsSeasonStart: null, pointsMax: null },
-                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', pointsSeasonStart: null, pointsMax: null },
+                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', pointsSeasonStart: '2024-11-29', pointsInfo: 'Possible S3 en cours depuis le TGE', pointsMax: null, airdropPct: 31 }, // Airdrop Genesis 31%
+                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', pointsSeasonStart: '2025-10-02', pointsMax: null, airdropPct: 25 }, // 25% airdrop S1+S2
+                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', pointsSeasonStart: '2025-09-03', pointsMax: null, airdropPct: null }, // Season 3
+                { name: 'ApeX', llamaSlug: 'apex-omni', coingeckoId: 'apex-token', pointsSeasonStart: '2025-10-06', pointsMax: null, airdropPct: null }, // Ape Season 1
+                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
             ],
             // Projets sans token (FDV estimée)
             withoutToken: [
-                { name: 'Extended', llamaSlug: 'extended', pointsSeasonStart: '2025-04-29', pointsMax: 70000000 }, // Season 1 - 70M points
-                { name: 'Paradex', llamaSlug: 'paradex', pointsSeasonStart: '2025-01-03', pointsMax: 310000000 }, // S1 ~100M + S2 ~210M = ~310M XP
-                { name: 'EdgeX', llamaSlug: 'edgex', pointsSeasonStart: '2025-12-11', pointsMax: null }, // 250-300K/semaine, 1:1 token
-                { name: 'Ethereal', llamaSlug: 'ethereal-dex', pointsSeasonStart: '2025-08-14', pointsMax: null }, // Non communiqué
-                { name: 'Ostium', llamaSlug: 'ostium', pointsSeasonStart: '2025-03-31', pointsMax: 35000000 }, // S1 10M + S2 25M cap
-                { name: 'Unit', llamaSlug: 'unit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée', pointsMax: null },
-                { name: 'tradeXYZ', llamaSlug: 'tradexyz', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée', pointsMax: null },
-                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', pointsSeasonStart: '2025-09-23', pointsMax: 220000000 }, // 22% de 1B tokens = 220M
-                { name: 'Reya', llamaSlug: 'reya', pointsSeasonStart: '2025-07-19', pointsMax: 6250000 }, // ~6.25M RCP (3.25M stakers + 2.75M traders + 250K bonus)
-                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', pointsSeasonStart: '2025-12-17', pointsMax: 9000000 }, // 9M points
-                { name: 'StandX', llamaSlug: 'standx', customApi: 'standx', pointsSeasonStart: null, pointsMax: null },
-                { name: 'Polynomial', llamaSlug: 'polynomial-trade', pointsSeasonStart: null, pointsMax: null }, // 1M pts/day
-                { name: 'Vest', llamaSlug: 'vest-exchange', pointsSeasonStart: null, pointsMax: null },
-                { name: 'HyENA', llamaSlug: 'hyena', pointsSeasonStart: '2025-12-09', pointsMax: null },
-                { name: 'Nado', llamaSlug: 'nado-perps', pointsSeasonStart: '2025-11-21', pointsMax: null },
+                { name: 'Extended', llamaSlug: 'extended', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, airdropPct: 30 }, // 30% confirmé
+                { name: 'Paradex', llamaSlug: 'paradex', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, airdropPct: 20 }, // 20% Genesis Airdrop
+                { name: 'EdgeX', llamaSlug: 'edgex', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25 }, // ~25% estimé
+                { name: 'Ethereal', llamaSlug: 'ethereal-dex', pointsSeasonStart: '2025-08-14', pointsMax: null, airdropPct: null }, // Non communiqué
+                { name: 'Ostium', llamaSlug: 'ostium', pointsSeasonStart: '2025-03-31', pointsMax: 35000000, airdropPct: null }, // Non annoncé
+                { name: 'Unit', llamaSlug: 'unit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null },
+                { name: 'tradeXYZ', llamaSlug: 'tradexyz', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null },
+                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', pointsSeasonStart: '2025-09-23', pointsMax: 220000000, airdropPct: 22 }, // 22% (S1 10% + S2 12%)
+                { name: 'Reya', llamaSlug: 'reya', pointsSeasonStart: '2025-07-19', pointsMax: 6250000, airdropPct: 45 }, // 45% communauté
+                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, airdropPct: 25 }, // 25% estimé
+                { name: 'StandX', llamaSlug: 'standx', customApi: 'standx', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'Polynomial', llamaSlug: 'polynomial-trade', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'Vest', llamaSlug: 'vest-exchange', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'HyENA', llamaSlug: 'hyena', pointsSeasonStart: '2025-12-09', pointsMax: null, airdropPct: null },
+                { name: 'Nado', llamaSlug: 'nado-perps', pointsSeasonStart: '2025-11-21', pointsMax: null, airdropPct: null },
             ]
         };
 
@@ -246,6 +270,7 @@
         let originalAvgRatio = null; // Ratio calculé automatiquement (ne change jamais après calcul initial)
         let currentAvgRatio = null; // Ratio actuellement utilisé (peut être manuel)
         let manualRatio = null; // Ratio défini manuellement par l'utilisateur
+        let defaultAirdropPct = 10; // % Airdrop par défaut pour les projets sans info
 
         // =====================================================
         // FONCTIONS UTILITAIRES
@@ -540,6 +565,7 @@
                     pointsSeasonStart: project.pointsSeasonStart || null, // Date de début de la saison de points
                     pointsInfo: project.pointsInfo || null, // Info supplémentaire sur les points
                     pointsMax: project.pointsMax || null, // Max de points en circulation à l'Airdrop
+                    airdropPct: project.airdropPct || null, // % du supply alloué à l'airdrop au TGE (null = utilise default)
                     fees24h: feesData?.total24h || 0,
                     fees7d: feesData?.total7d || 0,
                     fees7dAvg: daily7dAvg,
@@ -672,6 +698,11 @@
                         valA = a.pointsMax || -1;
                         valB = b.pointsMax || -1;
                         break;
+                    case 'airdropPct':
+                        // Utilise la valeur du projet ou le default
+                        valA = a.airdropPct !== null ? a.airdropPct : defaultAirdropPct;
+                        valB = b.airdropPct !== null ? b.airdropPct : defaultAirdropPct;
+                        break;
                     case 'hasToken':
                         valA = a.hasToken ? 1 : 0;
                         valB = b.hasToken ? 1 : 0;
@@ -766,6 +797,12 @@
                             : '<span class="text-gray-400">-</span>'
                         }
                     </td>
+                    <td class="text-right py-3 px-4 text-sm">
+                        ${project.airdropPct !== null 
+                            ? `<span class="text-emerald-700 font-medium">${project.airdropPct}%</span>`
+                            : `<span class="text-gray-500 italic">${defaultAirdropPct}%</span>`
+                        }
+                    </td>
                     <td class="text-center py-3 px-4">
                         ${project.hasToken 
                             ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Live</span>'
@@ -853,6 +890,23 @@
             updateTable();
             updateChart(originalAvgRatio);
             addLog('✅ Ratios réinitialisés au ratio moyen pondéré', 'success');
+        }
+
+        // Mettre à jour le % Airdrop par défaut
+        function updateDefaultAirdrop(value) {
+            const newDefault = parseInt(value, 10);
+            
+            if (isNaN(newDefault) || newDefault < 1 || newDefault > 100) {
+                addLog('⚠️ % Airdrop invalide, veuillez entrer un nombre entre 1 et 100', 'warning');
+                document.getElementById('defaultAirdropInput').value = defaultAirdropPct;
+                return;
+            }
+            
+            addLog(`📝 % Airdrop par défaut modifié: ${newDefault}% (précédent: ${defaultAirdropPct}%)`, 'info');
+            defaultAirdropPct = newDefault;
+            
+            // Mettre à jour le tableau pour refléter le nouveau default
+            updateTable();
         }
 
         // =====================================================
