@@ -15,6 +15,10 @@
     {
       "source": "/api/variational",
       "destination": "/api/variational.js"
+    },
+    {
+      "source": "/api/grvt",
+      "destination": "/api/grvt.js"
     }
   ],
   "headers": [
