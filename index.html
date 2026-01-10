@@ -200,13 +200,13 @@
         // =====================================================
         const PROJECTS = {
             // Projets avec token (slug DeFiLlama / id CoinGecko)
-            // Note: Les projets avec token n'ont plus de saison de points active
             withToken: [
-                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', pointsSeasonStart: null },
+                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', pointsSeasonStart: '2024-11-29', pointsInfo: 'Possible S3 en cours depuis le TGE' }, // Airdrop Genesis
                 { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', pointsSeasonStart: '2025-10-02' }, // Season 2 (TGE 30 Dec 2025)
                 { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', pointsSeasonStart: null },
                 { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', pointsSeasonStart: null },
                 { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', pointsSeasonStart: '2025-09-03' }, // Season 3
+                { name: 'ApeX', llamaSlug: 'apex-omni', coingeckoId: 'apex-token', pointsSeasonStart: '2025-10-06' }, // Ape Season 1
                 { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', pointsSeasonStart: null },
                 { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', pointsSeasonStart: null },
                 { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', pointsSeasonStart: null },
@@ -218,11 +218,13 @@
                 { name: 'EdgeX', llamaSlug: 'edgex', pointsSeasonStart: '2025-12-11' }, // Pre-TGE Season (après Open Season)
                 { name: 'Ethereal', llamaSlug: 'ethereal-dex', pointsSeasonStart: '2025-08-14' }, // Season 1 (après Season Zero)
                 { name: 'Ostium', llamaSlug: 'ostium', pointsSeasonStart: '2025-03-31' }, // Points Program
-                { name: 'Unit', llamaSlug: 'unit', pointsSeasonStart: null }, // Pas de programme de points connu
-                { name: 'tradeXYZ', llamaSlug: 'tradexyz', pointsSeasonStart: null }, // Waitlist, pas de points encore
+                { name: 'Unit', llamaSlug: 'unit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée' }, // Date lancement estimée
+                { name: 'tradeXYZ', llamaSlug: 'tradexyz', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée' }, // Mainnet launch
                 { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', pointsSeasonStart: '2025-09-23' }, // Rewards 2.0
                 { name: 'Reya', llamaSlug: 'reya', pointsSeasonStart: '2025-07-19' }, // RCP (Reya Chain Points)
                 { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', pointsSeasonStart: '2025-12-17' }, // Omni Points
+                { name: 'HyENA', llamaSlug: 'hyena', pointsSeasonStart: '2025-12-09' }, // Launch date (USDe perp DEX on Hyperliquid)
+                { name: 'Nado', llamaSlug: 'nado-perps', pointsSeasonStart: '2025-11-21' }, // Launch date (Kraken/Ink DEX)
             ]
         };
 
@@ -492,6 +494,7 @@
                     hasToken: project.hasToken,
                     customApi: project.customApi || false, // Flag pour APIs custom
                     pointsSeasonStart: project.pointsSeasonStart || null, // Date de début de la saison de points
+                    pointsInfo: project.pointsInfo || null, // Info supplémentaire sur les points
                     fees24h: feesData?.total24h || 0,
                     fees7d: feesData?.total7d || 0,
                     fees7dAvg: daily7dAvg,
@@ -697,7 +700,11 @@
                     </td>
                     <td class="text-center py-3 px-4 text-sm">
                         ${project.pointsSeasonStart 
-                            ? `<span class="text-indigo-700 font-medium">${daysSince(project.pointsSeasonStart)}j</span>`
+                            ? `<span class="text-indigo-700 font-medium">${daysSince(project.pointsSeasonStart)}j</span>${project.pointsInfo ? `
+                                <span class="tooltip-container text-amber-600 ml-1">
+                                    <span class="text-xs">ⓘ</span>
+                                    <span class="tooltip-text">${project.pointsInfo}</span>
+                                </span>` : ''}`
                             : '<span class="text-gray-400">-</span>'
                         }
                     </td>
