@@ -1,0 +1,94 @@
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(request) {
+  try {
+    // GRVT API - récupérer tous les instruments
+    const instrumentsUrl = 'https://market-data.grvt.io/full/v1/all_instruments';
+    
+    const instrumentsResponse = await fetch(instrumentsUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ is_active: true }),
+    });
+
+    if (!instrumentsResponse.ok) {
+      throw new Error(`GRVT instruments API error: ${instrumentsResponse.status}`);
+    }
+
+    const instrumentsData = await instrumentsResponse.json();
+    const instruments = instrumentsData.result || [];
+
+    // Récupérer le ticker pour chaque instrument et sommer les volumes
+    let totalVolume24h = 0;
+    let marketsCount = 0;
+
+    for (const instrument of instruments) {
+      try {
+        const tickerUrl = 'https://market-data.grvt.io/full/v1/ticker';
+        const tickerResponse = await fetch(tickerUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ instrument: instrument.instrument }),
+        });
+
+        if (tickerResponse.ok) {
+          const tickerData = await tickerResponse.json();
+          const ticker = tickerData.result;
+          
+          if (ticker) {
+            // Volume 24h en quote currency (USDT)
+            const buyVolume = parseFloat(ticker.buy_volume_24h_q || 0);
+            const sellVolume = parseFloat(ticker.sell_volume_24h_q || 0);
+            totalVolume24h += buyVolume + sellVolume;
+            marketsCount++;
+          }
+        }
+      } catch (e) {
+        // Ignorer les erreurs individuelles
+        console.error(`Error fetching ticker for ${instrument.instrument}:`, e);
+      }
+    }
+
+    // Calculer les fees : volume × 0.02% (estimation moyenne entre -0.01% maker et 0.045% taker)
+    const feeRate = 0.0002; // 0.02%
+    const fees24h = totalVolume24h * feeRate;
+
+    // Retourner les données formatées
+    const result = {
+      protocol: 'grvt',
+      name: 'GRVT',
+      total24h: fees24h,
+      total7d: fees24h * 7, // Estimation basée sur 24h
+      volume24h: totalVolume24h,
+      feeRate: feeRate,
+      feeRatePercent: '0.02%',
+      marketsCount: marketsCount,
+      logo: 'https://icons.llamao.fi/icons/protocols/grvt?w=48&h=48',
+    };
+
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400',
+      },
+    });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        protocol: 'grvt' 
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+}
