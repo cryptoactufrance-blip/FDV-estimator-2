@@ -223,6 +223,7 @@
                 { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', pointsSeasonStart: '2025-09-23' }, // Rewards 2.0
                 { name: 'Reya', llamaSlug: 'reya', pointsSeasonStart: '2025-07-19' }, // RCP (Reya Chain Points)
                 { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', pointsSeasonStart: '2025-12-17' }, // Omni Points
+                { name: 'StandX', llamaSlug: 'standx', customApi: 'standx', pointsSeasonStart: null }, // Fees = Volume × 0.025%
                 { name: 'HyENA', llamaSlug: 'hyena', pointsSeasonStart: '2025-12-09' }, // Launch date (USDe perp DEX on Hyperliquid)
                 { name: 'Nado', llamaSlug: 'nado-perps', pointsSeasonStart: '2025-11-21' }, // Launch date (Kraken/Ink DEX)
             ]
@@ -391,6 +392,30 @@
             }
         }
 
+        // Récupérer les données StandX via notre Edge Function custom
+        async function fetchStandX() {
+            try {
+                addLog(`📡 Appel API StandX...`, 'info');
+                const response = await fetch('/api/standx');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                addLog(`✅ StandX: Volume 24h=${formatUSD(data.volume24h)}, Fees (0.025%)=${formatUSD(data.total24h)}`, 'success');
+                return data;
+            } catch (error) {
+                addLog(`❌ Erreur StandX: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
         // =====================================================
         // CALCUL DU RATIO MOYEN PONDÉRÉ
         // =====================================================
@@ -480,6 +505,8 @@
                     feesData = await fetchVariational();
                 } else if (project.customApi === 'grvt') {
                     feesData = await fetchGRVT();
+                } else if (project.customApi === 'standx') {
+                    feesData = await fetchStandX();
                 } else {
                     feesData = await fetchFees(project.llamaSlug);
                 }
@@ -653,6 +680,8 @@
                     customApiTooltip = 'Données via API custom<br>(Fees = Loss Refund × 10)<br>Basé sur 24h glissantes';
                 } else if (project.customApi === 'grvt') {
                     customApiTooltip = 'Données via API custom<br>(Fees = Volume × 0.02%)<br>Basé sur 24h glissantes';
+                } else if (project.customApi === 'standx') {
+                    customApiTooltip = 'Données via API custom<br>(Fees = Volume × 0.025%)<br>Maker 0.01% / Taker 0.04%';
                 }
                 
                 return `
