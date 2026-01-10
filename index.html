@@ -151,8 +151,11 @@
                                 </span>
                             </div>
                         </th>
-                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('tgeDate')">
-                            Dernier Airdrop <span id="sort-tgeDate" class="text-gray-400">↕</span>
+                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsSeason')">
+                            <div class="tooltip-container">
+                                Points <span id="sort-pointsSeason" class="text-gray-400">↕</span>
+                                <span class="tooltip-text">Jours depuis le début de la dernière saison de points</span>
+                            </div>
                         </th>
                         <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('hasToken')">
                             Statut <span id="sort-hasToken" class="text-gray-400">↕</span>
@@ -197,28 +200,29 @@
         // =====================================================
         const PROJECTS = {
             // Projets avec token (slug DeFiLlama / id CoinGecko)
+            // Note: Les projets avec token n'ont plus de saison de points active
             withToken: [
-                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', tgeDate: '2024-11-29' },
-                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', tgeDate: '2025-12-30' },
-                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', tgeDate: '2025-09-17' },
-                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', tgeDate: '2021-09-08' },
-                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', tgeDate: '2025-09-09' },
-                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', tgeDate: '2024-08-26' },
-                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', tgeDate: '2021-09-01' },
-                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', tgeDate: '2024-05-16' },
+                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', pointsSeasonStart: null },
+                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', pointsSeasonStart: '2025-10-02' }, // Season 2 (TGE 30 Dec 2025)
+                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', pointsSeasonStart: null },
+                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', pointsSeasonStart: null },
+                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', pointsSeasonStart: '2025-09-03' }, // Season 3
+                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', pointsSeasonStart: null },
+                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', pointsSeasonStart: null },
+                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', pointsSeasonStart: null },
             ],
             // Projets sans token (FDV estimée)
             withoutToken: [
-                { name: 'Extended', llamaSlug: 'extended' },
-                { name: 'Paradex', llamaSlug: 'paradex' },
-                { name: 'EdgeX', llamaSlug: 'edgex' },
-                { name: 'Ethereal', llamaSlug: 'ethereal-dex' },
-                { name: 'Ostium', llamaSlug: 'ostium' },
-                { name: 'Unit', llamaSlug: 'unit' },
-                { name: 'tradeXYZ', llamaSlug: 'tradexyz' },
-                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt' },
-                { name: 'Reya', llamaSlug: 'reya' },
-                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational' },
+                { name: 'Extended', llamaSlug: 'extended', pointsSeasonStart: '2025-04-29' }, // Season 1
+                { name: 'Paradex', llamaSlug: 'paradex', pointsSeasonStart: '2025-01-03' }, // Season 2
+                { name: 'EdgeX', llamaSlug: 'edgex', pointsSeasonStart: '2025-12-11' }, // Pre-TGE Season (après Open Season)
+                { name: 'Ethereal', llamaSlug: 'ethereal-dex', pointsSeasonStart: '2025-08-14' }, // Season 1 (après Season Zero)
+                { name: 'Ostium', llamaSlug: 'ostium', pointsSeasonStart: '2025-03-31' }, // Points Program
+                { name: 'Unit', llamaSlug: 'unit', pointsSeasonStart: null }, // Pas de programme de points connu
+                { name: 'tradeXYZ', llamaSlug: 'tradexyz', pointsSeasonStart: null }, // Waitlist, pas de points encore
+                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', pointsSeasonStart: '2025-09-23' }, // Rewards 2.0
+                { name: 'Reya', llamaSlug: 'reya', pointsSeasonStart: '2025-07-19' }, // RCP (Reya Chain Points)
+                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', pointsSeasonStart: '2025-12-17' }, // Omni Points
             ]
         };
 
@@ -487,7 +491,7 @@
                     coingeckoId: project.coingeckoId || null,
                     hasToken: project.hasToken,
                     customApi: project.customApi || false, // Flag pour APIs custom
-                    tgeDate: project.tgeDate || null, // Date du TGE/Airdrop
+                    pointsSeasonStart: project.pointsSeasonStart || null, // Date de début de la saison de points
                     fees24h: feesData?.total24h || 0,
                     fees7d: feesData?.total7d || 0,
                     fees7dAvg: daily7dAvg,
@@ -610,10 +614,10 @@
                         valA = a.ratio || 0;
                         valB = b.ratio || 0;
                         break;
-                    case 'tgeDate':
-                        // Les dates null vont à la fin
-                        valA = a.tgeDate ? new Date(a.tgeDate).getTime() : 0;
-                        valB = b.tgeDate ? new Date(b.tgeDate).getTime() : 0;
+                    case 'pointsSeason':
+                        // Les dates null vont à la fin, sinon tri par nombre de jours
+                        valA = a.pointsSeasonStart ? daysSince(a.pointsSeasonStart) : -9999;
+                        valB = b.pointsSeasonStart ? daysSince(b.pointsSeasonStart) : -9999;
                         break;
                     case 'hasToken':
                         valA = a.hasToken ? 1 : 0;
@@ -692,9 +696,9 @@
                         </div>
                     </td>
                     <td class="text-center py-3 px-4 text-sm">
-                        ${project.tgeDate 
-                            ? `<span class="text-gray-700">${daysSince(project.tgeDate)}j</span>`
-                            : '<span class="text-gray-400">N/A</span>'
+                        ${project.pointsSeasonStart 
+                            ? `<span class="text-indigo-700 font-medium">${daysSince(project.pointsSeasonStart)}j</span>`
+                            : '<span class="text-gray-400">-</span>'
                         }
                     </td>
                     <td class="text-center py-3 px-4">
