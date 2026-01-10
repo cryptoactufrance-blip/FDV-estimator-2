@@ -213,10 +213,9 @@
                 { name: 'Ostium', llamaSlug: 'ostium' },
                 { name: 'Unit', llamaSlug: 'unit' },
                 { name: 'tradeXYZ', llamaSlug: 'tradexyz' },
-                { name: 'GRVT', llamaSlug: 'grvt' },
+                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt' },
                 { name: 'Reya', llamaSlug: 'reya' },
                 { name: 'Variational', llamaSlug: 'variational', customApi: 'variational' },
-                { name: '01 Exchange', llamaSlug: '01exchange', customApi: '01exchange' },
             ]
         };
 
@@ -349,11 +348,11 @@
             }
         }
 
-        // Récupérer les données 01 Exchange via notre Edge Function custom
-        async function fetch01Exchange() {
+        // Récupérer les données GRVT via notre Edge Function custom
+        async function fetchGRVT() {
             try {
-                addLog(`📡 Appel API 01 Exchange...`, 'info');
-                const response = await fetch('/api/01exchange');
+                addLog(`📡 Appel API GRVT...`, 'info');
+                const response = await fetch('/api/grvt');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
@@ -365,10 +364,10 @@
                     throw new Error(data.error);
                 }
                 
-                addLog(`✅ 01 Exchange: Volume 24h=${formatUSD(data.volume24h)}, Fees (0.02%)=${formatUSD(data.total24h)}`, 'success');
+                addLog(`✅ GRVT: Volume 24h=${formatUSD(data.volume24h)}, Fees (0.02%)=${formatUSD(data.total24h)}`, 'success');
                 return data;
             } catch (error) {
-                addLog(`❌ Erreur 01 Exchange: ${error.message}`, 'error');
+                addLog(`❌ Erreur GRVT: ${error.message}`, 'error');
                 return null;
             }
         }
@@ -460,8 +459,8 @@
                 // Cas spécial pour les APIs custom
                 if (project.customApi === 'variational') {
                     feesData = await fetchVariational();
-                } else if (project.customApi === '01exchange') {
-                    feesData = await fetch01Exchange();
+                } else if (project.customApi === 'grvt') {
+                    feesData = await fetchGRVT();
                 } else {
                     feesData = await fetchFees(project.llamaSlug);
                 }
@@ -626,7 +625,7 @@
                 let customApiTooltip = '';
                 if (project.customApi === 'variational') {
                     customApiTooltip = 'Données via API custom<br>(Fees = Loss Refund × 10)<br>Basé sur 24h glissantes';
-                } else if (project.customApi === '01exchange') {
+                } else if (project.customApi === 'grvt') {
                     customApiTooltip = 'Données via API custom<br>(Fees = Volume × 0.02%)<br>Basé sur 24h glissantes';
                 }
                 
