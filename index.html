@@ -151,6 +151,9 @@
                                 </span>
                             </div>
                         </th>
+                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('tgeDate')">
+                            Dernier Airdrop <span id="sort-tgeDate" class="text-gray-400">↕</span>
+                        </th>
                         <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('hasToken')">
                             Statut <span id="sort-hasToken" class="text-gray-400">↕</span>
                         </th>
@@ -158,7 +161,7 @@
                 </thead>
                 <tbody id="dataTable">
                     <tr>
-                        <td colspan="6" class="text-center py-8 text-gray-500">
+                        <td colspan="7" class="text-center py-8 text-gray-500">
                             Chargement des données...
                         </td>
                     </tr>
@@ -195,14 +198,14 @@
         const PROJECTS = {
             // Projets avec token (slug DeFiLlama / id CoinGecko)
             withToken: [
-                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid' },
-                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter' },
-                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2' },
-                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain' },
-                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis' },
-                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network' },
-                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx' },
-                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol' },
+                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', tgeDate: '2024-11-29' },
+                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', tgeDate: '2025-12-30' },
+                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', tgeDate: '2025-09-17' },
+                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', tgeDate: '2021-09-08' },
+                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', tgeDate: '2025-09-09' },
+                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', tgeDate: '2024-08-26' },
+                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', tgeDate: '2021-09-01' },
+                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', tgeDate: '2024-05-16' },
             ],
             // Projets sans token (FDV estimée)
             withoutToken: [
@@ -246,6 +249,16 @@
         function formatRatio(value) {
             if (value === null || value === undefined || isNaN(value) || !isFinite(value)) return '-';
             return value.toFixed(1) + 'x';
+        }
+
+        // Calculer le nombre de jours depuis une date
+        function daysSince(dateStr) {
+            if (!dateStr) return null;
+            const date = new Date(dateStr);
+            const today = new Date();
+            const diffTime = today - date;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
         }
 
         // Ajouter un log
@@ -474,6 +487,7 @@
                     coingeckoId: project.coingeckoId || null,
                     hasToken: project.hasToken,
                     customApi: project.customApi || false, // Flag pour APIs custom
+                    tgeDate: project.tgeDate || null, // Date du TGE/Airdrop
                     fees24h: feesData?.total24h || 0,
                     fees7d: feesData?.total7d || 0,
                     fees7dAvg: daily7dAvg,
@@ -596,6 +610,11 @@
                         valA = a.ratio || 0;
                         valB = b.ratio || 0;
                         break;
+                    case 'tgeDate':
+                        // Les dates null vont à la fin
+                        valA = a.tgeDate ? new Date(a.tgeDate).getTime() : 0;
+                        valB = b.tgeDate ? new Date(b.tgeDate).getTime() : 0;
+                        break;
                     case 'hasToken':
                         valA = a.hasToken ? 1 : 0;
                         valB = b.hasToken ? 1 : 0;
@@ -671,6 +690,12 @@
                             />
                             <span class="ml-1 text-gray-500">x</span>
                         </div>
+                    </td>
+                    <td class="text-center py-3 px-4 text-sm">
+                        ${project.tgeDate 
+                            ? `<span class="text-gray-700">${daysSince(project.tgeDate)}j</span>`
+                            : '<span class="text-gray-400">N/A</span>'
+                        }
                     </td>
                     <td class="text-center py-3 px-4">
                         ${project.hasToken 
