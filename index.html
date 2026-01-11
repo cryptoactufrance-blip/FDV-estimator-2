@@ -187,6 +187,12 @@
                                 </div>
                             </div>
                         </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointValue')">
+                            <div class="tooltip-container">
+                                $/Point <span id="sort-pointValue" class="text-gray-400">↕</span>
+                                <span class="tooltip-text">Valeur estimée d'un point = (FDV × %Airdrop) / Points Max</span>
+                            </div>
+                        </th>
                         <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('hasToken')">
                             Statut <span id="sort-hasToken" class="text-gray-400">↕</span>
                         </th>
@@ -194,7 +200,7 @@
                 </thead>
                 <tbody id="dataTable">
                     <tr>
-                        <td colspan="9" class="text-center py-8 text-gray-500">
+                        <td colspan="10" class="text-center py-8 text-gray-500">
                             Chargement des données...
                         </td>
                     </tr>
@@ -298,6 +304,24 @@
         function formatRatio(value) {
             if (value === null || value === undefined || isNaN(value) || !isFinite(value)) return '-';
             return value.toFixed(1) + 'x';
+        }
+
+        // Calculer la valeur d'un point: (FDV × %Airdrop) / Points Max
+        function calculatePointValue(project) {
+            if (!project.fdv || !project.pointsMax) return null;
+            const airdropPct = project.airdropPct !== null ? project.airdropPct : defaultAirdropPct;
+            const pointValue = (project.fdv * (airdropPct / 100)) / project.pointsMax;
+            return pointValue;
+        }
+
+        // Formatage de la valeur d'un point
+        function formatPointValue(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-';
+            if (value >= 1000) return '$' + (value / 1000).toFixed(1) + 'K';
+            if (value >= 1) return '$' + value.toFixed(2);
+            if (value >= 0.01) return '$' + value.toFixed(3);
+            if (value >= 0.001) return '$' + value.toFixed(4);
+            return '$' + value.toFixed(5);
         }
 
         // Calculer le nombre de jours depuis une date
@@ -703,6 +727,11 @@
                         valA = a.airdropPct !== null ? a.airdropPct : defaultAirdropPct;
                         valB = b.airdropPct !== null ? b.airdropPct : defaultAirdropPct;
                         break;
+                    case 'pointValue':
+                        // Calcul de la valeur d'un point
+                        valA = calculatePointValue(a);
+                        valB = calculatePointValue(b);
+                        break;
                     case 'hasToken':
                         valA = a.hasToken ? 1 : 0;
                         valB = b.hasToken ? 1 : 0;
@@ -802,6 +831,18 @@
                             ? `<span class="text-emerald-700 font-medium">${project.airdropPct}%</span>`
                             : `<span class="text-gray-500 italic">${defaultAirdropPct}%</span>`
                         }
+                    </td>
+                    <td class="text-right py-3 px-4 text-sm">
+                        ${(() => {
+                            const pointValue = calculatePointValue(project);
+                            if (pointValue === null) {
+                                return '<span class="text-gray-400">-</span>';
+                            }
+                            // Couleur selon si on utilise des valeurs par défaut
+                            const hasAllData = project.pointsMax && (project.airdropPct !== null);
+                            const colorClass = hasAllData ? 'text-cyan-700 font-medium' : 'text-gray-500 italic';
+                            return `<span class="${colorClass}">${formatPointValue(pointValue)}</span>`;
+                        })()}
                     </td>
                     <td class="text-center py-3 px-4">
                         ${project.hasToken 
