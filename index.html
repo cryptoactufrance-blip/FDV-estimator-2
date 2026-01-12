@@ -147,8 +147,8 @@
                             FDV <span id="sort-fdv-preTGE" class="text-gray-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4">
-                            <div class="flex items-center justify-end gap-2">
-                                <button onclick="resetRatios()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-2 py-1 rounded transition-colors" title="Réinitialiser les ratios">
+                            <div class="flex flex-col items-end gap-1">
+                                <button onclick="resetRatios(); event.stopPropagation();" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-2 py-0.5 rounded transition-colors" title="Réinitialiser les ratios">
                                     ↺ Reset
                                 </button>
                                 <span class="cursor-pointer" onclick="sortTable('ratio', 'preTGE')">
