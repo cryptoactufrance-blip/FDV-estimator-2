@@ -172,12 +172,36 @@
 
         <!-- Table 1: Projets sans token (Pre-TGE) -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6 overflow-x-auto">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">
-                <span class="inline-flex items-center gap-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">⏳ Estimé</span>
-                    Projets Pre-TGE
-                </span>
-            </h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">
+                    <span class="inline-flex items-center gap-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">⏳ Estimé</span>
+                        Projets Pre-TGE
+                    </span>
+                </h2>
+                <!-- Scenario Buttons (duplicated) -->
+                <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                    <button id="scenarioBearish2" onclick="setScenario('bearish')" 
+                        class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all"
+                        title="Prévoit un -66% sur les frais post TGE (cas de Lighter)">
+                        🐻 Bearish
+                    </button>
+                    <div class="tooltip-container">
+                        <button id="scenarioMid2" onclick="setScenario('mid')" 
+                            class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
+                            😐 Mid
+                        </button>
+                        <span class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
+                    </div>
+                    <div class="tooltip-container">
+                        <button id="scenarioBullish2" onclick="setScenario('bullish')" 
+                            class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
+                            🐂 Bullish
+                        </button>
+                        <span class="tooltip-text">Calculé par rapport aux frais actuels</span>
+                    </div>
+                </div>
+            </div>
             <table class="w-full">
                 <thead>
                     <tr class="border-b-2 border-gray-200">
@@ -750,11 +774,12 @@
             loadingText.textContent = 'Calcul du ratio moyen...';
             
             const avgRatio = calculateWeightedAverageRatio(projectsData);
+            const scenarioMultiplier = scenarioMultipliers[currentScenario];
             
-            // Appliquer les estimations aux projets sans token
+            // Appliquer les estimations aux projets sans token (avec multiplicateur du scénario)
             for (const project of projectsData) {
                 if (!project.hasToken && project.annualRevenue > 0) {
-                    const estimatedFDV = estimateFDV(project.annualRevenue, avgRatio);
+                    const estimatedFDV = estimateFDV(project.annualRevenue, avgRatio * scenarioMultiplier);
                     if (estimatedFDV) {
                         project.fdv = estimatedFDV;
                         project.fdvEstimated = true;
@@ -777,7 +802,7 @@
             // 4. Mettre à jour l'affichage
             addLog('🎨 Mise à jour de l\'interface...', 'info');
             updateTable();
-            await updateChart(avgRatio);
+            await updateChart(avgRatio * scenarioMultipliers[currentScenario], currentScenario);
             
             // Mettre à jour la date
             document.getElementById('lastUpdate').textContent = new Date().toLocaleString('fr-FR');
@@ -1063,7 +1088,7 @@
             
             // Mettre à jour le tableau et le graphique
             updateTable();
-            updateChart(manualRatio * multiplier);
+            updateChart(manualRatio * multiplier, currentScenario);
         }
         
         // Mettre à jour le pointsMax d'un projet (entrée utilisateur en millions)
@@ -1088,10 +1113,16 @@
             currentScenario = scenario;
             const multiplier = scenarioMultipliers[scenario];
             
-            // Mettre à jour les styles des boutons
-            document.getElementById('scenarioBearish').className = 'scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all' + (scenario === 'bearish' ? ' active-bearish' : '');
-            document.getElementById('scenarioMid').className = 'scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all' + (scenario === 'mid' ? ' active-mid' : '');
-            document.getElementById('scenarioBullish').className = 'scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all' + (scenario === 'bullish' ? ' active-bullish' : '');
+            // Mettre à jour les styles des deux sets de boutons
+            const buttons = ['scenarioBearish', 'scenarioMid', 'scenarioBullish', 'scenarioBearish2', 'scenarioMid2', 'scenarioBullish2'];
+            buttons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    const type = id.replace('2', '').replace('scenario', '').toLowerCase();
+                    btn.className = 'scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all' + 
+                        (scenario === type ? ` active-${type}` : '');
+                }
+            });
             
             // Recalculer les FDV estimées avec le multiplicateur du scénario
             const ratioToUse = manualRatio || originalAvgRatio;
@@ -1105,9 +1136,9 @@
             const scenarioNames = { bearish: 'Bearish (-66%)', mid: 'Mid (-33%)', bullish: 'Bullish (100%)' };
             addLog(`📊 Scénario changé: ${scenarioNames[scenario]}`, 'info');
             
-            // Mettre à jour le tableau et le graphique
+            // Mettre à jour le tableau et le graphique avec la couleur du scénario
             updateTable();
-            updateChart(ratioToUse * multiplier);
+            updateChart(ratioToUse * multiplier, scenario);
         }
         
         // Réinitialiser les ratios aux valeurs calculées automatiquement
@@ -1134,7 +1165,7 @@
             
             // Mettre à jour le tableau et le graphique
             updateTable();
-            updateChart(originalAvgRatio * multiplier);
+            updateChart(originalAvgRatio * multiplier, currentScenario);
             addLog('✅ Ratios réinitialisés au ratio moyen pondéré', 'success');
         }
 
@@ -1379,23 +1410,25 @@
             }
         };
         
-        async function updateChart(avgRatio) {
+        // Couleurs des scénarios pour la ligne du ratio
+        const scenarioColors = {
+            bearish: 'rgba(220, 38, 38, 0.7)',   // Rouge
+            mid: 'rgba(124, 58, 237, 0.7)',      // Violet
+            bullish: 'rgba(22, 163, 74, 0.7)'    // Vert
+        };
+
+        async function updateChart(avgRatio, scenario = null) {
             const ctx = document.getElementById('scatterChart').getContext('2d');
             
             // Stocker le ratio pour les redraws
             currentAvgRatio = avgRatio;
             
-            // Détruire le graphique existant
-            if (chart) {
-                chart.destroy();
-            }
+            // Utiliser le scénario courant si non spécifié
+            const activeScenario = scenario || currentScenario;
+            const lineColor = scenarioColors[activeScenario] || scenarioColors.bullish;
 
             // Filtrer les projets valides pour le graphique
             const validProjects = projectsData.filter(p => p.annualRevenue > 0 && p.fdv > 0);
-            
-            // Précharger les logos
-            addLog('🖼️ Chargement des logos pour le graphique...', 'info');
-            await preloadLogos(validProjects);
             
             // Préparer les données
             const liveTokens = validProjects.filter(p => p.hasToken);
@@ -1419,6 +1452,41 @@
                 }
             }
 
+            // Si le graphique existe, mettre à jour les données avec animation
+            if (chart) {
+                // Mettre à jour la ligne du ratio
+                chart.data.datasets[0].data = ratioLine;
+                chart.data.datasets[0].borderColor = lineColor;
+                
+                // Mettre à jour les tokens live
+                chart.data.datasets[1].data = liveTokens.map(p => ({
+                    x: p.annualRevenue,
+                    y: p.fdv,
+                    name: p.name,
+                    ratio: p.ratio,
+                    logo: p.logo
+                }));
+                
+                // Mettre à jour les FDV estimées
+                chart.data.datasets[2].data = estimatedTokens.map(p => ({
+                    x: p.annualRevenue,
+                    y: p.fdv,
+                    name: p.name,
+                    ratio: p.ratio,
+                    logo: p.logo,
+                    customApi: p.customApi
+                }));
+                
+                // Mettre à jour avec animation smooth
+                chart.update('active');
+                return;
+            }
+
+            // Sinon, créer le graphique (première fois)
+            // Précharger les logos
+            addLog('🖼️ Chargement des logos pour le graphique...', 'info');
+            await preloadLogos(validProjects);
+
             // Configuration Chart.js
             chart = new Chart(ctx, {
                 type: 'scatter',
@@ -1429,7 +1497,7 @@
                             label: 'Ratio moyen pondéré',
                             data: ratioLine,
                             type: 'line',
-                            borderColor: 'rgba(249, 115, 22, 0.7)',
+                            borderColor: lineColor,
                             borderWidth: 2,
                             borderDash: [5, 5],
                             pointRadius: 0,
@@ -1475,6 +1543,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 400,
+                        easing: 'easeInOutQuart'
+                    },
+                    transitions: {
+                        active: {
+                            animation: {
+                                duration: 300,
+                                easing: 'easeInOutQuart'
+                            }
+                        }
+                    },
                     interaction: {
                         mode: 'nearest',
                         intersect: true
