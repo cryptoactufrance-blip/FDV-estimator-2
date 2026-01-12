@@ -40,7 +40,7 @@
             border-radius: 6px;
             padding: 8px 10px;
             position: absolute;
-            z-index: 100;
+            z-index: 9999;
             bottom: 125%;
             left: 50%;
             transform: translateX(-50%);
@@ -49,6 +49,7 @@
             line-height: 1.4;
             transition: opacity 0.2s, visibility 0.2s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
         }
         .tooltip-container .tooltip-text::after {
             content: "";
@@ -173,7 +174,8 @@
         </div>
 
         <!-- Table 1: Projets sans token (Pre-TGE) -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6 overflow-x-auto">
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6 overflow-visible">
+            <div class="overflow-x-auto">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-gray-800">
                     <span class="inline-flex items-center gap-2">
@@ -183,21 +185,21 @@
                 </h2>
                 <!-- Scenario Buttons (duplicated) -->
                 <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-                    <div class="tooltip-container">
+                    <div class="tooltip-container relative">
                         <button id="scenarioBearish2" onclick="setScenario('bearish')" 
                             class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
                             🐻 Bearish
                         </button>
                         <span class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
                     </div>
-                    <div class="tooltip-container">
+                    <div class="tooltip-container relative">
                         <button id="scenarioMid2" onclick="setScenario('mid')" 
                             class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
                             🧙 Mid
                         </button>
                         <span class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
                     </div>
-                    <div class="tooltip-container">
+                    <div class="tooltip-container relative">
                         <button id="scenarioBullish2" onclick="setScenario('bullish')" 
                             class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
                             🐂 Bullish
@@ -283,6 +285,7 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
 
         <!-- Table 2: Projets avec token (Post-TGE) -->
