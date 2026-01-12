@@ -169,15 +169,9 @@
                             </div>
                         </th>
                         <th class="text-right py-3 px-4">
-                            <div class="flex items-center justify-end gap-1">
-                                <div class="tooltip-container">
-                                    <span class="cursor-pointer" onclick="sortTable('airdropPct', 'preTGE')">
-                                        %Airdrop <span id="sort-airdropPct-preTGE" class="text-gray-400">↕</span>
-                                    </span>
-                                    <span class="tooltip-text">% du supply alloué à l'airdrop au TGE</span>
-                                </div>
-                                <div class="flex items-center gap-1 ml-2 text-xs text-gray-500">
-                                    <span>(défaut:</span>
+                            <div class="flex flex-col items-end gap-1">
+                                <div class="flex items-center gap-1 text-xs text-gray-500">
+                                    <span>défaut:</span>
                                     <input 
                                         type="number" 
                                         id="defaultAirdropInput"
@@ -188,7 +182,13 @@
                                         onchange="updateDefaultAirdrop(this.value)"
                                         onclick="event.stopPropagation()"
                                     />
-                                    <span>%)</span>
+                                    <span>%</span>
+                                </div>
+                                <div class="tooltip-container">
+                                    <span class="cursor-pointer" onclick="sortTable('airdropPct', 'preTGE')">
+                                        %Airdrop <span id="sort-airdropPct-preTGE" class="text-gray-400">↕</span>
+                                    </span>
+                                    <span class="tooltip-text">% du supply alloué à l'airdrop au TGE</span>
                                 </div>
                             </div>
                         </th>
