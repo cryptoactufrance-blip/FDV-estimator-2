@@ -236,35 +236,11 @@
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('ratio', 'postTGE')">
                             Ratio <span id="sort-ratio-postTGE" class="text-gray-400">↕</span>
                         </th>
-                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsSeason', 'postTGE')">
-                            <div class="tooltip-container">
-                                Début points <span id="sort-pointsSeason-postTGE" class="text-gray-400">↕</span>
-                                <span class="tooltip-text">Jours depuis le début de la dernière saison de points</span>
-                            </div>
-                        </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsMax', 'postTGE')">
-                            <div class="tooltip-container">
-                                Points au TGE <span id="sort-pointsMax-postTGE" class="text-gray-400">↕</span>
-                                <span class="tooltip-text">Points max en circulation à l'Airdrop</span>
-                            </div>
-                        </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('airdropPct', 'postTGE')">
-                            <div class="tooltip-container">
-                                %Airdrop <span id="sort-airdropPct-postTGE" class="text-gray-400">↕</span>
-                                <span class="tooltip-text">% du supply alloué à l'airdrop au TGE</span>
-                            </div>
-                        </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointValue', 'postTGE')">
-                            <div class="tooltip-container">
-                                $/Point <span id="sort-pointValue-postTGE" class="text-gray-400">↕</span>
-                                <span class="tooltip-text">Valeur estimée d'un point = (FDV × %Airdrop) / Points Max</span>
-                            </div>
-                        </th>
                     </tr>
                 </thead>
                 <tbody id="dataTablePostTGE">
                     <tr>
-                        <td colspan="9" class="text-center py-8 text-gray-500">
+                        <td colspan="5" class="text-center py-8 text-gray-500">
                             Chargement des données...
                         </td>
                     </tr>
@@ -872,8 +848,8 @@
                 </td>
             `;
             
-            // Colonnes de points communes
-            const pointsCols = `
+            // Colonnes de points (seulement pour Pre-TGE)
+            const pointsCols = isPreTGE ? `
                 <td class="text-center py-3 px-4 text-sm">
                     ${project.pointsSeasonStart 
                         ? `<span class="text-indigo-700 font-medium">${daysSince(project.pointsSeasonStart)}j</span>${project.pointsInfo ? `
@@ -907,7 +883,7 @@
                         return `<span class="${colorClass}">${formatPointValue(pointValue)}</span>`;
                     })()}
                 </td>
-            `;
+            ` : '';
             
             return `
                 <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
