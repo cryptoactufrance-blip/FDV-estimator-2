@@ -64,6 +64,29 @@
             visibility: visible;
             opacity: 1;
         }
+        /* Scenario button styles */
+        .scenario-btn {
+            color: #6b7280;
+            background: transparent;
+        }
+        .scenario-btn:hover {
+            background: rgba(0,0,0,0.05);
+        }
+        .scenario-btn.active-bearish {
+            background: #fecaca;
+            color: #dc2626;
+            box-shadow: 0 1px 3px rgba(220, 38, 38, 0.3);
+        }
+        .scenario-btn.active-mid {
+            background: #e9d5ff;
+            color: #7c3aed;
+            box-shadow: 0 1px 3px rgba(124, 58, 237, 0.3);
+        }
+        .scenario-btn.active-bullish {
+            background: #bbf7d0;
+            color: #16a34a;
+            box-shadow: 0 1px 3px rgba(22, 163, 74, 0.3);
+        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen py-8 px-4">
@@ -81,13 +104,37 @@
                     <span class="text-sm text-gray-500">Dernière mise à jour :</span>
                     <span id="lastUpdate" class="text-sm font-medium text-gray-700">-</span>
                 </div>
-                <button id="refreshBtn" onclick="loadAllData()" 
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
-                    <svg id="refreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <span id="refreshText">Actualiser les données</span>
-                </button>
+                <div class="flex items-center gap-3">
+                    <!-- Scenario Buttons -->
+                    <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                        <button id="scenarioBearish" onclick="setScenario('bearish')" 
+                            class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all"
+                            title="Prévoit un -66% sur les frais post TGE (cas de Lighter)">
+                            🐻 Bearish
+                        </button>
+                        <div class="tooltip-container">
+                            <button id="scenarioMid" onclick="setScenario('mid')" 
+                                class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
+                                😐 Mid
+                            </button>
+                            <span class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
+                        </div>
+                        <div class="tooltip-container">
+                            <button id="scenarioBullish" onclick="setScenario('bullish')" 
+                                class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
+                                🐂 Bullish
+                            </button>
+                            <span class="tooltip-text">Calculé par rapport aux frais actuels</span>
+                        </div>
+                    </div>
+                    <button id="refreshBtn" onclick="loadAllData()" 
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
+                        <svg id="refreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span id="refreshText">Actualiser les données</span>
+                    </button>
+                </div>
             </div>
             <!-- Loading Progress -->
             <div id="loadingProgress" class="hidden mt-4">
@@ -318,6 +365,12 @@
         let currentAvgRatio = null; // Ratio actuellement utilisé (peut être manuel)
         let manualRatio = null; // Ratio défini manuellement par l'utilisateur
         let defaultAirdropPct = 10; // % Airdrop par défaut pour les projets sans info
+        let currentScenario = 'bullish'; // Scénario actuel (bearish, mid, bullish)
+        const scenarioMultipliers = {
+            bearish: 1/3,  // -66% sur les frais post TGE
+            mid: 2/3,      // -33% sur les frais post TGE
+            bullish: 1     // Frais actuels
+        };
 
         // =====================================================
         // FONCTIONS UTILITAIRES
@@ -879,13 +932,14 @@
                     }
                 </td>
                 <td class="text-right py-3 px-4 text-sm">
-                    ${project.pointsMax 
-                        ? `<span class="text-purple-700 font-medium">${formatNumber(project.pointsMax)}</span>${project.pointsMaxInfo ? `<span class="tooltip-container ml-1"><span class="text-gray-400 cursor-help">ⓘ</span><span class="tooltip-text">${project.pointsMaxInfo}</span></span>` : ''}`
+                    ${project.pointsMaxInfo 
+                        ? `<span class="text-purple-700 font-medium">${formatNumber(project.pointsMax)}</span><span class="tooltip-container ml-1"><span class="text-gray-400 cursor-help">ⓘ</span><span class="tooltip-text">${project.pointsMaxInfo}</span></span>`
                         : `<div class="flex items-center justify-end gap-1">
                             <input type="number" 
                                    id="pointsMax-${project.name}" 
                                    class="w-16 px-1 py-0.5 text-right text-sm border border-gray-300 rounded bg-purple-50 focus:outline-none focus:ring-1 focus:ring-purple-400"
                                    placeholder="?"
+                                   value="${project.pointsMax ? project.pointsMax / 1000000 : ''}"
                                    onchange="updatePointsMax('${project.name}', this.value)"
                                    title="Entrez le nombre de points en millions">
                             <span class="text-gray-500 text-xs">M</span>
@@ -997,18 +1051,19 @@
             manualRatio = newRatio;
             currentAvgRatio = newRatio;
             
-            // Recalculer les FDV estimées avec le nouveau ratio
+            // Recalculer les FDV estimées avec le nouveau ratio ET le scénario actuel
+            const multiplier = scenarioMultipliers[currentScenario];
             for (const project of projectsData) {
                 if (project.fdvEstimated && project.annualRevenue > 0) {
-                    project.fdv = project.annualRevenue * manualRatio;
-                    project.ratio = manualRatio;
+                    project.fdv = project.annualRevenue * manualRatio * multiplier;
+                    project.ratio = manualRatio * multiplier;
                     addLog(`💡 Recalcul ${project.name}: FDV=${formatUSD(project.fdv)}`, 'calc');
                 }
             }
             
             // Mettre à jour le tableau et le graphique
             updateTable();
-            updateChart(manualRatio);
+            updateChart(manualRatio * multiplier);
         }
         
         // Mettre à jour le pointsMax d'un projet (entrée utilisateur en millions)
@@ -1028,6 +1083,33 @@
             updateTable();
         }
         
+        // Changer le scénario (bearish, mid, bullish)
+        function setScenario(scenario) {
+            currentScenario = scenario;
+            const multiplier = scenarioMultipliers[scenario];
+            
+            // Mettre à jour les styles des boutons
+            document.getElementById('scenarioBearish').className = 'scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all' + (scenario === 'bearish' ? ' active-bearish' : '');
+            document.getElementById('scenarioMid').className = 'scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all' + (scenario === 'mid' ? ' active-mid' : '');
+            document.getElementById('scenarioBullish').className = 'scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all' + (scenario === 'bullish' ? ' active-bullish' : '');
+            
+            // Recalculer les FDV estimées avec le multiplicateur du scénario
+            const ratioToUse = manualRatio || originalAvgRatio;
+            for (const project of projectsData) {
+                if (project.fdvEstimated && project.annualRevenue > 0) {
+                    project.fdv = project.annualRevenue * ratioToUse * multiplier;
+                    project.ratio = ratioToUse * multiplier;
+                }
+            }
+            
+            const scenarioNames = { bearish: 'Bearish (-66%)', mid: 'Mid (-33%)', bullish: 'Bullish (100%)' };
+            addLog(`📊 Scénario changé: ${scenarioNames[scenario]}`, 'info');
+            
+            // Mettre à jour le tableau et le graphique
+            updateTable();
+            updateChart(ratioToUse * multiplier);
+        }
+        
         // Réinitialiser les ratios aux valeurs calculées automatiquement
         function resetRatios() {
             if (originalAvgRatio === null) {
@@ -1039,19 +1121,20 @@
             manualRatio = null;
             currentAvgRatio = originalAvgRatio;
             
-            // Restaurer les ratios originaux pour les projets estimés
+            // Restaurer les ratios originaux pour les projets estimés avec le scénario actuel
+            const multiplier = scenarioMultipliers[currentScenario];
             for (const project of projectsData) {
                 if (project.fdvEstimated && project.annualRevenue > 0) {
-                    // Recalculer avec le ratio moyen original
-                    project.fdv = project.annualRevenue * originalAvgRatio;
-                    project.ratio = originalAvgRatio;
+                    // Recalculer avec le ratio moyen original ET le scénario
+                    project.fdv = project.annualRevenue * originalAvgRatio * multiplier;
+                    project.ratio = originalAvgRatio * multiplier;
                     addLog(`🔄 Reset ${project.name}: FDV=${formatUSD(project.fdv)}, Ratio=${Math.round(project.ratio)}x`, 'calc');
                 }
             }
             
             // Mettre à jour le tableau et le graphique
             updateTable();
-            updateChart(originalAvgRatio);
+            updateChart(originalAvgRatio * multiplier);
             addLog('✅ Ratios réinitialisés au ratio moyen pondéré', 'success');
         }
 
@@ -1512,6 +1595,9 @@
         
         // Charger les données au démarrage
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialiser le scénario Bullish par défaut
+            setScenario('bullish');
+            
             loadAllData();
             
             // Actualisation automatique toutes les 24h
