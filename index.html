@@ -1442,8 +1442,12 @@
                     const data = point.data;
                     const baseSize = 28;
                     
+                    // Couleur du label basée sur le scénario
+                    const rgb = scenarioColorsRGB[currentScenario];
+                    const labelColor = hasToken ? '#3b82f6' : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+                    
                     ctx.save();
-                    ctx.fillStyle = hasToken ? '#3b82f6' : '#f97316';
+                    ctx.fillStyle = labelColor;
                     ctx.font = 'bold 11px Arial';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
@@ -1495,43 +1499,17 @@
                 }
             }
 
-            // Si le graphique existe, mettre à jour les données avec animation
+            // Si le graphique existe, le détruire et le recréer pour assurer le rendu des logos
             if (chart) {
-                // Mettre à jour la ligne du ratio
-                chart.data.datasets[0].data = ratioLine;
-                chart.data.datasets[0].borderColor = lineColor;
-                
-                // Mettre à jour les tokens live
-                chart.data.datasets[1].data = liveTokens.map(p => ({
-                    x: p.annualRevenue,
-                    y: p.fdv,
-                    name: p.name,
-                    ratio: p.ratio,
-                    logo: p.logo
-                }));
-                
-                // Mettre à jour les FDV estimées
-                chart.data.datasets[2].data = estimatedTokens.map(p => ({
-                    x: p.annualRevenue,
-                    y: p.fdv,
-                    name: p.name,
-                    ratio: p.ratio,
-                    logo: p.logo,
-                    customApi: p.customApi
-                }));
-                
-                // Mettre à jour avec animation smooth
-                chart.update({
-                    duration: 300,
-                    easing: 'easeInOutQuart'
-                });
-                return;
+                chart.destroy();
+                chart = null;
             }
 
-            // Sinon, créer le graphique (première fois)
-            // Précharger les logos
-            addLog('🖼️ Chargement des logos pour le graphique...', 'info');
-            await preloadLogos(validProjects);
+            // Précharger les logos seulement si pas déjà fait
+            if (Object.keys(logoImages).length === 0) {
+                addLog('🖼️ Chargement des logos pour le graphique...', 'info');
+                await preloadLogos(validProjects);
+            }
 
             // Configuration Chart.js
             chart = new Chart(ctx, {
