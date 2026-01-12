@@ -123,51 +123,56 @@
             </div>
         </div>
 
-        <!-- Data Table -->
+        <!-- Table 1: Projets sans token (Pre-TGE) -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6 overflow-x-auto">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Tableau des Données</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                <span class="inline-flex items-center gap-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">⏳ Estimé</span>
+                    Projets Pre-TGE
+                </span>
+            </h2>
             <table class="w-full">
                 <thead>
                     <tr class="border-b-2 border-gray-200">
-                        <th class="text-left py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('name')">
-                            Projet <span id="sort-name" class="text-gray-400">↕</span>
+                        <th class="text-left py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('name', 'preTGE')">
+                            Projet <span id="sort-name-preTGE" class="text-gray-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fees7d')">
-                            Moy. 7j <span id="sort-fees7d" class="text-gray-400">↕</span>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fees7d', 'preTGE')">
+                            Moy. 7j <span id="sort-fees7d-preTGE" class="text-gray-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('annualRevenue')">
-                            Revenu Annuel <span id="sort-annualRevenue" class="text-gray-400">↕</span>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('annualRevenue', 'preTGE')">
+                            Revenu Annuel <span id="sort-annualRevenue-preTGE" class="text-gray-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fdv')">
-                            FDV <span id="sort-fdv" class="text-gray-400">↕</span>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fdv', 'preTGE')">
+                            FDV <span id="sort-fdv-preTGE" class="text-gray-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4">
                             <div class="flex items-center justify-end gap-2">
                                 <button onclick="resetRatios()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-2 py-1 rounded transition-colors" title="Réinitialiser les ratios">
                                     ↺ Reset
                                 </button>
-                                <span class="cursor-pointer" onclick="sortTable('ratio')">
-                                    Ratio <span id="sort-ratio" class="text-gray-400">↕</span>
+                                <span class="cursor-pointer" onclick="sortTable('ratio', 'preTGE')">
+                                    Ratio <span id="sort-ratio-preTGE" class="text-gray-400">↕</span>
                                 </span>
                             </div>
                         </th>
-                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsSeason')">
+                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsSeason', 'preTGE')">
                             <div class="tooltip-container">
-                                Points <span id="sort-pointsSeason" class="text-gray-400">↕</span>
+                                Début points <span id="sort-pointsSeason-preTGE" class="text-gray-400">↕</span>
                                 <span class="tooltip-text">Jours depuis le début de la dernière saison de points</span>
                             </div>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsMax')">
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsMax', 'preTGE')">
                             <div class="tooltip-container">
-                                Max <span id="sort-pointsMax" class="text-gray-400">↕</span>
+                                Points au TGE <span id="sort-pointsMax-preTGE" class="text-gray-400">↕</span>
                                 <span class="tooltip-text">Points max en circulation à l'Airdrop</span>
                             </div>
                         </th>
                         <th class="text-right py-3 px-4">
                             <div class="flex items-center justify-end gap-1">
                                 <div class="tooltip-container">
-                                    <span class="cursor-pointer" onclick="sortTable('airdropPct')">
-                                        %Airdrop <span id="sort-airdropPct" class="text-gray-400">↕</span>
+                                    <span class="cursor-pointer" onclick="sortTable('airdropPct', 'preTGE')">
+                                        %Airdrop <span id="sort-airdropPct-preTGE" class="text-gray-400">↕</span>
                                     </span>
                                     <span class="tooltip-text">% du supply alloué à l'airdrop au TGE</span>
                                 </div>
@@ -187,20 +192,79 @@
                                 </div>
                             </div>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointValue')">
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointValue', 'preTGE')">
                             <div class="tooltip-container">
-                                $/Point <span id="sort-pointValue" class="text-gray-400">↕</span>
+                                $/Point <span id="sort-pointValue-preTGE" class="text-gray-400">↕</span>
                                 <span class="tooltip-text">Valeur estimée d'un point = (FDV × %Airdrop) / Points Max</span>
                             </div>
                         </th>
-                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('hasToken')">
-                            Statut <span id="sort-hasToken" class="text-gray-400">↕</span>
+                    </tr>
+                </thead>
+                <tbody id="dataTablePreTGE">
+                    <tr>
+                        <td colspan="9" class="text-center py-8 text-gray-500">
+                            Chargement des données...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table 2: Projets avec token (Post-TGE) -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6 overflow-x-auto">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                <span class="inline-flex items-center gap-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Live</span>
+                    Projets Post-TGE
+                </span>
+            </h2>
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b-2 border-gray-200">
+                        <th class="text-left py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('name', 'postTGE')">
+                            Projet <span id="sort-name-postTGE" class="text-gray-400">↕</span>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fees7d', 'postTGE')">
+                            Moy. 7j <span id="sort-fees7d-postTGE" class="text-gray-400">↕</span>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('annualRevenue', 'postTGE')">
+                            Revenu Annuel <span id="sort-annualRevenue-postTGE" class="text-gray-400">↕</span>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fdv', 'postTGE')">
+                            FDV <span id="sort-fdv-postTGE" class="text-gray-400">↕</span>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('ratio', 'postTGE')">
+                            Ratio <span id="sort-ratio-postTGE" class="text-gray-400">↕</span>
+                        </th>
+                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsSeason', 'postTGE')">
+                            <div class="tooltip-container">
+                                Début points <span id="sort-pointsSeason-postTGE" class="text-gray-400">↕</span>
+                                <span class="tooltip-text">Jours depuis le début de la dernière saison de points</span>
+                            </div>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsMax', 'postTGE')">
+                            <div class="tooltip-container">
+                                Points au TGE <span id="sort-pointsMax-postTGE" class="text-gray-400">↕</span>
+                                <span class="tooltip-text">Points max en circulation à l'Airdrop</span>
+                            </div>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('airdropPct', 'postTGE')">
+                            <div class="tooltip-container">
+                                %Airdrop <span id="sort-airdropPct-postTGE" class="text-gray-400">↕</span>
+                                <span class="tooltip-text">% du supply alloué à l'airdrop au TGE</span>
+                            </div>
+                        </th>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointValue', 'postTGE')">
+                            <div class="tooltip-container">
+                                $/Point <span id="sort-pointValue-postTGE" class="text-gray-400">↕</span>
+                                <span class="tooltip-text">Valeur estimée d'un point = (FDV × %Airdrop) / Points Max</span>
+                            </div>
                         </th>
                     </tr>
                 </thead>
-                <tbody id="dataTable">
+                <tbody id="dataTablePostTGE">
                     <tr>
-                        <td colspan="10" class="text-center py-8 text-gray-500">
+                        <td colspan="9" class="text-center py-8 text-gray-500">
                             Chargement des données...
                         </td>
                     </tr>
@@ -271,7 +335,8 @@
         // VARIABLES GLOBALES
         // =====================================================
         let projectsData = [];
-        let currentSort = { column: 'hasToken', direction: 'desc' };
+        let currentSortPreTGE = { column: 'annualRevenue', direction: 'desc' };
+        let currentSortPostTGE = { column: 'annualRevenue', direction: 'desc' };
         let chart = null;
         let originalAvgRatio = null; // Ratio calculé automatiquement (ne change jamais après calcul initial)
         let currentAvgRatio = null; // Ratio actuellement utilisé (peut être manuel)
@@ -684,11 +749,8 @@
         // MISE À JOUR DU TABLEAU
         // =====================================================
         
-        function updateTable() {
-            const tbody = document.getElementById('dataTable');
-            
-            // Tri des données
-            const sortedData = [...projectsData].sort((a, b) => {
+        function sortData(data, currentSort) {
+            return [...data].sort((a, b) => {
                 let valA, valB;
                 
                 switch (currentSort.column) {
@@ -713,28 +775,20 @@
                         valB = b.ratio || 0;
                         break;
                     case 'pointsSeason':
-                        // Les dates null vont à la fin, sinon tri par nombre de jours
                         valA = a.pointsSeasonStart ? daysSince(a.pointsSeasonStart) : -9999;
                         valB = b.pointsSeasonStart ? daysSince(b.pointsSeasonStart) : -9999;
                         break;
                     case 'pointsMax':
-                        // Les valeurs null vont à la fin
                         valA = a.pointsMax || -1;
                         valB = b.pointsMax || -1;
                         break;
                     case 'airdropPct':
-                        // Utilise la valeur du projet ou le default
                         valA = a.airdropPct !== null ? a.airdropPct : defaultAirdropPct;
                         valB = b.airdropPct !== null ? b.airdropPct : defaultAirdropPct;
                         break;
                     case 'pointValue':
-                        // Calcul de la valeur d'un point
-                        valA = calculatePointValue(a);
-                        valB = calculatePointValue(b);
-                        break;
-                    case 'hasToken':
-                        valA = a.hasToken ? 1 : 0;
-                        valB = b.hasToken ? 1 : 0;
+                        valA = calculatePointValue(a) || -1;
+                        valB = calculatePointValue(b) || -1;
                         break;
                     default:
                         return 0;
@@ -748,132 +802,181 @@
                 
                 return currentSort.direction === 'asc' ? valA - valB : valB - valA;
             });
-
-            // Générer le HTML du tableau
-            const displayRatio = manualRatio !== null ? manualRatio : currentAvgRatio;
+        }
+        
+        function generateRowHTML(project, isPreTGE) {
+            const ratioValue = project.fdvEstimated 
+                ? (manualRatio !== null ? manualRatio : Math.round(project.ratio))
+                : Math.round(project.ratio);
             
-            tbody.innerHTML = sortedData.map(project => {
-                const ratioValue = project.fdvEstimated 
-                    ? (manualRatio !== null ? manualRatio : Math.round(project.ratio))
-                    : Math.round(project.ratio);
-                
-                // Tooltip personnalisé selon le type d'API custom
-                let customApiTooltip = '';
-                if (project.customApi === 'variational') {
-                    customApiTooltip = 'Données via API custom<br>(Fees = Loss Refund × 10)<br>Basé sur 24h glissantes';
-                } else if (project.customApi === 'grvt') {
-                    customApiTooltip = 'Données via API custom<br>(Fees = Volume × 0.02%)<br>Basé sur 24h glissantes';
-                } else if (project.customApi === 'standx') {
-                    customApiTooltip = 'Données via API custom<br>(Fees = Volume × 0.025%)<br>Maker 0.01% / Taker 0.04%';
-                }
-                
-                return `
+            // Tooltip personnalisé selon le type d'API custom
+            let customApiTooltip = '';
+            if (project.customApi === 'variational') {
+                customApiTooltip = 'Données via API custom<br>(Fees = Loss Refund × 10)<br>Basé sur 24h glissantes';
+            } else if (project.customApi === 'grvt') {
+                customApiTooltip = 'Données via API custom<br>(Fees = Volume × 0.02%)<br>Basé sur 24h glissantes';
+            } else if (project.customApi === 'standx') {
+                customApiTooltip = 'Données via API custom<br>(Fees = Volume × 0.025%)<br>Maker 0.01% / Taker 0.04%';
+            }
+            
+            // Colonnes communes
+            const commonCols = `
+                <td class="py-3 px-4">
+                    <div class="flex items-center gap-2">
+                        ${project.logo ? `<img src="${project.logo}" alt="${project.name}" class="w-6 h-6 rounded-full">` : ''}
+                        <span class="font-medium text-gray-800">${project.name}</span>
+                        ${project.customApi ? `
+                            <span class="tooltip-container text-purple-600">
+                                <span class="text-xs">ⓘ</span>
+                                <span class="tooltip-text">${customApiTooltip}</span>
+                            </span>
+                        ` : ''}
+                    </div>
+                </td>
+                <td class="text-right py-3 px-4 text-gray-600">
+                    ${project.customApi 
+                        ? `<span title="Estimation basée sur 24h glissantes">${formatUSD(project.fees7dAvg)}*</span>`
+                        : formatUSD(project.fees7dAvg)
+                    }
+                </td>
+                <td class="text-right py-3 px-4 text-gray-600">
+                    ${project.customApi 
+                        ? `<span title="Estimation basée sur 24h glissantes">${formatUSD(project.annualRevenue)}*</span>`
+                        : formatUSD(project.annualRevenue)
+                    }
+                </td>
+                <td class="text-right py-3 px-4">
+                    <span class="${project.fdvEstimated ? 'text-orange-600' : 'text-gray-800'} font-medium">
+                        ${formatUSD(project.fdv)}${project.fdvEstimated ? '*' : ''}
+                    </span>
+                </td>
+            `;
+            
+            // Colonne Ratio (éditable seulement pour Pre-TGE)
+            const ratioCol = isPreTGE ? `
+                <td class="text-right py-3 px-4">
+                    <div class="flex items-center justify-end">
+                        <input type="text" 
+                            value="${ratioValue || ''}" 
+                            onchange="updateRatio(this.value)"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            class="w-16 text-right px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-orange-50 text-orange-700"
+                            title="Modifier pour recalculer les FDV estimées"
+                        />
+                        <span class="ml-1 text-gray-500">x</span>
+                    </div>
+                </td>
+            ` : `
+                <td class="text-right py-3 px-4">
+                    <span class="text-gray-700">${ratioValue || '-'}x</span>
+                </td>
+            `;
+            
+            // Colonnes de points communes
+            const pointsCols = `
+                <td class="text-center py-3 px-4 text-sm">
+                    ${project.pointsSeasonStart 
+                        ? `<span class="text-indigo-700 font-medium">${daysSince(project.pointsSeasonStart)}j</span>${project.pointsInfo ? `
+                            <span class="tooltip-container text-amber-600 ml-1">
+                                <span class="text-xs">ⓘ</span>
+                                <span class="tooltip-text">${project.pointsInfo}</span>
+                            </span>` : ''}`
+                        : '<span class="text-gray-400">-</span>'
+                    }
+                </td>
+                <td class="text-right py-3 px-4 text-sm">
+                    ${project.pointsMax 
+                        ? `<span class="text-purple-700 font-medium">${formatNumber(project.pointsMax)}</span>`
+                        : '<span class="text-gray-400">-</span>'
+                    }
+                </td>
+                <td class="text-right py-3 px-4 text-sm">
+                    ${project.airdropPct !== null 
+                        ? `<span class="text-emerald-700 font-medium">${project.airdropPct}%</span>`
+                        : `<span class="text-gray-500 italic">${defaultAirdropPct}%</span>`
+                    }
+                </td>
+                <td class="text-right py-3 px-4 text-sm">
+                    ${(() => {
+                        const pointValue = calculatePointValue(project);
+                        if (pointValue === null) {
+                            return '<span class="text-gray-400">-</span>';
+                        }
+                        const hasAllData = project.pointsMax && (project.airdropPct !== null);
+                        const colorClass = hasAllData ? 'text-cyan-700 font-medium' : 'text-gray-500 italic';
+                        return `<span class="${colorClass}">${formatPointValue(pointValue)}</span>`;
+                    })()}
+                </td>
+            `;
+            
+            return `
                 <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="py-3 px-4">
-                        <div class="flex items-center gap-2">
-                            ${project.logo ? `<img src="${project.logo}" alt="${project.name}" class="w-6 h-6 rounded-full">` : ''}
-                            <span class="font-medium text-gray-800">${project.name}</span>
-                            ${project.customApi ? `
-                                <span class="tooltip-container text-purple-600">
-                                    <span class="text-xs">ⓘ</span>
-                                    <span class="tooltip-text">${customApiTooltip}</span>
-                                </span>
-                            ` : ''}
-                        </div>
-                    </td>
-                    <td class="text-right py-3 px-4 text-gray-600">
-                        ${project.customApi 
-                            ? `<span title="Estimation basée sur 24h glissantes">${formatUSD(project.fees7dAvg)}*</span>`
-                            : formatUSD(project.fees7dAvg)
-                        }
-                    </td>
-                    <td class="text-right py-3 px-4 text-gray-600">
-                        ${project.customApi 
-                            ? `<span title="Estimation basée sur 24h glissantes">${formatUSD(project.annualRevenue)}*</span>`
-                            : formatUSD(project.annualRevenue)
-                        }
-                    </td>
-                    <td class="text-right py-3 px-4">
-                        <span class="${project.fdvEstimated ? 'text-orange-600' : 'text-gray-800'} font-medium">
-                            ${formatUSD(project.fdv)}${project.fdvEstimated ? '*' : ''}
-                        </span>
-                    </td>
-                    <td class="text-right py-3 px-4">
-                        <div class="flex items-center justify-end">
-                            <input type="text" 
-                                value="${ratioValue || ''}" 
-                                onchange="updateRatio(this.value)"
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                                class="w-16 text-right px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${project.fdvEstimated ? 'bg-orange-50 text-orange-700' : 'bg-gray-50 text-gray-700'}"
-                                ${!project.fdvEstimated ? 'disabled title="Ratio calculé depuis la FDV réelle"' : 'title="Modifier pour recalculer les FDV estimées"'}
-                            />
-                            <span class="ml-1 text-gray-500">x</span>
-                        </div>
-                    </td>
-                    <td class="text-center py-3 px-4 text-sm">
-                        ${project.pointsSeasonStart 
-                            ? `<span class="text-indigo-700 font-medium">${daysSince(project.pointsSeasonStart)}j</span>${project.pointsInfo ? `
-                                <span class="tooltip-container text-amber-600 ml-1">
-                                    <span class="text-xs">ⓘ</span>
-                                    <span class="tooltip-text">${project.pointsInfo}</span>
-                                </span>` : ''}`
-                            : '<span class="text-gray-400">-</span>'
-                        }
-                    </td>
-                    <td class="text-right py-3 px-4 text-sm">
-                        ${project.pointsMax 
-                            ? `<span class="text-purple-700 font-medium">${formatNumber(project.pointsMax)}</span>`
-                            : '<span class="text-gray-400">-</span>'
-                        }
-                    </td>
-                    <td class="text-right py-3 px-4 text-sm">
-                        ${project.airdropPct !== null 
-                            ? `<span class="text-emerald-700 font-medium">${project.airdropPct}%</span>`
-                            : `<span class="text-gray-500 italic">${defaultAirdropPct}%</span>`
-                        }
-                    </td>
-                    <td class="text-right py-3 px-4 text-sm">
-                        ${(() => {
-                            const pointValue = calculatePointValue(project);
-                            if (pointValue === null) {
-                                return '<span class="text-gray-400">-</span>';
-                            }
-                            // Couleur selon si on utilise des valeurs par défaut
-                            const hasAllData = project.pointsMax && (project.airdropPct !== null);
-                            const colorClass = hasAllData ? 'text-cyan-700 font-medium' : 'text-gray-500 italic';
-                            return `<span class="${colorClass}">${formatPointValue(pointValue)}</span>`;
-                        })()}
-                    </td>
-                    <td class="text-center py-3 px-4">
-                        ${project.hasToken 
-                            ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Live</span>'
-                            : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">⏳ Estimé</span>'
-                        }
-                    </td>
+                    ${commonCols}
+                    ${ratioCol}
+                    ${pointsCols}
                 </tr>
-            `}).join('');
+            `;
+        }
+        
+        function updateTable() {
+            // Séparer les projets Pre-TGE et Post-TGE
+            const preTGEProjects = projectsData.filter(p => !p.hasToken);
+            const postTGEProjects = projectsData.filter(p => p.hasToken);
+            
+            // Trier chaque groupe
+            const sortedPreTGE = sortData(preTGEProjects, currentSortPreTGE);
+            const sortedPostTGE = sortData(postTGEProjects, currentSortPostTGE);
+            
+            // Mettre à jour le tableau Pre-TGE
+            const tbodyPreTGE = document.getElementById('dataTablePreTGE');
+            tbodyPreTGE.innerHTML = sortedPreTGE.map(project => generateRowHTML(project, true)).join('');
+            
+            // Mettre à jour le tableau Post-TGE
+            const tbodyPostTGE = document.getElementById('dataTablePostTGE');
+            tbodyPostTGE.innerHTML = sortedPostTGE.map(project => generateRowHTML(project, false)).join('');
 
-            // Mettre à jour les indicateurs de tri
-            document.querySelectorAll('[id^="sort-"]').forEach(el => {
+            // Mettre à jour les indicateurs de tri pour Pre-TGE
+            document.querySelectorAll('[id^="sort-"][id$="-preTGE"]').forEach(el => {
                 el.textContent = '↕';
                 el.classList.remove('text-indigo-600');
                 el.classList.add('text-gray-400');
             });
+            const preTGESortEl = document.getElementById(`sort-${currentSortPreTGE.column}-preTGE`);
+            if (preTGESortEl) {
+                preTGESortEl.textContent = currentSortPreTGE.direction === 'asc' ? '↑' : '↓';
+                preTGESortEl.classList.remove('text-gray-400');
+                preTGESortEl.classList.add('text-indigo-600');
+            }
             
-            const currentSortEl = document.getElementById(`sort-${currentSort.column}`);
-            if (currentSortEl) {
-                currentSortEl.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
-                currentSortEl.classList.remove('text-gray-400');
-                currentSortEl.classList.add('text-indigo-600');
+            // Mettre à jour les indicateurs de tri pour Post-TGE
+            document.querySelectorAll('[id^="sort-"][id$="-postTGE"]').forEach(el => {
+                el.textContent = '↕';
+                el.classList.remove('text-indigo-600');
+                el.classList.add('text-gray-400');
+            });
+            const postTGESortEl = document.getElementById(`sort-${currentSortPostTGE.column}-postTGE`);
+            if (postTGESortEl) {
+                postTGESortEl.textContent = currentSortPostTGE.direction === 'asc' ? '↑' : '↓';
+                postTGESortEl.classList.remove('text-gray-400');
+                postTGESortEl.classList.add('text-indigo-600');
             }
         }
 
-        function sortTable(column) {
-            if (currentSort.column === column) {
-                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSort.column = column;
-                currentSort.direction = 'desc';
+        function sortTable(column, tableType) {
+            if (tableType === 'preTGE') {
+                if (currentSortPreTGE.column === column) {
+                    currentSortPreTGE.direction = currentSortPreTGE.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSortPreTGE.column = column;
+                    currentSortPreTGE.direction = 'desc';
+                }
+            } else if (tableType === 'postTGE') {
+                if (currentSortPostTGE.column === column) {
+                    currentSortPostTGE.direction = currentSortPostTGE.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSortPostTGE.column = column;
+                    currentSortPostTGE.direction = 'desc';
+                }
             }
             updateTable();
         }
