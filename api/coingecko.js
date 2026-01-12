@@ -34,11 +34,28 @@ export default async function handler(request) {
     const data = await response.json();
 
     // Extract the relevant data
+    const price = data.market_data?.current_price?.usd || 0;
+    const totalSupply = data.market_data?.total_supply || 0;
+    const maxSupply = data.market_data?.max_supply || 0;
+    
+    // Try to get FDV from API, otherwise calculate it from price * total_supply (or max_supply)
+    let fdv = data.market_data?.fully_diluted_valuation?.usd || 0;
+    
+    // Fallback: calculate FDV if not provided but we have price and supply data
+    if (fdv === 0 && price > 0) {
+      const supplyForFDV = maxSupply || totalSupply;
+      if (supplyForFDV > 0) {
+        fdv = price * supplyForFDV;
+      }
+    }
+
     const result = {
       coinId: coinId,
-      fdv: data.market_data?.fully_diluted_valuation?.usd || 0,
+      fdv: fdv,
       marketCap: data.market_data?.market_cap?.usd || 0,
-      price: data.market_data?.current_price?.usd || 0,
+      price: price,
+      totalSupply: totalSupply,
+      maxSupply: maxSupply,
       name: data.name || coinId,
       symbol: data.symbol || '',
       image: data.image?.small || null,
