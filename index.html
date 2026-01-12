@@ -386,7 +386,7 @@
         // VARIABLES GLOBALES
         // =====================================================
         let projectsData = [];
-        let currentSortPreTGE = { column: 'annualRevenue', direction: 'desc' };
+        let currentSortPreTGE = { column: 'pointValue', direction: 'desc' }; // Tri par $/Point par défaut
         let currentSortPostTGE = { column: 'annualRevenue', direction: 'desc' };
         let chart = null;
         let originalAvgRatio = null; // Ratio calculé automatiquement (ne change jamais après calcul initial)
@@ -874,8 +874,18 @@
                         valB = b.airdropPct !== null ? b.airdropPct : defaultAirdropPct;
                         break;
                     case 'pointValue':
-                        valA = calculatePointValue(a) || -1;
-                        valB = calculatePointValue(b) || -1;
+                        // Projets avec valeur de point en premier, sans valeur en dernier
+                        const pvA = calculatePointValue(a);
+                        const pvB = calculatePointValue(b);
+                        // Si les deux ont une valeur ou les deux n'en ont pas, comparer normalement
+                        if ((pvA !== null) === (pvB !== null)) {
+                            valA = pvA || 0;
+                            valB = pvB || 0;
+                        } else {
+                            // Celui avec valeur passe en premier (desc) ou dernier (asc)
+                            valA = pvA !== null ? 1 : 0;
+                            valB = pvB !== null ? 1 : 0;
+                        }
                         break;
                     default:
                         return 0;
@@ -1306,7 +1316,7 @@
         // Plugin personnalisé pour dessiner les logos avec anti-collision
         const logoPlugin = {
             id: 'logoPlugin',
-            afterDraw: function(chart) {
+            afterDatasetsDraw: function(chart) {
                 const ctx = chart.ctx;
                 const baseSize = 28;
                 
@@ -1499,40 +1509,17 @@
                 }
             }
 
-            // Si le graphique existe, mettre à jour les données avec animation
+            // Si le graphique existe, le détruire et le recréer pour assurer le rendu des logos
             if (chart) {
-                // Mettre à jour la ligne du ratio
-                chart.data.datasets[0].data = ratioLine;
-                chart.data.datasets[0].borderColor = lineColor;
-                
-                // Mettre à jour les tokens live
-                chart.data.datasets[1].data = liveTokens.map(p => ({
-                    x: p.annualRevenue,
-                    y: p.fdv,
-                    name: p.name,
-                    ratio: p.ratio,
-                    logo: p.logo
-                }));
-                
-                // Mettre à jour les FDV estimées
-                chart.data.datasets[2].data = estimatedTokens.map(p => ({
-                    x: p.annualRevenue,
-                    y: p.fdv,
-                    name: p.name,
-                    ratio: p.ratio,
-                    logo: p.logo,
-                    customApi: p.customApi
-                }));
-                
-                // Mettre à jour avec animation smooth
-                chart.update('default');
-                return;
+                chart.destroy();
+                chart = null;
             }
 
-            // Sinon, créer le graphique (première fois)
-            // Précharger les logos
-            addLog('🖼️ Chargement des logos pour le graphique...', 'info');
-            await preloadLogos(validProjects);
+            // Précharger les logos seulement si pas déjà fait
+            if (Object.keys(logoImages).length === 0) {
+                addLog('🖼️ Chargement des logos pour le graphique...', 'info');
+                await preloadLogos(validProjects);
+            }
 
             // Configuration Chart.js
             chart = new Chart(ctx, {
