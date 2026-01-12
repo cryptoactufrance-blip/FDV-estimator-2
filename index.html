@@ -289,16 +289,16 @@
             ],
             // Projets sans token (FDV estimée)
             withoutToken: [
-                { name: 'Extended', llamaSlug: 'extended', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, airdropPct: 30 }, // 30% confirmé
-                { name: 'Paradex', llamaSlug: 'paradex', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, airdropPct: 20 }, // 20% Genesis Airdrop
+                { name: 'Extended', llamaSlug: 'extended', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30 }, // 30% confirmé
+                { name: 'Paradex', llamaSlug: 'paradex', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20 }, // 20% Genesis Airdrop
                 { name: 'EdgeX', llamaSlug: 'edgex', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25 }, // ~25% estimé
                 { name: 'Ethereal', llamaSlug: 'ethereal-dex', pointsSeasonStart: '2025-08-14', pointsMax: null, airdropPct: null }, // Non communiqué
-                { name: 'Ostium', llamaSlug: 'ostium', pointsSeasonStart: '2025-03-31', pointsMax: 35000000, airdropPct: null }, // Non annoncé
+                { name: 'Ostium', llamaSlug: 'ostium', pointsSeasonStart: '2025-03-31', pointsMax: 55000000, pointsMaxInfo: '30M points S1 (estimé) + 25M points S2 (hardcap)', airdropPct: null }, // Non annoncé
                 { name: 'Unit', llamaSlug: 'unit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null },
                 { name: 'tradeXYZ', llamaSlug: 'tradexyz', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null },
-                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', pointsSeasonStart: '2025-09-23', pointsMax: 220000000, airdropPct: 22 }, // 22% (S1 10% + S2 12%)
-                { name: 'Reya', llamaSlug: 'reya', pointsSeasonStart: '2025-07-19', pointsMax: 6250000, airdropPct: 45 }, // 45% communauté
-                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, airdropPct: 25 }, // 25% estimé
+                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', pointsSeasonStart: '2025-09-23', pointsMax: null, airdropPct: 22 }, // 22% (S1 10% + S2 12%) - points S1 non comparables à S2
+                { name: 'Reya', llamaSlug: 'reya', pointsSeasonStart: '2025-07-19', pointsMax: null, airdropPct: 45 }, // 45% communauté - 6.25M RCP initial mais distribution continue
+                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, pointsMaxInfo: 'Source : Données dispo dans la doc du projet', airdropPct: 25 }, // 25% estimé
                 // { name: 'StandX', llamaSlug: 'standx', customApi: 'standx', pointsSeasonStart: null, pointsMax: null, airdropPct: null }, // Pas de données DeFiLlama
                 // { name: 'Polynomial', llamaSlug: 'polynomial-trade', pointsSeasonStart: null, pointsMax: null, airdropPct: null }, // Pas de fees sur DeFiLlama
                 { name: 'Vest', llamaSlug: 'vest-exchange', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
@@ -640,6 +640,7 @@
                     pointsSeasonStart: project.pointsSeasonStart || null, // Date de début de la saison de points
                     pointsInfo: project.pointsInfo || null, // Info supplémentaire sur les points
                     pointsMax: project.pointsMax || null, // Max de points en circulation à l'Airdrop
+                    pointsMaxInfo: project.pointsMaxInfo || null, // Info supplémentaire sur le max de points
                     airdropPct: project.airdropPct || null, // % du supply alloué à l'airdrop au TGE (null = utilise default)
                     fees24h: feesData?.total24h || 0,
                     fees7d: feesData?.total7d || 0,
@@ -879,8 +880,16 @@
                 </td>
                 <td class="text-right py-3 px-4 text-sm">
                     ${project.pointsMax 
-                        ? `<span class="text-purple-700 font-medium">${formatNumber(project.pointsMax)}</span>`
-                        : '<span class="text-gray-400">-</span>'
+                        ? `<span class="text-purple-700 font-medium">${formatNumber(project.pointsMax)}</span>${project.pointsMaxInfo ? `<span class="tooltip-container ml-1"><span class="text-gray-400 cursor-help">ⓘ</span><span class="tooltip-text">${project.pointsMaxInfo}</span></span>` : ''}`
+                        : `<div class="flex items-center justify-end gap-1">
+                            <input type="number" 
+                                   id="pointsMax-${project.name}" 
+                                   class="w-16 px-1 py-0.5 text-right text-sm border border-gray-300 rounded bg-purple-50 focus:outline-none focus:ring-1 focus:ring-purple-400"
+                                   placeholder="?"
+                                   onchange="updatePointsMax('${project.name}', this.value)"
+                                   title="Entrez le nombre de points en millions">
+                            <span class="text-gray-500 text-xs">M</span>
+                           </div>`
                     }
                 </td>
                 <td class="text-right py-3 px-4 text-sm">
@@ -1000,6 +1009,23 @@
             // Mettre à jour le tableau et le graphique
             updateTable();
             updateChart(manualRatio);
+        }
+        
+        // Mettre à jour le pointsMax d'un projet (entrée utilisateur en millions)
+        function updatePointsMax(projectName, valueInMillions) {
+            const project = projectsData.find(p => p.name === projectName);
+            if (!project) return;
+            
+            const numValue = parseFloat(valueInMillions);
+            if (isNaN(numValue) || numValue <= 0) {
+                project.pointsMax = null;
+                addLog(`🔄 ${projectName}: Points au TGE réinitialisé`, 'info');
+            } else {
+                project.pointsMax = numValue * 1000000; // Convertir millions en unités
+                addLog(`📝 ${projectName}: Points au TGE = ${numValue}M`, 'info');
+            }
+            
+            updateTable();
         }
         
         // Réinitialiser les ratios aux valeurs calculées automatiquement
