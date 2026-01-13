@@ -519,172 +519,6 @@
                 font-size: 11px;
             }
         }
-        
-        /* ========== MOBILE RESPONSIVE STYLES ========== */
-        
-        /* Table wrapper for horizontal scroll */
-        .table-wrapper {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin: 0 -1rem;
-            padding: 0 1rem;
-        }
-        
-        .table-wrapper::-webkit-scrollbar {
-            height: 8px;
-        }
-        
-        .table-wrapper::-webkit-scrollbar-thumb {
-            background: var(--neon-cyan);
-            border-radius: 4px;
-        }
-        
-        /* Mobile breakpoint */
-        @media (max-width: 640px) {
-            /* Body padding */
-            body {
-                padding: 1rem 0.5rem;
-            }
-            
-            /* Header */
-            .font-display.text-4xl {
-                font-size: 1.5rem !important;
-            }
-            
-            /* Cards */
-            .tech-card {
-                padding: 1rem !important;
-            }
-            
-            /* Controls - stack vertically */
-            .flex.flex-wrap.items-center.justify-between {
-                flex-direction: column;
-                align-items: stretch !important;
-                gap: 1rem !important;
-            }
-            
-            /* Scenario buttons - smaller */
-            .scenario-btn {
-                padding: 6px 8px;
-                font-size: 10px;
-            }
-            
-            /* Refresh button - full width */
-            .tech-btn-primary {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            /* Table minimum width to enable scroll */
-            .tech-table {
-                min-width: 800px;
-            }
-            
-            /* Table Pre-TGE needs more space */
-            #dataTablePreTGE {
-                min-width: 1200px;
-            }
-            
-            /* Chart height reduced */
-            .chart-container {
-                height: 300px !important;
-            }
-            
-            /* Chart legend - wrap */
-            .flex.gap-8.mt-6.justify-center {
-                flex-wrap: wrap;
-                gap: 0.75rem !important;
-                justify-content: flex-start !important;
-            }
-            
-            /* Section headers */
-            .section-header {
-                font-size: 1rem;
-                flex-direction: column;
-                align-items: flex-start !important;
-                gap: 0.5rem;
-            }
-            
-            /* Hide duplicate scenario buttons on mobile */
-            .tech-card .flex.items-center.gap-2.bg-mono-800\/50:not(:first-of-type) {
-                display: none;
-            }
-            
-            /* Tooltips - adjust position */
-            .tooltip-container .tooltip-text {
-                width: 180px;
-                font-size: 11px;
-                left: auto;
-                right: 0;
-                transform: none;
-            }
-            
-            /* Footer text */
-            .text-center.text-mono-400 {
-                font-size: 0.75rem;
-            }
-        }
-        
-        /* Very small screens */
-        @media (max-width: 380px) {
-            .font-display.text-4xl {
-                font-size: 1.25rem !important;
-            }
-            
-            .scenario-btn {
-                padding: 4px 6px;
-                font-size: 9px;
-            }
-            
-            .tech-badge {
-                font-size: 8px;
-                padding: 3px 6px;
-            }
-        }
-        
-        /* Tablet adjustments */
-        @media (min-width: 641px) and (max-width: 1024px) {
-            .tech-table {
-                min-width: 700px;
-            }
-            
-            #dataTablePreTGE {
-                min-width: 1000px;
-            }
-            
-            .chart-container {
-                height: 400px !important;
-            }
-        }
-        
-        /* Mobile-specific scroll indicator */
-        .scroll-hint {
-            display: none;
-        }
-        
-        @media (max-width: 640px) {
-            .scroll-hint {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0.5rem;
-                padding: 0.5rem;
-                background: rgba(0, 245, 255, 0.1);
-                border-radius: 4px;
-                margin-bottom: 0.5rem;
-                font-size: 12px;
-                color: var(--neon-cyan);
-            }
-            
-            .scroll-hint svg {
-                animation: scroll-bounce 1.5s infinite;
-            }
-            
-            @keyframes scroll-bounce {
-                0%, 100% { transform: translateX(0); }
-                50% { transform: translateX(5px); }
-            }
-        }
     </style>
 </head>
 <body class="tech-bg min-h-screen py-8 px-4">
@@ -699,51 +533,51 @@
         </div>
         
         <!-- Header -->
-        <div class="text-center mb-6 md:mb-10 px-2">
-            <h1 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold neon-text mb-3 tracking-wider">
+        <div class="text-center mb-10">
+            <h1 class="font-display text-4xl md:text-5xl font-bold neon-text mb-3 tracking-wider">
                 CRYPTO FDV ESTIMATOR
             </h1>
-            <p id="headerSubtitle" class="text-mono-200 font-body text-sm sm:text-base md:text-lg">Estimation de la Fully Diluted Valuation basée sur les revenus</p>
+            <p id="headerSubtitle" class="text-mono-200 font-body text-lg">Estimation de la Fully Diluted Valuation basée sur les revenus</p>
         </div>
 
         <!-- Controls -->
-        <div class="tech-card tech-card-glow p-4 sm:p-6 mb-6">
-            <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-2 justify-center sm:justify-start">
-                    <span id="lastUpdateLabel" class="text-xs sm:text-sm text-mono-300 font-body">Dernière mise à jour :</span>
-                    <span id="lastUpdate" class="text-xs sm:text-sm font-mono neon-text">-</span>
+        <div class="tech-card tech-card-glow p-6 mb-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <span id="lastUpdateLabel" class="text-sm text-mono-300 font-body">Dernière mise à jour :</span>
+                    <span id="lastUpdate" class="text-sm font-mono neon-text">-</span>
                 </div>
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                <div class="flex items-center gap-4">
                     <!-- Scenario Buttons -->
-                    <div class="flex items-center justify-center gap-1 sm:gap-2 bg-mono-800/50 rounded-md p-1 sm:p-1.5 border border-mono-600">
+                    <div class="flex items-center gap-2 bg-mono-800/50 rounded-md p-1.5 border border-mono-600">
                         <div class="tooltip-container">
                             <button id="scenarioBearish" onclick="setScenario('bearish')" 
                                 class="scenario-btn">
-                                🐻 <span class="hidden xs:inline">Bearish</span>
+                                🐻 Bearish
                             </button>
                             <span id="tooltipBearish" class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
                         </div>
                         <div class="tooltip-container">
                             <button id="scenarioMid" onclick="setScenario('mid')" 
                                 class="scenario-btn">
-                                🧙 <span class="hidden xs:inline">Mid</span>
+                                🧙 Mid
                             </button>
                             <span id="tooltipMid" class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
                         </div>
                         <div class="tooltip-container">
                             <button id="scenarioBullish" onclick="setScenario('bullish')" 
                                 class="scenario-btn">
-                                🐂 <span class="hidden xs:inline">Bullish</span>
+                                🐂 Bullish
                             </button>
                             <span id="tooltipBullish" class="tooltip-text">Calculé par rapport aux frais actuels</span>
                         </div>
                     </div>
                     <button id="refreshBtn" onclick="loadAllData()" 
-                        class="tech-btn tech-btn-primary flex items-center justify-center gap-2">
-                        <svg id="refreshIcon" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="tech-btn tech-btn-primary flex items-center gap-2">
+                        <svg id="refreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
-                        <span id="refreshText" class="text-xs sm:text-sm">Actualiser</span>
+                        <span id="refreshText">Actualiser les données</span>
                     </button>
                 </div>
             </div>
@@ -760,36 +594,36 @@
         </div>
 
         <!-- Chart -->
-        <div class="tech-card tech-card-glow p-4 sm:p-6 mb-6">
-            <h2 id="chartTitle" class="section-header text-base sm:text-xl mb-4 neon-text">Graphique Revenu vs FDV (Échelle Log)</h2>
-            <div class="chart-container relative" style="height: 300px; min-height: 250px;">
+        <div class="tech-card tech-card-glow p-6 mb-6">
+            <h2 id="chartTitle" class="section-header text-xl mb-4 neon-text">Graphique Revenu vs FDV (Échelle Logarithmique)</h2>
+            <div class="chart-container relative" style="height: 500px;">
                 <canvas id="scatterChart"></canvas>
             </div>
-            <div class="flex flex-wrap gap-3 sm:gap-8 mt-4 sm:mt-6 justify-center">
+            <div class="flex gap-8 mt-6 justify-center">
                 <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.5)]"></div>
-                    <span id="legendTokenLive" class="text-xs sm:text-sm text-mono-200 font-body">Token Live</span>
+                    <div class="w-3 h-3 rounded-full bg-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.5)]"></div>
+                    <span id="legendTokenLive" class="text-sm text-mono-200 font-body">Token Live</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div id="legendEstimatedDot" class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-neon-green shadow-[0_0_10px_rgba(0,255,136,0.5)]"></div>
-                    <span id="legendFdvEstimated" class="text-xs sm:text-sm text-mono-200 font-body">FDV Estimée</span>
+                    <div id="legendEstimatedDot" class="w-3 h-3 rounded-full bg-neon-green shadow-[0_0_10px_rgba(0,255,136,0.5)]"></div>
+                    <span id="legendFdvEstimated" class="text-sm text-mono-200 font-body">FDV Estimée</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div id="legendRatioLine" class="w-5 sm:w-6 h-0.5 border-dashed border-t-2 border-neon-green"></div>
-                    <span id="legendWeightedRatio" class="text-xs sm:text-sm text-mono-200 font-body">Ratio pondéré</span>
+                    <div id="legendRatioLine" class="w-6 h-0.5 border-dashed border-t-2 border-neon-green"></div>
+                    <span id="legendWeightedRatio" class="text-sm text-mono-200 font-body">Ratio moyen pondéré</span>
                 </div>
             </div>
         </div>
 
         <!-- Table 1: Projets sans token (Pre-TGE) -->
-        <div class="tech-card tech-card-glow p-4 sm:p-6 mb-6">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-                <h2 class="section-header text-base sm:text-xl flex items-center gap-2 sm:gap-3">
+        <div class="tech-card tech-card-glow p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="section-header text-xl flex items-center gap-3">
                     <span id="badgeEstime" class="tech-badge tech-badge-cyan">⏳ Estimé</span>
                     <span id="preTGETitle" class="text-mono-100">Projets Pre-TGE</span>
                 </h2>
-                <!-- Scenario Buttons (duplicated) - hidden on mobile -->
-                <div class="hidden sm:flex items-center gap-2 bg-mono-800/50 rounded-md p-1.5 border border-mono-600">
+                <!-- Scenario Buttons (duplicated) -->
+                <div class="flex items-center gap-2 bg-mono-800/50 rounded-md p-1.5 border border-mono-600">
                     <div class="tooltip-container relative">
                         <button id="scenarioBearish2" onclick="setScenario('bearish')" 
                             class="scenario-btn">
@@ -813,14 +647,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Scroll hint for mobile -->
-            <div class="scroll-hint">
-                <span>Glissez pour voir plus</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-            </div>
-            <div class="table-wrapper">
             <table class="tech-table">
                 <thead>
                     <tr class="">
@@ -905,23 +731,15 @@
                 </tbody>
             </table>
             </div>
-            </div>
         </div>
 
         <!-- Table 2: Projets avec token (Post-TGE) -->
-        <div class="tech-card tech-card-glow p-4 sm:p-6 mb-6">
-            <h2 class="section-header text-base sm:text-xl mb-4 flex items-center gap-2 sm:gap-3">
+        <div class="tech-card tech-card-glow p-6 mb-6">
+            <h2 class="section-header text-xl mb-4 flex items-center gap-3">
                 <span id="badgeLive" class="tech-badge tech-badge-green">✓ Live</span>
                 <span id="postTGETitle" class="text-mono-100">Projets Post-TGE</span>
             </h2>
-            <!-- Scroll hint for mobile -->
-            <div class="scroll-hint">
-                <span>Glissez pour voir plus</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-            </div>
-            <div class="table-wrapper">
+            <div class="overflow-x-auto">
             <table class="tech-table">
                 <thead>
                     <tr>
