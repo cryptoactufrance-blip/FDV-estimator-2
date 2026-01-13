@@ -4,25 +4,363 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto FDV Estimator</title>
+    <!-- Google Fonts - Orbitron for tech feel + JetBrains Mono for data -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'mono': {
+                            900: '#0a0a0f',
+                            800: '#12121a',
+                            700: '#1a1a24',
+                            600: '#24242f',
+                            500: '#2e2e3a',
+                            400: '#4a4a5a',
+                            300: '#6a6a7a',
+                            200: '#9a9aaa',
+                            100: '#cacacd',
+                        },
+                        'neon': {
+                            cyan: '#00f5ff',
+                            blue: '#0080ff',
+                            purple: '#a855f7',
+                            pink: '#f472b6',
+                            green: '#00ff88',
+                            red: '#ff3366',
+                            orange: '#ff8800',
+                        }
+                    },
+                    fontFamily: {
+                        'display': ['Orbitron', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace'],
+                        'body': ['Space Grotesk', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <!-- Chart.js v4 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <!-- Chart.js Datalabels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+        /* ========== DARK TECH MONOLITH THEME ========== */
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a24;
+            --bg-card: #14141c;
+            --border-color: #2a2a3a;
+            --border-glow: #00f5ff;
+            --text-primary: #e8e8ec;
+            --text-secondary: #9a9aaa;
+            --text-muted: #6a6a7a;
+            --neon-cyan: #00f5ff;
+            --neon-green: #00ff88;
+            --neon-purple: #a855f7;
+            --neon-red: #ff3366;
+            --neon-orange: #ff8800;
         }
-        .log-entry {
-            font-family: 'Monaco', 'Menlo', monospace;
+        
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) var(--bg-secondary);
+        }
+        
+        *::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        *::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        *::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        /* Animated grid background */
+        .tech-bg {
+            background: 
+                linear-gradient(var(--bg-primary) 0%, transparent 100%),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 50px,
+                    rgba(0, 245, 255, 0.03) 50px,
+                    rgba(0, 245, 255, 0.03) 51px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 50px,
+                    rgba(0, 245, 255, 0.03) 50px,
+                    rgba(0, 245, 255, 0.03) 51px
+                );
+            background-color: var(--bg-primary);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .tech-bg::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 400px;
+            background: radial-gradient(ellipse at 50% 0%, rgba(0, 245, 255, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Card styling */
+        .tech-card {
+            background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tech-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--neon-cyan) 50%, transparent 100%);
+            opacity: 0.5;
+        }
+        
+        .tech-card-glow {
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.05), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        
+        /* Glowing border effect on hover */
+        .glow-border {
+            position: relative;
+        }
+        
+        .glow-border::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .glow-border:hover::after {
+            opacity: 0.3;
+        }
+        
+        /* Table styling */
+        .tech-table {
+            width: 100%;
+        }
+        
+        .tech-table thead {
+            background: rgba(0, 245, 255, 0.05);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tech-table th {
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 500;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 14px 12px;
+        }
+        
+        .tech-table tbody tr {
+            border-bottom: 1px solid rgba(42, 42, 58, 0.5);
+            transition: all 0.2s ease;
+        }
+        
+        .tech-table tbody tr:hover {
+            background: rgba(0, 245, 255, 0.03);
+        }
+        
+        .tech-table td {
+            padding: 12px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+        
+        /* Neon text effects */
+        .neon-text {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(0, 245, 255, 0.5), 0 0 20px rgba(0, 245, 255, 0.3);
+        }
+        
+        .neon-text-green {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .neon-text-purple {
+            color: var(--neon-purple);
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        }
+        
+        .neon-text-red {
+            color: var(--neon-red);
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+        }
+        
+        .neon-text-orange {
+            color: var(--neon-orange);
+            text-shadow: 0 0 10px rgba(255, 136, 0, 0.5);
+        }
+        
+        /* Button styles */
+        .tech-btn {
+            background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: 'Orbitron', sans-serif;
             font-size: 12px;
+            letter-spacing: 0.05em;
+            padding: 10px 20px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .log-info { color: #3b82f6; }
-        .log-success { color: #22c55e; }
-        .log-warning { color: #f59e0b; }
-        .log-error { color: #ef4444; }
-        .log-calc { color: #8b5cf6; }
+        
+        .tech-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .tech-btn:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+        }
+        
+        .tech-btn:hover::before {
+            left: 100%;
+        }
+        
+        .tech-btn-primary {
+            background: linear-gradient(145deg, rgba(0, 245, 255, 0.2), rgba(0, 128, 255, 0.1));
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+        
+        .tech-btn-primary:hover {
+            background: linear-gradient(145deg, rgba(0, 245, 255, 0.3), rgba(0, 128, 255, 0.2));
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+        }
+        
+        /* Scenario buttons */
+        .scenario-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            padding: 8px 14px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .scenario-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-muted);
+        }
+        
+        .scenario-btn.active-bearish {
+            background: rgba(255, 51, 102, 0.15);
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.2);
+        }
+        
+        .scenario-btn.active-mid {
+            background: rgba(168, 85, 247, 0.15);
+            border-color: var(--neon-purple);
+            color: var(--neon-purple);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+        }
+        
+        .scenario-btn.active-bullish {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+        
+        /* Input styling */
+        .tech-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .tech-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+        }
+        
+        .tech-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        /* Badge styling */
+        .tech-badge {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            padding: 4px 10px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+        
+        .tech-badge-cyan {
+            background: rgba(0, 245, 255, 0.15);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            color: var(--neon-cyan);
+        }
+        
+        .tech-badge-green {
+            background: rgba(0, 255, 136, 0.15);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--neon-green);
+        }
         
         /* Custom tooltip */
         .tooltip-container {
@@ -30,117 +368,205 @@
             display: inline-block;
             cursor: help;
         }
+        
         .tooltip-container .tooltip-text {
             visibility: hidden;
             opacity: 0;
             width: 220px;
-            background-color: #1f2937;
-            color: #fff;
+            background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
             text-align: center;
-            border-radius: 6px;
-            padding: 8px 10px;
+            border-radius: 4px;
+            padding: 10px 12px;
             position: absolute;
             z-index: 9999;
             bottom: 125%;
             left: 50%;
             transform: translateX(-50%);
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 12px;
             font-weight: normal;
             line-height: 1.4;
             transition: opacity 0.2s, visibility 0.2s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 245, 255, 0.1);
             pointer-events: none;
         }
+        
         .tooltip-container .tooltip-text::after {
             content: "";
             position: absolute;
             top: 100%;
             left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
+            margin-left: -6px;
+            border-width: 6px;
             border-style: solid;
-            border-color: #1f2937 transparent transparent transparent;
+            border-color: var(--bg-tertiary) transparent transparent transparent;
         }
+        
         .tooltip-container:hover .tooltip-text {
             visibility: visible;
             opacity: 1;
         }
-        /* Scenario button styles */
-        .scenario-btn {
-            color: #6b7280;
-            background: transparent;
+        
+        /* Progress bar */
+        .tech-progress {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
         }
-        .scenario-btn:hover {
-            background: rgba(0,0,0,0.05);
+        
+        .tech-progress-bar {
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+            box-shadow: 0 0 10px var(--neon-cyan);
+            transition: width 0.3s ease;
         }
-        .scenario-btn.active-bearish {
-            background: #fecaca;
-            color: #dc2626;
-            box-shadow: 0 1px 3px rgba(220, 38, 38, 0.3);
+        
+        /* Log styling */
+        .log-entry {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
         }
-        .scenario-btn.active-mid {
-            background: #e9d5ff;
-            color: #7c3aed;
-            box-shadow: 0 1px 3px rgba(124, 58, 237, 0.3);
+        .log-info { color: var(--neon-cyan); }
+        .log-success { color: var(--neon-green); }
+        .log-warning { color: var(--neon-orange); }
+        .log-error { color: var(--neon-red); }
+        .log-calc { color: var(--neon-purple); }
+        
+        /* Spinning animation for refresh */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
-        .scenario-btn.active-bullish {
-            background: #bbf7d0;
-            color: #16a34a;
-            box-shadow: 0 1px 3px rgba(22, 163, 74, 0.3);
+        
+        .animate-spin-slow {
+            animation: spin 1.5s linear infinite;
+        }
+        
+        /* Pulse glow animation */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px var(--neon-cyan); }
+            50% { box-shadow: 0 0 20px var(--neon-cyan), 0 0 30px rgba(0, 245, 255, 0.3); }
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        /* Scanline effect */
+        .scanlines::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1),
+                rgba(0, 0, 0, 0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        
+        /* Chart container */
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        /* Link styling for project names */
+        .tech-link {
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+        
+        .tech-link:hover {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+        }
+        
+        /* Section headers */
+        .section-header {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+        }
+        
+        /* Data values */
+        .data-value {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .tech-table th, .tech-table td {
+                padding: 8px 6px;
+                font-size: 11px;
+            }
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen py-8 px-4">
-    <div class="max-w-7xl mx-auto">
+<body class="tech-bg min-h-screen py-8 px-4">
+    <div class="max-w-7xl mx-auto relative z-10">
         <!-- Language Toggle -->
-        <div class="flex justify-end mb-2">
+        <div class="flex justify-end mb-4">
             <button id="langToggle" onclick="toggleLanguage()" 
-                class="text-2xl hover:scale-110 transition-transform cursor-pointer" 
+                class="text-2xl hover:scale-110 transition-transform cursor-pointer hover:drop-shadow-[0_0_10px_rgba(0,245,255,0.5)]" 
                 title="Switch to English">
                 🥖
             </button>
         </div>
         
         <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">📊 Crypto FDV Estimator</h1>
-            <p id="headerSubtitle" class="text-gray-600">Estimation de la Fully Diluted Valuation basée sur les revenus</p>
+        <div class="text-center mb-10">
+            <h1 class="font-display text-4xl md:text-5xl font-bold neon-text mb-3 tracking-wider">
+                CRYPTO FDV ESTIMATOR
+            </h1>
+            <p id="headerSubtitle" class="text-mono-200 font-body text-lg">Estimation de la Fully Diluted Valuation basée sur les revenus</p>
         </div>
 
         <!-- Controls -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <div class="tech-card tech-card-glow p-6 mb-6">
             <div class="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <span id="lastUpdateLabel" class="text-sm text-gray-500">Dernière mise à jour :</span>
-                    <span id="lastUpdate" class="text-sm font-medium text-gray-700">-</span>
+                <div class="flex items-center gap-2">
+                    <span id="lastUpdateLabel" class="text-sm text-mono-300 font-body">Dernière mise à jour :</span>
+                    <span id="lastUpdate" class="text-sm font-mono neon-text">-</span>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-4">
                     <!-- Scenario Buttons -->
-                    <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                    <div class="flex items-center gap-2 bg-mono-800/50 rounded-md p-1.5 border border-mono-600">
                         <div class="tooltip-container">
                             <button id="scenarioBearish" onclick="setScenario('bearish')" 
-                                class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
+                                class="scenario-btn">
                                 🐻 Bearish
                             </button>
                             <span id="tooltipBearish" class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
                         </div>
                         <div class="tooltip-container">
                             <button id="scenarioMid" onclick="setScenario('mid')" 
-                                class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
+                                class="scenario-btn">
                                 🧙 Mid
                             </button>
                             <span id="tooltipMid" class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
                         </div>
                         <div class="tooltip-container">
                             <button id="scenarioBullish" onclick="setScenario('bullish')" 
-                                class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
+                                class="scenario-btn">
                                 🐂 Bullish
                             </button>
                             <span id="tooltipBullish" class="tooltip-text">Calculé par rapport aux frais actuels</span>
                         </div>
                     </div>
                     <button id="refreshBtn" onclick="loadAllData()" 
-                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
+                        class="tech-btn tech-btn-primary flex items-center gap-2">
                         <svg id="refreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
@@ -151,85 +577,83 @@
             <!-- Loading Progress -->
             <div id="loadingProgress" class="hidden mt-4">
                 <div class="flex items-center gap-3">
-                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
-                    <span id="loadingText" class="text-sm text-gray-600">Chargement...</span>
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-neon-cyan"></div>
+                    <span id="loadingText" class="text-sm text-mono-200">Chargement...</span>
                 </div>
-                <div class="mt-2 bg-gray-200 rounded-full h-2">
-                    <div id="progressBar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                <div class="mt-2 tech-progress h-2">
+                    <div id="progressBar" class="tech-progress-bar h-2 transition-all duration-300" style="width: 0%"></div>
                 </div>
             </div>
         </div>
 
         <!-- Chart -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 id="chartTitle" class="text-xl font-semibold text-gray-800 mb-4">Graphique Revenu vs FDV (Échelle Logarithmique)</h2>
-            <div class="relative" style="height: 500px;">
+        <div class="tech-card tech-card-glow p-6 mb-6">
+            <h2 id="chartTitle" class="section-header text-xl mb-4 neon-text">Graphique Revenu vs FDV (Échelle Logarithmique)</h2>
+            <div class="chart-container relative" style="height: 500px;">
                 <canvas id="scatterChart"></canvas>
             </div>
-            <div class="flex gap-6 mt-4 justify-center">
+            <div class="flex gap-8 mt-6 justify-center">
                 <div class="flex items-center gap-2">
-                    <div class="w-4 h-4 rounded-full bg-blue-500"></div>
-                    <span id="legendTokenLive" class="text-sm text-gray-600">Token Live</span>
+                    <div class="w-3 h-3 rounded-full bg-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.5)]"></div>
+                    <span id="legendTokenLive" class="text-sm text-mono-200 font-body">Token Live</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div id="legendEstimatedDot" class="w-4 h-4 rounded-full bg-green-500"></div>
-                    <span id="legendFdvEstimated" class="text-sm text-gray-600">FDV Estimée</span>
+                    <div id="legendEstimatedDot" class="w-3 h-3 rounded-full bg-neon-green shadow-[0_0_10px_rgba(0,255,136,0.5)]"></div>
+                    <span id="legendFdvEstimated" class="text-sm text-mono-200 font-body">FDV Estimée</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div id="legendRatioLine" class="w-6 h-0.5 border-dashed border-t-2 border-green-500"></div>
-                    <span id="legendWeightedRatio" class="text-sm text-gray-600">Ratio moyen pondéré</span>
+                    <div id="legendRatioLine" class="w-6 h-0.5 border-dashed border-t-2 border-neon-green"></div>
+                    <span id="legendWeightedRatio" class="text-sm text-mono-200 font-body">Ratio moyen pondéré</span>
                 </div>
             </div>
         </div>
 
         <!-- Table 1: Projets sans token (Pre-TGE) -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <div class="tech-card tech-card-glow p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-gray-800">
-                    <span class="inline-flex items-center gap-2">
-                        <span id="badgeEstime" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">⏳ Estimé</span>
-                        <span id="preTGETitle">Projets Pre-TGE</span>
-                    </span>
+                <h2 class="section-header text-xl flex items-center gap-3">
+                    <span id="badgeEstime" class="tech-badge tech-badge-cyan">⏳ Estimé</span>
+                    <span id="preTGETitle" class="text-mono-100">Projets Pre-TGE</span>
                 </h2>
                 <!-- Scenario Buttons (duplicated) -->
-                <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                <div class="flex items-center gap-2 bg-mono-800/50 rounded-md p-1.5 border border-mono-600">
                     <div class="tooltip-container relative">
                         <button id="scenarioBearish2" onclick="setScenario('bearish')" 
-                            class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
+                            class="scenario-btn">
                             🐻 Bearish
                         </button>
                         <span id="tooltipBearish2" class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
                     </div>
                     <div class="tooltip-container relative">
                         <button id="scenarioMid2" onclick="setScenario('mid')" 
-                            class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
+                            class="scenario-btn">
                             🧙 Mid
                         </button>
                         <span id="tooltipMid2" class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
                     </div>
                     <div class="tooltip-container relative">
                         <button id="scenarioBullish2" onclick="setScenario('bullish')" 
-                            class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
+                            class="scenario-btn">
                             🐂 Bullish
                         </button>
                         <span id="tooltipBullish2" class="tooltip-text">Calculé par rapport aux frais actuels</span>
                     </div>
                 </div>
             </div>
-            <table class="w-full">
+            <table class="tech-table">
                 <thead>
-                    <tr class="border-b-2 border-gray-200">
-                        <th class="text-left py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('name', 'preTGE')">
-                            <span id="headerProject">Projet</span> <span id="sort-name-preTGE" class="text-gray-400">↕</span>
+                    <tr class="">
+                        <th class="text-left py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('name', 'preTGE')">
+                            <span id="headerProject">Projet</span> <span id="sort-name-preTGE" class="text-mono-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fees7d', 'preTGE')">
-                            <span id="headerAvg7d">Moy. 7j</span> <span id="sort-fees7d-preTGE" class="text-gray-400">↕</span>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('fees7d', 'preTGE')">
+                            <span id="headerAvg7d">Moy. 7j</span> <span id="sort-fees7d-preTGE" class="text-mono-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('annualRevenue', 'preTGE')">
-                            <span id="headerAnnualRevenue">Revenu Annuel</span> <span id="sort-annualRevenue-preTGE" class="text-gray-400">↕</span>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('annualRevenue', 'preTGE')">
+                            <span id="headerAnnualRevenue">Revenu Annuel</span> <span id="sort-annualRevenue-preTGE" class="text-mono-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fdv', 'preTGE')">
-                            FDV <span id="sort-fdv-preTGE" class="text-gray-400">↕</span>
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('fdv', 'preTGE')">
+                            FDV <span id="sort-fdv-preTGE" class="text-mono-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4">
                             <div class="flex flex-col items-end gap-1">
@@ -237,25 +661,25 @@
                                     ↺ Reset
                                 </button>
                                 <span class="cursor-pointer" onclick="sortTable('ratio', 'preTGE')">
-                                    <span id="headerRatio">Ratio</span> <span id="sort-ratio-preTGE" class="text-gray-400">↕</span>
+                                    <span id="headerRatio">Ratio</span> <span id="sort-ratio-preTGE" class="text-mono-400">↕</span>
                                 </span>
                             </div>
                         </th>
-                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsSeason', 'preTGE')">
+                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('pointsSeason', 'preTGE')">
                             <div class="tooltip-container">
-                                <span id="headerStartPoints">Début points</span> <span id="sort-pointsSeason-preTGE" class="text-gray-400">↕</span>
+                                <span id="headerStartPoints">Début points</span> <span id="sort-pointsSeason-preTGE" class="text-mono-400">↕</span>
                                 <span id="tooltipStartPoints" class="tooltip-text">Jours depuis le début de la dernière saison de points</span>
                             </div>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsMax', 'preTGE')">
+                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('pointsMax', 'preTGE')">
                             <div class="tooltip-container">
-                                <span id="headerPointsAtTGE">Points au TGE</span> <span id="sort-pointsMax-preTGE" class="text-gray-400">↕</span>
+                                <span id="headerPointsAtTGE">Points au TGE</span> <span id="sort-pointsMax-preTGE" class="text-mono-400">↕</span>
                                 <span id="tooltipPointsAtTGE" class="tooltip-text">Points max en circulation à l'Airdrop</span>
                             </div>
                         </th>
                         <th class="text-right py-3 px-4">
                             <div class="flex flex-col items-end gap-1">
-                                <div class="flex items-center gap-1 text-xs text-gray-500">
+                                <div class="flex items-center gap-1 text-xs text-mono-400">
                                     <span id="headerDefault">défaut:</span>
                                     <input 
                                         type="number" 
@@ -263,27 +687,27 @@
                                         value="10"
                                         min="1" 
                                         max="100"
-                                        class="w-10 text-center border border-gray-300 rounded px-1 py-0.5 text-xs"
+                                        class="tech-input w-10 text-center text-xs"
                                         onchange="updateDefaultAirdrop(this.value)"
                                         onclick="event.stopPropagation()"
                                     />
                                     <span>%</span>
                                 </div>
                                 <div class="tooltip-container">
-                                    <span class="cursor-pointer" onclick="sortTable('airdropPct', 'preTGE')">
-                                        <span id="headerAirdrop">%Airdrop</span> <span id="sort-airdropPct-preTGE" class="text-gray-400">↕</span>
+                                    <span class="cursor-pointer hover:text-white transition-colors" onclick="sortTable('airdropPct', 'preTGE')">
+                                        <span id="headerAirdrop">%Airdrop</span> <span id="sort-airdropPct-preTGE" class="text-mono-400">↕</span>
                                     </span>
                                     <span id="tooltipAirdrop" class="tooltip-text">% du supply alloué à l'airdrop au TGE</span>
                                 </div>
                             </div>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointValue', 'preTGE')">
+                        <th class="text-right cursor-pointer hover:text-white transition-colors" onclick="sortTable('pointValue', 'preTGE')">
                             <div class="tooltip-container">
-                                <span id="headerPointValue">$/Point</span> <span id="sort-pointValue-preTGE" class="text-gray-400">↕</span>
+                                <span id="headerPointValue">$/Point</span> <span id="sort-pointValue-preTGE" class="text-mono-400">↕</span>
                                 <span id="tooltipPointValue" class="tooltip-text">Valeur estimée d'un point = (FDV × %Airdrop) / Points Max</span>
                             </div>
                         </th>
-                        <th class="text-center py-3 px-4">
+                        <th class="text-center">
                             <div class="tooltip-container">
                                 💬
                                 <span id="tooltipComments" class="tooltip-text">Commentaires et conseils</span>
@@ -293,71 +717,72 @@
                 </thead>
                 <tbody id="dataTablePreTGE">
                     <tr>
-                        <td colspan="10" class="text-center py-8 text-gray-500">
+                        <td colspan="10" class="text-center py-8 text-mono-400">
                             Chargement des données...
                         </td>
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
 
         <!-- Table 2: Projets avec token (Post-TGE) -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6 overflow-x-auto">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">
-                <span class="inline-flex items-center gap-2">
-                    <span id="badgeLive" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Live</span>
-                    <span id="postTGETitle">Projets Post-TGE</span>
-                </span>
+        <div class="tech-card tech-card-glow p-6 mb-6">
+            <h2 class="section-header text-xl mb-4 flex items-center gap-3">
+                <span id="badgeLive" class="tech-badge tech-badge-green">✓ Live</span>
+                <span id="postTGETitle" class="text-mono-100">Projets Post-TGE</span>
             </h2>
-            <table class="w-full">
+            <div class="overflow-x-auto">
+            <table class="tech-table">
                 <thead>
-                    <tr class="border-b-2 border-gray-200">
-                        <th class="text-left py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('name', 'postTGE')">
-                            <span id="headerProject2">Projet</span> <span id="sort-name-postTGE" class="text-gray-400">↕</span>
+                    <tr>
+                        <th class="text-left cursor-pointer hover:text-white transition-colors" onclick="sortTable('name', 'postTGE')">
+                            <span id="headerProject2">Projet</span> <span id="sort-name-postTGE" class="text-mono-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fees7d', 'postTGE')">
-                            <span id="headerAvg7d2">Moy. 7j</span> <span id="sort-fees7d-postTGE" class="text-gray-400">↕</span>
+                        <th class="text-right cursor-pointer hover:text-white transition-colors" onclick="sortTable('fees7d', 'postTGE')">
+                            <span id="headerAvg7d2">Moy. 7j</span> <span id="sort-fees7d-postTGE" class="text-mono-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('annualRevenue', 'postTGE')">
-                            <span id="headerAnnualRevenue2">Revenu Annuel</span> <span id="sort-annualRevenue-postTGE" class="text-gray-400">↕</span>
+                        <th class="text-right cursor-pointer hover:text-white transition-colors" onclick="sortTable('annualRevenue', 'postTGE')">
+                            <span id="headerAnnualRevenue2">Revenu Annuel</span> <span id="sort-annualRevenue-postTGE" class="text-mono-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fdv', 'postTGE')">
-                            FDV <span id="sort-fdv-postTGE" class="text-gray-400">↕</span>
+                        <th class="text-right cursor-pointer hover:text-white transition-colors" onclick="sortTable('fdv', 'postTGE')">
+                            FDV <span id="sort-fdv-postTGE" class="text-mono-400">↕</span>
                         </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('ratio', 'postTGE')">
-                            <span id="headerRatio2">Ratio</span> <span id="sort-ratio-postTGE" class="text-gray-400">↕</span>
+                        <th class="text-right cursor-pointer hover:text-white transition-colors" onclick="sortTable('ratio', 'postTGE')">
+                            <span id="headerRatio2">Ratio</span> <span id="sort-ratio-postTGE" class="text-mono-400">↕</span>
                         </th>
                     </tr>
                 </thead>
                 <tbody id="dataTablePostTGE">
                     <tr>
-                        <td colspan="5" class="text-center py-8 text-gray-500">
+                        <td colspan="5" class="text-center py-8 text-mono-400">
                             Chargement des données...
                         </td>
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
 
         <!-- Debug Logs -->
-        <div class="bg-white rounded-xl shadow-lg mb-6">
-            <button onclick="toggleLogs()" class="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 rounded-xl">
-                <span id="debugLogsTitle" class="font-semibold text-gray-800">🔧 Logs de Debug</span>
-                <svg id="logsArrow" class="w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="tech-card mb-6">
+            <button onclick="toggleLogs()" class="w-full p-4 text-left flex items-center justify-between hover:bg-mono-700 rounded-lg transition-colors">
+                <span id="debugLogsTitle" class="font-display text-sm text-mono-200 tracking-wider">🔧 LOGS DE DEBUG</span>
+                <svg id="logsArrow" class="w-5 h-5 text-mono-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
-            <div id="logsContainer" class="hidden border-t border-gray-200">
-                <div class="p-4 max-h-96 overflow-y-auto bg-gray-900 rounded-b-xl">
-                    <pre id="logs" class="log-entry text-gray-300 whitespace-pre-wrap"></pre>
+            <div id="logsContainer" class="hidden border-t border-mono-600">
+                <div class="p-4 max-h-96 overflow-y-auto bg-mono-900 rounded-b-lg">
+                    <pre id="logs" class="log-entry text-mono-200 whitespace-pre-wrap"></pre>
                 </div>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="text-center text-gray-500 text-sm">
-            <p>Données fournies par DeFiLlama & CoinGecko</p>
-            <p class="mt-1">Actualisation automatique toutes les 24h</p>
+        <div class="text-center text-mono-400 text-sm font-body mt-8 pb-4">
+            <p>Données fournies par <span class="neon-text">DeFiLlama</span> & <span class="neon-text">CoinGecko</span></p>
+            <p class="mt-1 text-mono-500">Actualisation automatique toutes les 24h</p>
         </div>
     </div>
 
@@ -518,14 +943,14 @@
             bullish: 1     // Frais actuels
         };
         const scenarioColorsRGB = {
-            bearish: { r: 220, g: 38, b: 38 },   // Rouge
-            mid: { r: 124, g: 58, b: 237 },      // Violet
-            bullish: { r: 22, g: 163, b: 74 }    // Vert
+            bearish: { r: 255, g: 51, b: 102 },   // Neon Red
+            mid: { r: 168, g: 85, b: 247 },       // Neon Purple
+            bullish: { r: 0, g: 255, b: 136 }     // Neon Green
         };
         const scenarioTextClasses = {
-            bearish: { text: 'text-red-600', bg: 'bg-red-50', textDark: 'text-red-700' },
-            mid: { text: 'text-purple-600', bg: 'bg-purple-50', textDark: 'text-purple-700' },
-            bullish: { text: 'text-green-600', bg: 'bg-green-50', textDark: 'text-green-700' }
+            bearish: { text: 'neon-text-red', bg: 'bg-mono-700', textDark: 'neon-text-red' },
+            mid: { text: 'neon-text-purple', bg: 'bg-mono-700', textDark: 'neon-text-purple' },
+            bullish: { text: 'neon-text-green', bg: 'bg-mono-700', textDark: 'neon-text-green' }
         };
 
         // =====================================================
@@ -1039,36 +1464,36 @@
             
             // Colonnes communes
             const projectLink = project.url ? `href="${project.url}" target="_blank" rel="noopener noreferrer"` : '';
-            const cursorClass = project.url ? 'cursor-pointer hover:opacity-80' : '';
+            const cursorClass = project.url ? 'cursor-pointer' : '';
             const commonCols = `
                 <td class="py-3 px-4">
                     <div class="flex items-center gap-2">
-                        ${project.url ? `<a ${projectLink} class="flex items-center gap-2 ${cursorClass}">` : ''}
-                        ${project.logo ? `<img src="${project.logo}" alt="${project.name}" class="w-6 h-6 rounded-full">` : ''}
-                        <span class="font-medium text-gray-800 ${project.url ? 'hover:text-indigo-600 hover:underline' : ''}">${project.name}</span>
+                        ${project.url ? `<a ${projectLink} class="flex items-center gap-2 ${cursorClass} tech-link">` : ''}
+                        ${project.logo ? `<img src="${project.logo}" alt="${project.name}" class="w-6 h-6 rounded-full ring-1 ring-mono-500">` : ''}
+                        <span class="font-medium text-mono-100">${project.name}</span>
                         ${project.url ? '</a>' : ''}
                         ${project.customApi ? `
-                            <span class="tooltip-container text-purple-600">
+                            <span class="tooltip-container neon-text-purple">
                                 <span class="text-xs">ⓘ</span>
                                 <span class="tooltip-text">${customApiTooltip}</span>
                             </span>
                         ` : ''}
                     </div>
                 </td>
-                <td class="text-right py-3 px-4 text-gray-600">
+                <td class="text-right py-3 px-4 text-mono-200">
                     ${project.customApi 
                         ? `<span title="${t.estimationBased24h}">${formatUSD(project.fees7dAvg)}*</span>`
                         : formatUSD(project.fees7dAvg)
                     }
                 </td>
-                <td class="text-right py-3 px-4 text-gray-600">
+                <td class="text-right py-3 px-4 text-mono-200">
                     ${project.customApi 
                         ? `<span title="${t.estimationBased24h}">${formatUSD(project.annualRevenue)}*</span>`
                         : formatUSD(project.annualRevenue)
                     }
                 </td>
                 <td class="text-right py-3 px-4">
-                    <span class="${project.fdvEstimated ? scenarioTextClasses[currentScenario].text : 'text-gray-800'} font-medium">
+                    <span class="${project.fdvEstimated ? scenarioTextClasses[currentScenario].text : 'text-mono-100'} font-medium">
                         ${formatUSD(project.fdv)}${project.fdvEstimated ? '*' : ''}
                     </span>
                 </td>
@@ -1082,15 +1507,15 @@
                             value="${ratioValue || ''}" 
                             onchange="updateRatio(this.value)"
                             oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                            class="w-16 text-right px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${scenarioTextClasses[currentScenario].bg} ${scenarioTextClasses[currentScenario].textDark}"
+                            class="tech-input w-16 text-right ${scenarioTextClasses[currentScenario].text}"
                             title="${t.ratioInputTitle}"
                         />
-                        <span class="ml-1 text-gray-500">x</span>
+                        <span class="ml-1 text-mono-400">x</span>
                     </div>
                 </td>
             ` : `
                 <td class="text-right py-3 px-4">
-                    <span class="text-gray-700">${ratioValue || '-'}x</span>
+                    <span class="text-mono-200">${ratioValue || '-'}x</span>
                 </td>
             `;
             
@@ -1098,60 +1523,60 @@
             const pointsCols = isPreTGE ? `
                 <td class="text-center py-3 px-4 text-sm">
                     ${project.pointsSeasonStart 
-                        ? `<span class="text-indigo-700 font-medium">${daysSince(project.pointsSeasonStart)}${t.daysAgo}</span>${project.pointsInfo ? `
-                            <span class="tooltip-container text-amber-600 ml-1">
+                        ? `<span class="neon-text font-medium">${daysSince(project.pointsSeasonStart)}${t.daysAgo}</span>${project.pointsInfo ? `
+                            <span class="tooltip-container neon-text-orange ml-1">
                                 <span class="text-xs">ⓘ</span>
                                 <span class="tooltip-text">${project.pointsInfo}</span>
                             </span>` : ''}`
-                        : '<span class="text-gray-400">-</span>'
+                        : '<span class="text-mono-500">-</span>'
                     }
                 </td>
                 <td class="text-right py-3 px-4 text-sm">
                     ${project.pointsMaxInfo 
-                        ? `<span class="text-purple-700 font-medium">${formatNumber(project.pointsMax)}</span><span class="tooltip-container ml-1"><span class="text-gray-400 cursor-help">ⓘ</span><span class="tooltip-text">${project.pointsMaxInfo}</span></span>`
+                        ? `<span class="neon-text-purple font-medium">${formatNumber(project.pointsMax)}</span><span class="tooltip-container ml-1"><span class="text-mono-400 cursor-help">ⓘ</span><span class="tooltip-text">${project.pointsMaxInfo}</span></span>`
                         : `<div class="flex items-center justify-end gap-1">
                             <input type="number" 
                                    id="pointsMax-${project.name}" 
-                                   class="w-16 px-1 py-0.5 text-right text-sm border border-gray-300 rounded bg-purple-50 focus:outline-none focus:ring-1 focus:ring-purple-400"
+                                   class="tech-input w-16 text-right text-sm"
                                    placeholder="?"
                                    value="${project.pointsMax ? project.pointsMax / 1000000 : ''}"
                                    onchange="updatePointsMax('${project.name}', this.value)"
                                    title="${currentLang === 'fr' ? 'Entrez le nombre de points en millions' : 'Enter points in millions'}">
-                            <span class="text-gray-500 text-xs">M</span>
+                            <span class="text-mono-400 text-xs">M</span>
                            </div>`
                     }
                 </td>
                 <td class="text-right py-3 px-4 text-sm">
                     ${project.airdropPct !== null 
                         ? (project.airdropPctInfo 
-                            ? `<span class="tooltip-container"><span class="text-emerald-700 font-medium">${project.airdropPct}%</span> <span class="text-amber-600 text-xs">ⓘ</span><span class="tooltip-text">${project.airdropPctInfo}</span></span>`
-                            : `<span class="text-emerald-700 font-medium">${project.airdropPct}%</span>`)
-                        : `<span class="text-gray-500 italic">${defaultAirdropPct}%</span>`
+                            ? `<span class="tooltip-container"><span class="neon-text-green font-medium">${project.airdropPct}%</span> <span class="neon-text-orange text-xs">ⓘ</span><span class="tooltip-text">${project.airdropPctInfo}</span></span>`
+                            : `<span class="neon-text-green font-medium">${project.airdropPct}%</span>`)
+                        : `<span class="text-mono-400 italic">${defaultAirdropPct}%</span>`
                     }
                 </td>
                 <td class="text-right py-3 px-4 text-sm">
                     ${(() => {
                         const pointValue = calculatePointValue(project);
                         if (pointValue === null) {
-                            return '<span class="text-gray-400">-</span>';
+                            return '<span class="text-mono-500">-</span>';
                         }
                         const hasAllData = project.pointsMax && (project.airdropPct !== null);
-                        const colorClass = hasAllData ? 'text-cyan-700 font-medium' : 'text-gray-500 italic';
+                        const colorClass = hasAllData ? 'neon-text font-medium' : 'text-mono-400 italic';
                         return `<span class="${colorClass}">${formatPointValue(pointValue)}</span>`;
                     })()}
                 </td>
                 <td class="text-center py-3 px-4">
                     ${project.comment 
-                        ? `<span class="tooltip-container text-gray-500 hover:text-gray-700 cursor-help">
+                        ? `<span class="tooltip-container text-mono-400 hover:neon-text cursor-help">
                             <span class="text-base">💬</span>
                             <span class="tooltip-text">${project.comment}</span>
                            </span>` 
-                        : '<span class="text-gray-300">-</span>'}
+                        : '<span class="text-mono-600">-</span>'}
                 </td>
             ` : '';
             
             return `
-                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <tr class="border-b border-mono-700/50 hover:bg-mono-700/30 transition-colors">
                     ${commonCols}
                     ${ratioCol}
                     ${pointsCols}
@@ -1359,28 +1784,49 @@
                 const btn = document.getElementById(id);
                 if (btn) {
                     const type = id.replace('2', '').replace('scenario', '').toLowerCase();
-                    btn.className = 'scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all' + 
+                    btn.className = 'scenario-btn' + 
                         (scenario === type ? ` active-${type}` : '');
                 }
             });
             
-            // Mettre à jour les couleurs de la légende du graphique
+            // Mettre à jour les couleurs de la légende du graphique (dark theme)
             const legendDot = document.getElementById('legendEstimatedDot');
             const legendLine = document.getElementById('legendRatioLine');
             const badgeEstime = document.getElementById('badgeEstime');
             const scenarioTailwindColors = {
-                bearish: { bg: 'bg-red-500', border: 'border-red-500', badgeBg: 'bg-red-100', badgeText: 'text-red-800' },
-                mid: { bg: 'bg-purple-500', border: 'border-purple-500', badgeBg: 'bg-purple-100', badgeText: 'text-purple-800' },
-                bullish: { bg: 'bg-green-500', border: 'border-green-500', badgeBg: 'bg-green-100', badgeText: 'text-green-800' }
+                bearish: { 
+                    bg: 'bg-neon-red', 
+                    border: 'border-neon-red', 
+                    shadow: 'shadow-[0_0_10px_rgba(255,51,102,0.5)]',
+                    badgeBg: 'bg-neon-red/15',
+                    badgeBorder: 'border-neon-red/30',
+                    badgeText: 'text-neon-red'
+                },
+                mid: { 
+                    bg: 'bg-neon-purple', 
+                    border: 'border-neon-purple', 
+                    shadow: 'shadow-[0_0_10px_rgba(168,85,247,0.5)]',
+                    badgeBg: 'bg-neon-purple/15',
+                    badgeBorder: 'border-neon-purple/30',
+                    badgeText: 'text-neon-purple'
+                },
+                bullish: { 
+                    bg: 'bg-neon-green', 
+                    border: 'border-neon-green', 
+                    shadow: 'shadow-[0_0_10px_rgba(0,255,136,0.5)]',
+                    badgeBg: 'bg-neon-green/15',
+                    badgeBorder: 'border-neon-green/30',
+                    badgeText: 'text-neon-green'
+                }
             };
             if (legendDot) {
-                legendDot.className = `w-4 h-4 rounded-full ${scenarioTailwindColors[scenario].bg}`;
+                legendDot.className = `w-3 h-3 rounded-full ${scenarioTailwindColors[scenario].bg} ${scenarioTailwindColors[scenario].shadow}`;
             }
             if (legendLine) {
                 legendLine.className = `w-6 h-0.5 border-dashed border-t-2 ${scenarioTailwindColors[scenario].border}`;
             }
             if (badgeEstime) {
-                badgeEstime.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${scenarioTailwindColors[scenario].badgeBg} ${scenarioTailwindColors[scenario].badgeText}`;
+                badgeEstime.className = `tech-badge border ${scenarioTailwindColors[scenario].badgeBg} ${scenarioTailwindColors[scenario].badgeBorder} ${scenarioTailwindColors[scenario].badgeText}`;
             }
             
             // Recalculer les FDV estimées avec le multiplicateur du scénario
@@ -1533,6 +1979,11 @@
                 const ctx = chart.ctx;
                 const baseSize = 28;
                 
+                // Couleur pour les tokens live (cyan néon)
+                const liveTokenColor = 'rgba(0, 245, 255, 0.9)';
+                const liveTokenColorLight = 'rgba(0, 245, 255, 0.2)';
+                const liveTokenColorHex = '#00f5ff';
+                
                 // Collecter tous les points des datasets 1 et 2
                 let allPoints = [];
                 
@@ -1588,7 +2039,7 @@
                         // Dessiner un cercle de fond (bordure colorée)
                         ctx.beginPath();
                         ctx.arc(x, y, size / 2 + 3, 0, Math.PI * 2);
-                        ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.9)' : estimatedColor;
+                        ctx.fillStyle = hasToken ? liveTokenColor : estimatedColor;
                         ctx.fill();
                         
                         // Ombre portée au hover
@@ -1620,19 +2071,19 @@
                         // Fallback: dessiner un cercle coloré avec initiales
                         ctx.beginPath();
                         ctx.arc(x, y, size / 2 + 2, 0, Math.PI * 2);
-                        ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.9)' : estimatedColor;
+                        ctx.fillStyle = hasToken ? liveTokenColor : estimatedColor;
                         ctx.fill();
                         
                         // Ombre portée au hover
                         if (isHovered) {
-                            ctx.shadowColor = hasToken ? 'rgba(59, 130, 246, 0.5)' : estimatedColorMid;
+                            ctx.shadowColor = hasToken ? 'rgba(0, 245, 255, 0.5)' : estimatedColorMid;
                             ctx.shadowBlur = 15;
                         }
                         
-                        // Cercle intérieur blanc
+                        // Cercle intérieur (fond sombre)
                         ctx.beginPath();
                         ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-                        ctx.fillStyle = '#ffffff';
+                        ctx.fillStyle = '#12121a';
                         ctx.fill();
                         
                         // Reset shadow
@@ -1642,12 +2093,12 @@
                         // Cercle intérieur coloré
                         ctx.beginPath();
                         ctx.arc(x, y, size / 2 - 2, 0, Math.PI * 2);
-                        ctx.fillStyle = hasToken ? 'rgba(59, 130, 246, 0.2)' : estimatedColorLight;
+                        ctx.fillStyle = hasToken ? liveTokenColorLight : estimatedColorLight;
                         ctx.fill();
                         
                         // Initiales du projet
-                        ctx.fillStyle = hasToken ? '#3b82f6' : estimatedColorHex;
-                        ctx.font = `bold ${isHovered ? 13 : 10}px Arial`;
+                        ctx.fillStyle = hasToken ? liveTokenColorHex : estimatedColorHex;
+                        ctx.font = `bold ${isHovered ? 13 : 10}px 'Orbitron', Arial`;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         const initials = data.name.substring(0, 2).toUpperCase();
@@ -1667,11 +2118,11 @@
                     
                     // Couleur du label basée sur le scénario
                     const rgb = scenarioColorsRGB[currentScenario];
-                    const labelColor = hasToken ? '#3b82f6' : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+                    const labelColor = hasToken ? liveTokenColorHex : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
                     
                     ctx.save();
                     ctx.fillStyle = labelColor;
-                    ctx.font = 'bold 11px Arial';
+                    ctx.font = "bold 11px 'Orbitron', Arial";
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText(data.name, x, y - baseSize / 2 - 8);
@@ -1812,7 +2263,8 @@
                             title: {
                                 display: true,
                                 text: 'Revenu Annuel (USD)',
-                                font: { size: 14, weight: 'bold' }
+                                font: { size: 14, weight: 'bold', family: 'Orbitron' },
+                                color: '#00f5ff'
                             },
                             ticks: {
                                 callback: function(value) {
@@ -1826,10 +2278,12 @@
                                     }
                                     return '';
                                 },
-                                maxTicksLimit: 10
+                                maxTicksLimit: 10,
+                                color: '#9a9aaa',
+                                font: { family: 'JetBrains Mono' }
                             },
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
+                                color: 'rgba(0, 245, 255, 0.08)'
                             }
                         },
                         y: {
@@ -1837,7 +2291,8 @@
                             title: {
                                 display: true,
                                 text: 'FDV (USD)',
-                                font: { size: 14, weight: 'bold' }
+                                font: { size: 14, weight: 'bold', family: 'Orbitron' },
+                                color: '#00f5ff'
                             },
                             ticks: {
                                 callback: function(value) {
@@ -1850,19 +2305,25 @@
                                     }
                                     return '';
                                 },
-                                maxTicksLimit: 10
+                                maxTicksLimit: 10,
+                                color: '#9a9aaa',
+                                font: { family: 'JetBrains Mono' }
                             },
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
+                                color: 'rgba(0, 245, 255, 0.08)'
                             }
                         }
                     },
                     plugins: {
                         tooltip: {
                             enabled: true,
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleFont: { size: 14, weight: 'bold' },
-                            bodyFont: { size: 12 },
+                            backgroundColor: 'rgba(18, 18, 26, 0.95)',
+                            borderColor: 'rgba(0, 245, 255, 0.3)',
+                            borderWidth: 1,
+                            titleFont: { size: 14, weight: 'bold', family: 'Orbitron' },
+                            titleColor: '#00f5ff',
+                            bodyFont: { size: 12, family: 'JetBrains Mono' },
+                            bodyColor: '#e8e8ec',
                             padding: 12,
                             displayColors: false,
                             callbacks: {
