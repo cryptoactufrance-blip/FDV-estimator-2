@@ -28,11 +28,11 @@
                             800: '#12121a',
                             700: '#1a1a24',
                             600: '#24242f',
-                            500: '#2e2e3a',
-                            400: '#4a4a5a',
-                            300: '#6a6a7a',
-                            200: '#9a9aaa',
-                            100: '#cacacd',
+                            500: '#3a3a4a',
+                            400: '#5a5a6a',
+                            300: '#8a8a9a',
+                            200: '#b8b8c8',
+                            100: '#dadadd',
                         },
                         'neon': {
                             cyan: '#00f5ff',
@@ -68,8 +68,8 @@
             --border-color: #2a2a3a;
             --border-glow: #00f5ff;
             --text-primary: #e8e8ec;
-            --text-secondary: #9a9aaa;
-            --text-muted: #6a6a7a;
+            --text-secondary: #b8b8c8;
+            --text-muted: #8a8a9a;
             --neon-cyan: #00f5ff;
             --neon-green: #00ff88;
             --neon-purple: #a855f7;
@@ -646,11 +646,11 @@
                     <span id="legendTokenLive" class="text-sm text-mono-200 font-body">Token Live</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div id="legendEstimatedDot" class="w-3 h-3 rounded-full bg-neon-green shadow-[0_0_10px_rgba(0,255,136,0.5)]"></div>
+                    <div id="legendEstimatedDot" class="w-3 h-3 rounded-full bg-neon-purple shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
                     <span id="legendFdvEstimated" class="text-sm text-mono-200 font-body">FDV Estimée</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div id="legendRatioLine" class="w-6 h-0.5 border-dashed border-t-2 border-neon-green"></div>
+                    <div id="legendRatioLine" class="w-6 h-0.5 border-dashed border-t-2 border-neon-purple"></div>
                     <span id="legendWeightedRatio" class="text-sm text-mono-200 font-body">Ratio moyen pondéré</span>
                 </div>
             </div>
@@ -1437,7 +1437,7 @@
                         <span class="font-medium text-mono-100">${project.name}</span>
                         ${project.url ? '</a>' : ''}
                         ${project.customApi ? `
-                            <span class="tooltip-container neon-text-purple">
+                            <span class="tooltip-container neon-text-orange">
                                 <span class="text-xs">ⓘ</span>
                                 <span class="tooltip-text">${customApiTooltip}</span>
                             </span>
@@ -1497,7 +1497,7 @@
                 </td>
                 <td class="text-right py-3 px-4 text-sm">
                     ${project.pointsMaxInfo 
-                        ? `<span class="neon-text-purple font-medium">${formatNumber(project.pointsMax)}</span><span class="tooltip-container ml-1"><span class="text-mono-400 cursor-help">ⓘ</span><span class="tooltip-text">${project.pointsMaxInfo}</span></span>`
+                        ? `<span class="neon-text-purple font-medium">${formatNumber(project.pointsMax)}</span><span class="tooltip-container ml-1"><span class="neon-text-orange cursor-help">ⓘ</span><span class="tooltip-text">${project.pointsMaxInfo}</span></span>`
                         : `<div class="flex items-center justify-end gap-1">
                             <input type="number" 
                                    id="pointsMax-${project.name}" 
@@ -1759,14 +1759,6 @@
             const badgeEstime = document.getElementById('badgeEstime');
             const scenarioTailwindColors = {
                 bearish: { 
-                    bg: 'bg-neon-red', 
-                    border: 'border-neon-red', 
-                    shadow: 'shadow-[0_0_10px_rgba(255,51,102,0.5)]',
-                    badgeBg: 'bg-neon-red/15',
-                    badgeBorder: 'border-neon-red/30',
-                    badgeText: 'text-neon-red'
-                },
-                mid: { 
                     bg: 'bg-neon-purple', 
                     border: 'border-neon-purple', 
                     shadow: 'shadow-[0_0_10px_rgba(168,85,247,0.5)]',
@@ -1774,13 +1766,21 @@
                     badgeBorder: 'border-neon-purple/30',
                     badgeText: 'text-neon-purple'
                 },
-                bullish: { 
+                mid: { 
                     bg: 'bg-neon-green', 
                     border: 'border-neon-green', 
                     shadow: 'shadow-[0_0_10px_rgba(0,255,136,0.5)]',
                     badgeBg: 'bg-neon-green/15',
                     badgeBorder: 'border-neon-green/30',
                     badgeText: 'text-neon-green'
+                },
+                bullish: { 
+                    bg: 'bg-neon-orange', 
+                    border: 'border-neon-orange', 
+                    shadow: 'shadow-[0_0_10px_rgba(255,136,0,0.5)]',
+                    badgeBg: 'bg-neon-orange/15',
+                    badgeBorder: 'border-neon-orange/30',
+                    badgeText: 'text-neon-orange'
                 }
             };
             if (legendDot) {
@@ -1802,7 +1802,7 @@
                 }
             }
             
-            const scenarioNames = { bearish: 'Bearish (-66%)', mid: 'Mid (-33%)', bullish: 'Bullish (100%)' };
+            const scenarioNames = { bearish: 'Réaliste (-66%)', mid: 'Bullish (-33%)', bullish: 'Giga Bullish (100%)' };
             addLog(`📊 Scénario changé: ${scenarioNames[scenario]}`, 'info');
             
             // Mettre à jour le tableau et le graphique avec la couleur du scénario
