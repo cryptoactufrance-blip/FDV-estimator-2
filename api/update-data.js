@@ -13,12 +13,10 @@ const PROJECTS = {
         { name: 'dYdX', llamaSlug: 'dydx', coinGeckoId: 'dydx-chain', logo: 'https://icons.llamao.fi/icons/protocols/dydx?w=48&h=48', url: 'https://dydx.trade' },
         { name: 'Drift', llamaSlug: 'drift-trade', coinGeckoId: 'drift-protocol', logo: 'https://icons.llamao.fi/icons/protocols/drift-trade?w=48&h=48', url: 'https://www.drift.trade/' },
         { name: 'Orderly', llamaSlug: 'orderly', coinGeckoId: 'orderly-network', logo: 'https://icons.llamao.fi/icons/protocols/orderly?w=48&h=48', url: 'https://orderly.network' },
-        { name: 'ApeX', llamaSlug: 'apex-protocol', coinGeckoId: 'apex-protocol-2', logo: 'https://icons.llamao.fi/icons/protocols/apex-protocol?w=48&h=48', url: 'https://www.apex.exchange/fr-FR' },
+        { name: 'ApeX', llamaSlug: 'apex-protocol', coinGeckoId: 'apex-token', logo: 'https://icons.llamao.fi/icons/protocols/apex-protocol?w=48&h=48', url: 'https://www.apex.exchange/fr-FR' },
         { name: 'Avantis', llamaSlug: 'avantis', coinGeckoId: 'avantis', logo: 'https://icons.llamao.fi/icons/protocols/avantis?w=48&h=48', url: 'https://www.avantisfi.com/referral?code=cryptomage' },
-        { name: 'Lighter', llamaSlug: 'lighter', coinGeckoContract: { platform: 'arbitrum-one', address: '0xe5edc9a1c478fd0e5068923118e2f1a9d52dcd4c' }, logo: 'https://icons.llamao.fi/icons/protocols/lighter?w=48&h=48', url: 'https://app.lighter.xyz/trade/LIT_USDC' },
-        { name: 'Aster', llamaSlug: 'aster', coinGeckoId: 'asterfi', logo: 'https://icons.llamao.fi/icons/protocols/aster?w=48&h=48', url: 'https://www.asterdex.com/en/referral/081a02' },
-        { name: 'Nado', llamaSlug: 'nado', coinGeckoContract: { platform: 'sonic', address: '0x0e84f0404f7c407e42766dd793ec0f4a8fb4b132' }, logo: 'https://icons.llamao.fi/icons/protocols/nado?w=48&h=48', url: 'https://www.nado.xyz' },
-        { name: 'HyENA', llamaSlug: 'hyena', coinGeckoContract: { platform: 'hyperliquid', address: '0xfd01722b0ab17a946bc0a3c7e394e8b2ec7b5881' }, logo: 'https://icons.llamao.fi/icons/protocols/hyena?w=48&h=48', url: 'https://app.hyena.trade' },
+        { name: 'Lighter', llamaSlug: 'lighter', coinGeckoId: 'lighter', logo: 'https://icons.llamao.fi/icons/protocols/lighter?w=48&h=48', url: 'https://app.lighter.xyz/trade/LIT_USDC' },
+        { name: 'Aster', llamaSlug: 'aster', coinGeckoId: 'aster-2', logo: 'https://icons.llamao.fi/icons/protocols/aster?w=48&h=48', url: 'https://www.asterdex.com/en/referral/081a02' },
     ],
     withoutToken: [
         { name: 'Extended', llamaSlug: 'extended', logo: 'https://icons.llamao.fi/icons/protocols/extended?w=48&h=48', url: 'https://app.extended.exchange/join/CRYPTOMAGE', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30, comment: 'Maker 0% / Taker 0.035%' },
@@ -32,6 +30,8 @@ const PROJECTS = {
         { name: 'Variational', llamaSlug: 'variational', logo: 'https://icons.llamao.fi/icons/protocols/variational?w=48&h=48', customApi: 'variational', url: 'https://www.variational.io/', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, pointsMaxInfo: 'Source : Données dispo dans la doc du projet', airdropPct: 25, comment: 'Relativement early. À utiliser pour la majorité de tes DN, récompense énormément les positions longues sur les paires avec peu d\'OI.' },
         { name: 'GRVT', llamaSlug: 'grvt', logo: 'https://icons.llamao.fi/icons/protocols/grvt?w=48&h=48', customApi: 'grvt', url: 'https://grvt.io', pointsSeasonStart: '2025-02-12', pointsMax: null, airdropPct: 10, comment: 'Maker -0.01% (rebate) / Taker 0.02%' },
         { name: 'Reya', llamaSlug: 'reya', logo: 'https://icons.llamao.fi/icons/protocols/reya?w=48&h=48', url: 'https://reya.xyz', pointsSeasonStart: '2025-09-17', pointsMax: 150000000, pointsMaxInfo: '150M points sur tout le programme', airdropPct: 20, airdropPctInfo: '45% allocation communautaire, estimation à 20% pour l\'airdrop initial', comment: 'Maker 0% / Taker 0%' },
+        { name: 'Nado', llamaSlug: 'nado', logo: 'https://icons.llamao.fi/icons/protocols/nado?w=48&h=48', url: 'https://www.nado.xyz', pointsSeasonStart: null, pointsMax: null, airdropPct: null, comment: '' },
+        { name: 'HyENA', llamaSlug: 'hyena', logo: 'https://icons.llamao.fi/icons/protocols/hyena?w=48&h=48', url: 'https://app.hyena.trade', pointsSeasonStart: null, pointsMax: null, airdropPct: null, comment: '' },
     ]
 };
 
