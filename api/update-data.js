@@ -13,7 +13,7 @@ const PROJECTS = {
         { name: 'dYdX', llamaSlug: 'dydx', coinGeckoId: 'dydx-chain', logo: 'https://icons.llamao.fi/icons/protocols/dydx?w=48&h=48', url: 'https://dydx.trade' },
         { name: 'Drift', llamaSlug: 'drift-trade', coinGeckoId: 'drift-protocol', logo: 'https://icons.llamao.fi/icons/protocols/drift-trade?w=48&h=48', url: 'https://www.drift.trade/' },
         { name: 'Orderly', llamaSlug: 'orderly', coinGeckoId: 'orderly-network', logo: 'https://icons.llamao.fi/icons/protocols/orderly?w=48&h=48', url: 'https://orderly.network' },
-        { name: 'ApeX', llamaSlug: 'apex-protocol', coinGeckoId: 'apex-token', logo: 'https://icons.llamao.fi/icons/protocols/apex-protocol?w=48&h=48', url: 'https://www.apex.exchange/fr-FR' },
+        { name: 'ApeX', llamaSlug: 'apex-protocol', coinGeckoId: 'apex-token-2', logo: 'https://icons.llamao.fi/icons/protocols/apex-protocol?w=48&h=48', url: 'https://www.apex.exchange/fr-FR' },
         { name: 'Avantis', llamaSlug: 'avantis', coinGeckoId: 'avantis', logo: 'https://icons.llamao.fi/icons/protocols/avantis?w=48&h=48', url: 'https://www.avantisfi.com/referral?code=cryptomage' },
         { name: 'Lighter', llamaSlug: 'lighter', coinGeckoId: 'lighter', logo: 'https://icons.llamao.fi/icons/protocols/lighter?w=48&h=48', url: 'https://app.lighter.xyz/trade/LIT_USDC' },
         { name: 'Aster', llamaSlug: 'aster', coinGeckoId: 'aster-2', logo: 'https://icons.llamao.fi/icons/protocols/aster?w=48&h=48', url: 'https://www.asterdex.com/en/referral/081a02' },
