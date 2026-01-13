@@ -274,11 +274,14 @@
                                 <span class="tooltip-text">Valeur estimée d'un point = (FDV × %Airdrop) / Points Max</span>
                             </div>
                         </th>
+                        <th class="text-left py-3 px-4">
+                            Commentaires
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="dataTablePreTGE">
                     <tr>
-                        <td colspan="9" class="text-center py-8 text-gray-500">
+                        <td colspan="10" class="text-center py-8 text-gray-500">
                             Chargement des données...
                         </td>
                     </tr>
@@ -365,21 +368,21 @@
             ],
             // Projets sans token (FDV estimée)
             withoutToken: [
-                { name: 'Extended', llamaSlug: 'extended', url: 'https://app.extended.exchange/join/CRYPTOMAGE', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30 }, // 30% confirmé
-                { name: 'Paradex', llamaSlug: 'paradex', url: 'https://app.paradex.trade/r/cryptomage', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20, airdropPctInfo: '5% S1 + 15% S2 (source: Paradex Foundation)' }, // 20% Genesis Airdrop
-                { name: 'EdgeX', llamaSlug: 'edgex', url: 'https://www.edgex.exchange/en-US', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25 }, // ~25% estimé
-                { name: 'Ethereal', llamaSlug: 'ethereal-dex', url: 'https://www.ethereal.trade/', pointsSeasonStart: '2025-08-14', pointsMax: null, airdropPct: null }, // Non communiqué
-                { name: 'Ostium', llamaSlug: 'ostium', url: 'https://ostium.app/trade?ref=JVCXY', pointsSeasonStart: '2025-03-31', pointsMax: 55000000, pointsMaxInfo: '30M points S1 (estimé) + 25M points S2 (hardcap)', airdropPct: null }, // Non annoncé
-                { name: 'Unit', llamaSlug: 'unit', url: 'https://hyperunit.xyz/deposit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null },
-                { name: 'tradeXYZ', llamaSlug: 'tradexyz', url: 'https://app.trade.xyz/trade?market=XYZ100', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null },
-                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', url: 'https://grvt.io', pointsSeasonStart: '2025-09-23', pointsMax: null, airdropPct: 22 }, // 22% (S1 10% + S2 12%) - points S1 non comparables à S2
-                { name: 'Reya', llamaSlug: 'reya', url: 'https://reya.xyz', pointsSeasonStart: '2025-07-19', pointsMax: null, airdropPct: 20, airdropPctInfo: '45% allocation communautaire, estimation à 20% pour l\'airdrop initial' }, // 6.25M RCP initial mais distribution continue
-                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', url: 'https://www.variational.io/', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, pointsMaxInfo: 'Source : Données dispo dans la doc du projet', airdropPct: 25 }, // 25% estimé
+                { name: 'Extended', llamaSlug: 'extended', url: 'https://app.extended.exchange/join/CRYPTOMAGE', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30, comment: 'Maker 0% / Taker 0.035%' }, // 30% confirmé
+                { name: 'Paradex', llamaSlug: 'paradex', url: 'https://app.paradex.trade/r/cryptomage', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20, airdropPctInfo: '5% S1 + 15% S2 (source: Paradex Foundation)', comment: 'Arrive à la fin de la partie pre-TGE. Top pour faire du farming de fundings avec Variational.' }, // 20% Genesis Airdrop
+                { name: 'EdgeX', llamaSlug: 'edgex', url: 'https://www.edgex.exchange/en-US', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25, comment: 'Perps Asiatique, pas beaucoup d\'info dessus' }, // ~25% estimé
+                { name: 'Ethereal', llamaSlug: 'ethereal-dex', url: 'https://www.ethereal.trade/', pointsSeasonStart: '2025-08-14', pointsMax: null, airdropPct: null, comment: 'Top pour faire du DN, gros bonus de yield sur les positions longues durées.' }, // Non communiqué
+                { name: 'Ostium', llamaSlug: 'ostium', url: 'https://ostium.app/trade?ref=JVCXY', pointsSeasonStart: '2025-03-31', pointsMax: 55000000, pointsMaxInfo: '30M points S1 (estimé) + 25M points S2 (hardcap)', airdropPct: null, comment: 'Vaut le coup uniquement pour le vault (bon rendement + points)' }, // Non annoncé
+                { name: 'Unit', llamaSlug: 'unit', url: 'https://hyperunit.xyz/deposit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null, comment: 'Meilleur farm = rééquilibrage de LPs avec des assets Unit (BTC / ETH / SOL...)' },
+                { name: 'tradeXYZ', llamaSlug: 'tradexyz', url: 'https://app.trade.xyz/trade?market=XYZ100', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null, comment: 'Mieux de trade ici que sur Hyperliquid, utilise HIP-3 et exactement les mêmes fonctionnalités, farm l\'Airdrop d\'Unit' },
+                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', url: 'https://grvt.io', pointsSeasonStart: '2025-09-23', pointsMax: null, airdropPct: 22, comment: 'Maker -0.01% (rebate) / Taker 0.02%' }, // 22% (S1 10% + S2 12%) - points S1 non comparables à S2
+                { name: 'Reya', llamaSlug: 'reya', url: 'https://reya.xyz', pointsSeasonStart: '2025-07-19', pointsMax: null, airdropPct: 20, airdropPctInfo: '45% allocation communautaire, estimation à 20% pour l\'airdrop initial', comment: 'Maker 0% / Taker 0%' }, // 6.25M RCP initial mais distribution continue
+                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', url: 'https://www.variational.io/', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, pointsMaxInfo: 'Source : Données dispo dans la doc du projet', airdropPct: 25, comment: 'Relativement early. À utiliser pour la majorité de tes DN, récompense énormément les positions longues sur les paires avec peu d\'OI.' }, // 25% estimé
                 // { name: 'StandX', llamaSlug: 'standx', customApi: 'standx', pointsSeasonStart: null, pointsMax: null, airdropPct: null }, // Pas de données DeFiLlama
                 // { name: 'Polynomial', llamaSlug: 'polynomial-trade', pointsSeasonStart: null, pointsMax: null, airdropPct: null }, // Pas de fees sur DeFiLlama
-                { name: 'Vest', llamaSlug: 'vest-exchange', url: 'https://trade.vestmarkets.com/trade/NVDA-USD-PERP', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-                { name: 'HyENA', llamaSlug: 'hyena', url: 'https://app.hyena.trade', pointsSeasonStart: '2025-12-09', pointsMax: null, airdropPct: null },
-                { name: 'Nado', llamaSlug: 'nado-perps', url: 'https://www.nado.xyz', pointsSeasonStart: '2025-11-21', pointsMax: null, airdropPct: null },
+                { name: 'Vest', llamaSlug: 'vest-exchange', url: 'https://trade.vestmarkets.com/trade/NVDA-USD-PERP', pointsSeasonStart: null, pointsMax: null, airdropPct: null, comment: 'Maker 0.02% / Taker 0.06%' },
+                { name: 'HyENA', llamaSlug: 'hyena', url: 'https://app.hyena.trade', pointsSeasonStart: '2025-12-09', pointsMax: null, airdropPct: null, comment: 'HIP-3, bon combo' },
+                { name: 'Nado', llamaSlug: 'nado-perps', url: 'https://www.nado.xyz', pointsSeasonStart: '2025-11-21', pointsMax: null, airdropPct: null, comment: 'Trop de volume pour une période pre-points, j\'ai skip' },
             ]
         };
 
@@ -737,6 +740,7 @@
                     pointsMaxInfo: project.pointsMaxInfo || null, // Info supplémentaire sur le max de points
                     airdropPct: project.airdropPct || null, // % du supply alloué à l'airdrop au TGE (null = utilise default)
                     airdropPctInfo: project.airdropPctInfo || null, // Info supplémentaire sur le % airdrop
+                    comment: project.comment || null, // Commentaire sur le projet
                     fees24h: feesData?.total24h || 0,
                     fees7d: feesData?.total7d || 0,
                     fees7dAvg: daily7dAvg,
@@ -1021,6 +1025,9 @@
                         const colorClass = hasAllData ? 'text-cyan-700 font-medium' : 'text-gray-500 italic';
                         return `<span class="${colorClass}">${formatPointValue(pointValue)}</span>`;
                     })()}
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-600 max-w-xs">
+                    ${project.comment ? `<span class="line-clamp-2">${project.comment}</span>` : '<span class="text-gray-400">-</span>'}
                 </td>
             ` : '';
             
