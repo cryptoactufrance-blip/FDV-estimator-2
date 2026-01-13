@@ -92,17 +92,26 @@
 </head>
 <body class="gradient-bg min-h-screen py-8 px-4">
     <div class="max-w-7xl mx-auto">
+        <!-- Language Toggle -->
+        <div class="flex justify-end mb-2">
+            <button id="langToggle" onclick="toggleLanguage()" 
+                class="text-2xl hover:scale-110 transition-transform cursor-pointer" 
+                title="Switch to English">
+                🥖
+            </button>
+        </div>
+        
         <!-- Header -->
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-gray-800 mb-2">📊 Crypto FDV Estimator</h1>
-            <p class="text-gray-600">Estimation de la Fully Diluted Valuation basée sur les revenus</p>
+            <p id="headerSubtitle" class="text-gray-600">Estimation de la Fully Diluted Valuation basée sur les revenus</p>
         </div>
 
         <!-- Controls -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <span class="text-sm text-gray-500">Dernière mise à jour :</span>
+                    <span id="lastUpdateLabel" class="text-sm text-gray-500">Dernière mise à jour :</span>
                     <span id="lastUpdate" class="text-sm font-medium text-gray-700">-</span>
                 </div>
                 <div class="flex items-center gap-3">
@@ -113,21 +122,21 @@
                                 class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
                                 🐻 Bearish
                             </button>
-                            <span class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
+                            <span id="tooltipBearish" class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
                         </div>
                         <div class="tooltip-container">
                             <button id="scenarioMid" onclick="setScenario('mid')" 
                                 class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
                                 🧙 Mid
                             </button>
-                            <span class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
+                            <span id="tooltipMid" class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
                         </div>
                         <div class="tooltip-container">
                             <button id="scenarioBullish" onclick="setScenario('bullish')" 
                                 class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
                                 🐂 Bullish
                             </button>
-                            <span class="tooltip-text">Calculé par rapport aux frais actuels</span>
+                            <span id="tooltipBullish" class="tooltip-text">Calculé par rapport aux frais actuels</span>
                         </div>
                     </div>
                     <button id="refreshBtn" onclick="loadAllData()" 
@@ -153,22 +162,22 @@
 
         <!-- Chart -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Graphique Revenu vs FDV (Échelle Logarithmique)</h2>
+            <h2 id="chartTitle" class="text-xl font-semibold text-gray-800 mb-4">Graphique Revenu vs FDV (Échelle Logarithmique)</h2>
             <div class="relative" style="height: 500px;">
                 <canvas id="scatterChart"></canvas>
             </div>
             <div class="flex gap-6 mt-4 justify-center">
                 <div class="flex items-center gap-2">
                     <div class="w-4 h-4 rounded-full bg-blue-500"></div>
-                    <span class="text-sm text-gray-600">Token Live</span>
+                    <span id="legendTokenLive" class="text-sm text-gray-600">Token Live</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <div id="legendEstimatedDot" class="w-4 h-4 rounded-full bg-green-500"></div>
-                    <span class="text-sm text-gray-600">FDV Estimée</span>
+                    <span id="legendFdvEstimated" class="text-sm text-gray-600">FDV Estimée</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <div id="legendRatioLine" class="w-6 h-0.5 border-dashed border-t-2 border-green-500"></div>
-                    <span class="text-sm text-gray-600">Ratio moyen pondéré</span>
+                    <span id="legendWeightedRatio" class="text-sm text-gray-600">Ratio moyen pondéré</span>
                 </div>
             </div>
         </div>
@@ -179,7 +188,7 @@
                 <h2 class="text-xl font-semibold text-gray-800">
                     <span class="inline-flex items-center gap-2">
                         <span id="badgeEstime" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">⏳ Estimé</span>
-                        Projets Pre-TGE
+                        <span id="preTGETitle">Projets Pre-TGE</span>
                     </span>
                 </h2>
                 <!-- Scenario Buttons (duplicated) -->
@@ -189,21 +198,21 @@
                             class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
                             🐻 Bearish
                         </button>
-                        <span class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
+                        <span id="tooltipBearish2" class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
                     </div>
                     <div class="tooltip-container relative">
                         <button id="scenarioMid2" onclick="setScenario('mid')" 
                             class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
                             🧙 Mid
                         </button>
-                        <span class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
+                        <span id="tooltipMid2" class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
                     </div>
                     <div class="tooltip-container relative">
                         <button id="scenarioBullish2" onclick="setScenario('bullish')" 
                             class="scenario-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all">
                             🐂 Bullish
                         </button>
-                        <span class="tooltip-text">Calculé par rapport aux frais actuels</span>
+                        <span id="tooltipBullish2" class="tooltip-text">Calculé par rapport aux frais actuels</span>
                     </div>
                 </div>
             </div>
@@ -211,43 +220,43 @@
                 <thead>
                     <tr class="border-b-2 border-gray-200">
                         <th class="text-left py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('name', 'preTGE')">
-                            Projet <span id="sort-name-preTGE" class="text-gray-400">↕</span>
+                            <span id="headerProject">Projet</span> <span id="sort-name-preTGE" class="text-gray-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fees7d', 'preTGE')">
-                            Moy. 7j <span id="sort-fees7d-preTGE" class="text-gray-400">↕</span>
+                            <span id="headerAvg7d">Moy. 7j</span> <span id="sort-fees7d-preTGE" class="text-gray-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('annualRevenue', 'preTGE')">
-                            Revenu Annuel <span id="sort-annualRevenue-preTGE" class="text-gray-400">↕</span>
+                            <span id="headerAnnualRevenue">Revenu Annuel</span> <span id="sort-annualRevenue-preTGE" class="text-gray-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fdv', 'preTGE')">
                             FDV <span id="sort-fdv-preTGE" class="text-gray-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4">
                             <div class="flex flex-col items-end gap-1">
-                                <button onclick="resetRatios(); event.stopPropagation();" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-2 py-0.5 rounded transition-colors" title="Réinitialiser les ratios">
+                                <button id="resetBtn" onclick="resetRatios(); event.stopPropagation();" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-2 py-0.5 rounded transition-colors" title="Réinitialiser les ratios">
                                     ↺ Reset
                                 </button>
                                 <span class="cursor-pointer" onclick="sortTable('ratio', 'preTGE')">
-                                    Ratio <span id="sort-ratio-preTGE" class="text-gray-400">↕</span>
+                                    <span id="headerRatio">Ratio</span> <span id="sort-ratio-preTGE" class="text-gray-400">↕</span>
                                 </span>
                             </div>
                         </th>
                         <th class="text-center py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsSeason', 'preTGE')">
                             <div class="tooltip-container">
-                                Début points <span id="sort-pointsSeason-preTGE" class="text-gray-400">↕</span>
-                                <span class="tooltip-text">Jours depuis le début de la dernière saison de points</span>
+                                <span id="headerStartPoints">Début points</span> <span id="sort-pointsSeason-preTGE" class="text-gray-400">↕</span>
+                                <span id="tooltipStartPoints" class="tooltip-text">Jours depuis le début de la dernière saison de points</span>
                             </div>
                         </th>
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointsMax', 'preTGE')">
                             <div class="tooltip-container">
-                                Points au TGE <span id="sort-pointsMax-preTGE" class="text-gray-400">↕</span>
-                                <span class="tooltip-text">Points max en circulation à l'Airdrop</span>
+                                <span id="headerPointsAtTGE">Points au TGE</span> <span id="sort-pointsMax-preTGE" class="text-gray-400">↕</span>
+                                <span id="tooltipPointsAtTGE" class="tooltip-text">Points max en circulation à l'Airdrop</span>
                             </div>
                         </th>
                         <th class="text-right py-3 px-4">
                             <div class="flex flex-col items-end gap-1">
                                 <div class="flex items-center gap-1 text-xs text-gray-500">
-                                    <span>défaut:</span>
+                                    <span id="headerDefault">défaut:</span>
                                     <input 
                                         type="number" 
                                         id="defaultAirdropInput"
@@ -262,22 +271,22 @@
                                 </div>
                                 <div class="tooltip-container">
                                     <span class="cursor-pointer" onclick="sortTable('airdropPct', 'preTGE')">
-                                        %Airdrop <span id="sort-airdropPct-preTGE" class="text-gray-400">↕</span>
+                                        <span id="headerAirdrop">%Airdrop</span> <span id="sort-airdropPct-preTGE" class="text-gray-400">↕</span>
                                     </span>
-                                    <span class="tooltip-text">% du supply alloué à l'airdrop au TGE</span>
+                                    <span id="tooltipAirdrop" class="tooltip-text">% du supply alloué à l'airdrop au TGE</span>
                                 </div>
                             </div>
                         </th>
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('pointValue', 'preTGE')">
                             <div class="tooltip-container">
-                                $/Point <span id="sort-pointValue-preTGE" class="text-gray-400">↕</span>
-                                <span class="tooltip-text">Valeur estimée d'un point = (FDV × %Airdrop) / Points Max</span>
+                                <span id="headerPointValue">$/Point</span> <span id="sort-pointValue-preTGE" class="text-gray-400">↕</span>
+                                <span id="tooltipPointValue" class="tooltip-text">Valeur estimée d'un point = (FDV × %Airdrop) / Points Max</span>
                             </div>
                         </th>
                         <th class="text-center py-3 px-4">
                             <div class="tooltip-container">
                                 💬
-                                <span class="tooltip-text">Commentaires et conseils</span>
+                                <span id="tooltipComments" class="tooltip-text">Commentaires et conseils</span>
                             </div>
                         </th>
                     </tr>
@@ -296,27 +305,27 @@
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6 overflow-x-auto">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">
                 <span class="inline-flex items-center gap-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Live</span>
-                    Projets Post-TGE
+                    <span id="badgeLive" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Live</span>
+                    <span id="postTGETitle">Projets Post-TGE</span>
                 </span>
             </h2>
             <table class="w-full">
                 <thead>
                     <tr class="border-b-2 border-gray-200">
                         <th class="text-left py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('name', 'postTGE')">
-                            Projet <span id="sort-name-postTGE" class="text-gray-400">↕</span>
+                            <span id="headerProject2">Projet</span> <span id="sort-name-postTGE" class="text-gray-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fees7d', 'postTGE')">
-                            Moy. 7j <span id="sort-fees7d-postTGE" class="text-gray-400">↕</span>
+                            <span id="headerAvg7d2">Moy. 7j</span> <span id="sort-fees7d-postTGE" class="text-gray-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('annualRevenue', 'postTGE')">
-                            Revenu Annuel <span id="sort-annualRevenue-postTGE" class="text-gray-400">↕</span>
+                            <span id="headerAnnualRevenue2">Revenu Annuel</span> <span id="sort-annualRevenue-postTGE" class="text-gray-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('fdv', 'postTGE')">
                             FDV <span id="sort-fdv-postTGE" class="text-gray-400">↕</span>
                         </th>
                         <th class="text-right py-3 px-4 cursor-pointer hover:bg-gray-50" onclick="sortTable('ratio', 'postTGE')">
-                            Ratio <span id="sort-ratio-postTGE" class="text-gray-400">↕</span>
+                            <span id="headerRatio2">Ratio</span> <span id="sort-ratio-postTGE" class="text-gray-400">↕</span>
                         </th>
                     </tr>
                 </thead>
@@ -333,7 +342,7 @@
         <!-- Debug Logs -->
         <div class="bg-white rounded-xl shadow-lg mb-6">
             <button onclick="toggleLogs()" class="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 rounded-xl">
-                <span class="font-semibold text-gray-800">🔧 Logs de Debug</span>
+                <span id="debugLogsTitle" class="font-semibold text-gray-800">🔧 Logs de Debug</span>
                 <svg id="logsArrow" class="w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
@@ -402,6 +411,107 @@
         let defaultAirdropPct = 10; // % Airdrop par défaut pour les projets sans info
         let currentScenario = 'bullish'; // Scénario actuel (bearish, mid, bullish)
         let currentScenarioColor = 'rgba(22, 163, 74, 0.9)'; // Couleur actuelle du scénario
+        let currentLang = 'fr'; // Langue actuelle (fr ou en)
+        
+        const translations = {
+            fr: {
+                headerSubtitle: 'Estimation de la Fully Diluted Valuation basée sur les revenus',
+                lastUpdate: 'Dernière mise à jour :',
+                refresh: 'Actualiser les données',
+                refreshing: 'Chargement...',
+                chartTitle: 'Graphique Revenu vs FDV (Échelle Logarithmique)',
+                tokenLive: 'Token Live',
+                fdvEstimated: 'FDV Estimée',
+                weightedRatio: 'Ratio moyen pondéré',
+                preTGE: 'Projets Pre-TGE',
+                postTGE: 'Projets Post-TGE',
+                estimated: '⏳ Estimé',
+                live: '✓ Live',
+                project: 'Projet',
+                avg7d: 'Moy. 7j',
+                annualRevenue: 'Revenu Annuel',
+                fdv: 'FDV',
+                ratio: 'Ratio',
+                reset: '↺ Reset',
+                resetTitle: 'Réinitialiser les ratios',
+                startPoints: 'Début points',
+                pointsAtTGE: 'Points au TGE',
+                airdrop: '%Airdrop',
+                default: 'défaut:',
+                pointValue: '$/Point',
+                comments: '💬',
+                commentsTooltip: 'Commentaires et conseils',
+                startPointsTooltip: 'Jours depuis le début de la dernière saison de points',
+                pointsAtTGETooltip: 'Points max en circulation à l\'Airdrop',
+                airdropTooltip: '% du supply alloué à l\'airdrop au TGE',
+                pointValueTooltip: 'Valeur estimée d\'un point = (FDV × %Airdrop) / Points Max',
+                bearishTooltip: 'Prévoit un -66% sur les frais post TGE (cas de Lighter)',
+                midTooltip: 'Prévoit un -33% sur les frais post TGE',
+                bullishTooltip: 'Calculé par rapport aux frais actuels',
+                loading: 'Chargement des données...',
+                loadingProgress: 'Chargement...',
+                xAxisLabel: 'Revenu Annuel (USD)',
+                yAxisLabel: 'FDV (USD)',
+                langToggleTitle: 'Switch to English',
+                debugLogs: '🔧 Logs de Debug',
+                ratioInputTitle: 'Modifier pour recalculer les FDV estimées',
+                estimationBased24h: 'Estimation basée sur 24h glissantes',
+                customApiVariational: 'Données via API custom<br>(Fees = Loss Refund × 10)<br>Basé sur 24h glissantes',
+                customApiGrvt: 'Données via API custom<br>(Fees = Volume × 0.02%)<br>Basé sur 24h glissantes',
+                customApiStandx: 'Données via API custom<br>(Fees = Volume × 0.025%)<br>Maker 0.01% / Taker 0.04%',
+                daysAgo: 'j',
+                noPointsSeason: '-'
+            },
+            en: {
+                headerSubtitle: 'Fully Diluted Valuation estimation based on revenue',
+                lastUpdate: 'Last update:',
+                refresh: 'Refresh data',
+                refreshing: 'Loading...',
+                chartTitle: 'Revenue vs FDV Chart (Logarithmic Scale)',
+                tokenLive: 'Live Token',
+                fdvEstimated: 'Estimated FDV',
+                weightedRatio: 'Weighted average ratio',
+                preTGE: 'Pre-TGE Projects',
+                postTGE: 'Post-TGE Projects',
+                estimated: '⏳ Estimated',
+                live: '✓ Live',
+                project: 'Project',
+                avg7d: '7d Avg',
+                annualRevenue: 'Annual Revenue',
+                fdv: 'FDV',
+                ratio: 'Ratio',
+                reset: '↺ Reset',
+                resetTitle: 'Reset ratios',
+                startPoints: 'Points start',
+                pointsAtTGE: 'Points at TGE',
+                airdrop: '%Airdrop',
+                default: 'default:',
+                pointValue: '$/Point',
+                comments: '💬',
+                commentsTooltip: 'Comments and tips',
+                startPointsTooltip: 'Days since the start of the last points season',
+                pointsAtTGETooltip: 'Max points in circulation at Airdrop',
+                airdropTooltip: '% of supply allocated to airdrop at TGE',
+                pointValueTooltip: 'Estimated point value = (FDV × %Airdrop) / Max Points',
+                bearishTooltip: 'Expects -66% on post-TGE fees (Lighter case)',
+                midTooltip: 'Expects -33% on post-TGE fees',
+                bullishTooltip: 'Based on current fees',
+                loading: 'Loading data...',
+                loadingProgress: 'Loading...',
+                xAxisLabel: 'Annual Revenue (USD)',
+                yAxisLabel: 'FDV (USD)',
+                langToggleTitle: 'Passer en Français',
+                debugLogs: '🔧 Debug Logs',
+                ratioInputTitle: 'Edit to recalculate estimated FDVs',
+                estimationBased24h: 'Estimation based on 24h rolling',
+                customApiVariational: 'Data via custom API<br>(Fees = Loss Refund × 10)<br>Based on 24h rolling',
+                customApiGrvt: 'Data via custom API<br>(Fees = Volume × 0.02%)<br>Based on 24h rolling',
+                customApiStandx: 'Data via custom API<br>(Fees = Volume × 0.025%)<br>Maker 0.01% / Taker 0.04%',
+                daysAgo: 'd',
+                noPointsSeason: '-'
+            }
+        };
+        
         const scenarioMultipliers = {
             bearish: 1/3,  // -66% sur les frais post TGE
             mid: 2/3,      // -33% sur les frais post TGE
@@ -912,6 +1022,7 @@
         }
         
         function generateRowHTML(project, isPreTGE) {
+            const t = translations[currentLang];
             const ratioValue = project.fdvEstimated 
                 ? (manualRatio !== null ? manualRatio : Math.round(project.ratio))
                 : Math.round(project.ratio);
@@ -919,11 +1030,11 @@
             // Tooltip personnalisé selon le type d'API custom
             let customApiTooltip = '';
             if (project.customApi === 'variational') {
-                customApiTooltip = 'Données via API custom<br>(Fees = Loss Refund × 10)<br>Basé sur 24h glissantes';
+                customApiTooltip = t.customApiVariational;
             } else if (project.customApi === 'grvt') {
-                customApiTooltip = 'Données via API custom<br>(Fees = Volume × 0.02%)<br>Basé sur 24h glissantes';
+                customApiTooltip = t.customApiGrvt;
             } else if (project.customApi === 'standx') {
-                customApiTooltip = 'Données via API custom<br>(Fees = Volume × 0.025%)<br>Maker 0.01% / Taker 0.04%';
+                customApiTooltip = t.customApiStandx;
             }
             
             // Colonnes communes
@@ -946,13 +1057,13 @@
                 </td>
                 <td class="text-right py-3 px-4 text-gray-600">
                     ${project.customApi 
-                        ? `<span title="Estimation basée sur 24h glissantes">${formatUSD(project.fees7dAvg)}*</span>`
+                        ? `<span title="${t.estimationBased24h}">${formatUSD(project.fees7dAvg)}*</span>`
                         : formatUSD(project.fees7dAvg)
                     }
                 </td>
                 <td class="text-right py-3 px-4 text-gray-600">
                     ${project.customApi 
-                        ? `<span title="Estimation basée sur 24h glissantes">${formatUSD(project.annualRevenue)}*</span>`
+                        ? `<span title="${t.estimationBased24h}">${formatUSD(project.annualRevenue)}*</span>`
                         : formatUSD(project.annualRevenue)
                     }
                 </td>
@@ -972,7 +1083,7 @@
                             onchange="updateRatio(this.value)"
                             oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                             class="w-16 text-right px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${scenarioTextClasses[currentScenario].bg} ${scenarioTextClasses[currentScenario].textDark}"
-                            title="Modifier pour recalculer les FDV estimées"
+                            title="${t.ratioInputTitle}"
                         />
                         <span class="ml-1 text-gray-500">x</span>
                     </div>
@@ -987,7 +1098,7 @@
             const pointsCols = isPreTGE ? `
                 <td class="text-center py-3 px-4 text-sm">
                     ${project.pointsSeasonStart 
-                        ? `<span class="text-indigo-700 font-medium">${daysSince(project.pointsSeasonStart)}j</span>${project.pointsInfo ? `
+                        ? `<span class="text-indigo-700 font-medium">${daysSince(project.pointsSeasonStart)}${t.daysAgo}</span>${project.pointsInfo ? `
                             <span class="tooltip-container text-amber-600 ml-1">
                                 <span class="text-xs">ⓘ</span>
                                 <span class="tooltip-text">${project.pointsInfo}</span>
@@ -1005,7 +1116,7 @@
                                    placeholder="?"
                                    value="${project.pointsMax ? project.pointsMax / 1000000 : ''}"
                                    onchange="updatePointsMax('${project.name}', this.value)"
-                                   title="Entrez le nombre de points en millions">
+                                   title="${currentLang === 'fr' ? 'Entrez le nombre de points en millions' : 'Enter points in millions'}">
                             <span class="text-gray-500 text-xs">M</span>
                            </div>`
                     }
@@ -1155,6 +1266,84 @@
             }
             
             updateTable();
+        }
+        
+        // Changer la langue (fr/en)
+        function toggleLanguage() {
+            currentLang = currentLang === 'fr' ? 'en' : 'fr';
+            const t = translations[currentLang];
+            
+            // Mettre à jour le bouton toggle
+            const langToggle = document.getElementById('langToggle');
+            langToggle.textContent = currentLang === 'fr' ? '🥖' : '🍔';
+            langToggle.title = t.langToggleTitle;
+            
+            // Mettre à jour les textes statiques
+            document.getElementById('headerSubtitle').textContent = t.headerSubtitle;
+            document.getElementById('lastUpdateLabel').textContent = t.lastUpdate;
+            document.getElementById('refreshText').textContent = t.refresh;
+            document.getElementById('chartTitle').textContent = t.chartTitle;
+            document.getElementById('legendTokenLive').textContent = t.tokenLive;
+            document.getElementById('legendFdvEstimated').textContent = t.fdvEstimated;
+            document.getElementById('legendWeightedRatio').textContent = t.weightedRatio;
+            document.getElementById('preTGETitle').textContent = t.preTGE;
+            document.getElementById('postTGETitle').textContent = t.postTGE;
+            document.getElementById('badgeEstime').innerHTML = t.estimated;
+            document.getElementById('badgeLive').innerHTML = t.live;
+            
+            // Loading text
+            document.getElementById('loadingText').textContent = t.loadingProgress;
+            
+            // Debug logs
+            document.getElementById('debugLogsTitle').textContent = t.debugLogs;
+            
+            // Reset button
+            const resetBtn = document.getElementById('resetBtn');
+            if (resetBtn) {
+                resetBtn.title = t.resetTitle;
+            }
+            
+            // Headers Pre-TGE
+            document.getElementById('headerProject').textContent = t.project;
+            document.getElementById('headerAvg7d').textContent = t.avg7d;
+            document.getElementById('headerAnnualRevenue').textContent = t.annualRevenue;
+            document.getElementById('headerRatio').textContent = t.ratio;
+            document.getElementById('headerStartPoints').textContent = t.startPoints;
+            document.getElementById('headerPointsAtTGE').textContent = t.pointsAtTGE;
+            document.getElementById('headerAirdrop').textContent = t.airdrop;
+            document.getElementById('headerPointValue').textContent = t.pointValue;
+            document.getElementById('headerDefault').textContent = t.default;
+            
+            // Headers Post-TGE
+            document.getElementById('headerProject2').textContent = t.project;
+            document.getElementById('headerAvg7d2').textContent = t.avg7d;
+            document.getElementById('headerAnnualRevenue2').textContent = t.annualRevenue;
+            document.getElementById('headerRatio2').textContent = t.ratio;
+            
+            // Tooltips
+            document.getElementById('tooltipStartPoints').textContent = t.startPointsTooltip;
+            document.getElementById('tooltipPointsAtTGE').textContent = t.pointsAtTGETooltip;
+            document.getElementById('tooltipAirdrop').textContent = t.airdropTooltip;
+            document.getElementById('tooltipPointValue').textContent = t.pointValueTooltip;
+            document.getElementById('tooltipComments').textContent = t.commentsTooltip;
+            document.getElementById('tooltipBearish').textContent = t.bearishTooltip;
+            document.getElementById('tooltipMid').textContent = t.midTooltip;
+            document.getElementById('tooltipBullish').textContent = t.bullishTooltip;
+            document.getElementById('tooltipBearish2').textContent = t.bearishTooltip;
+            document.getElementById('tooltipMid2').textContent = t.midTooltip;
+            document.getElementById('tooltipBullish2').textContent = t.bullishTooltip;
+            
+            // Mettre à jour le graphique si existant
+            if (chart) {
+                chart.options.scales.x.title.text = t.xAxisLabel;
+                chart.options.scales.y.title.text = t.yAxisLabel;
+                chart.update();
+            }
+            
+            // Mettre à jour le tableau (pour les textes dynamiques)
+            if (projectsData.length > 0) {
+                updateTable();
+            }
         }
         
         // Changer le scénario (bearish, mid, bullish)
