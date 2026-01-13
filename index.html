@@ -519,6 +519,29 @@
                 font-size: 11px;
             }
         }
+        
+        /* Mobile table scroll */
+        .table-scroll-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .table-scroll-wrapper::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .table-scroll-wrapper::-webkit-scrollbar-thumb {
+            background: var(--neon-cyan);
+            border-radius: 3px;
+        }
+        
+        .table-scroll-wrapper .tech-table {
+            min-width: 900px;
+        }
+        
+        .table-scroll-wrapper-large .tech-table {
+            min-width: 1200px;
+        }
     </style>
 </head>
 <body class="tech-bg min-h-screen py-8 px-4">
@@ -640,6 +663,7 @@
                     </div>
                 </div>
             </div>
+            <div class="table-scroll-wrapper table-scroll-wrapper-large">
             <table class="tech-table">
                 <thead>
                     <tr class="">
@@ -732,7 +756,7 @@
                 <span id="badgeLive" class="tech-badge tech-badge-green">✓ Live</span>
                 <span id="postTGETitle" class="text-mono-100">Projets Post-TGE</span>
             </h2>
-            <div class="overflow-x-auto">
+            <div class="table-scroll-wrapper">
             <table class="tech-table">
                 <thead>
                     <tr>
@@ -765,9 +789,17 @@
         </div>
 
         <!-- Footer -->
-        <div class="text-center text-mono-400 text-sm font-body mt-8 pb-4">
+        <div class="text-center text-mono-400 text-sm font-body mt-8 pb-4 relative">
             <p>Données fournies par <span class="neon-text">DeFiLlama</span> & <span class="neon-text">CoinGecko</span></p>
             <p class="mt-1 text-mono-500">Actualisation automatique toutes les 24h</p>
+            
+            <!-- CryptoMage Avatar -->
+            <a href="https://x.com/CryptoMage_YT" target="_blank" rel="noopener noreferrer" 
+               class="fixed bottom-4 right-4 w-14 h-14 rounded-full overflow-hidden border-2 border-neon-purple hover:border-neon-cyan transition-all duration-300 hover:scale-110 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] z-50">
+                <img src="https://pbs.twimg.com/profile_images/1692547979939356673/NDO3ukHf_400x400.jpg" 
+                     alt="CryptoMage" 
+                     class="w-full h-full object-cover">
+            </a>
         </div>
     </div>
 
