@@ -572,13 +572,6 @@
                             <span id="tooltipBullish" class="tooltip-text">Calculé par rapport aux frais actuels</span>
                         </div>
                     </div>
-                    <button id="refreshBtn" onclick="loadAllData()" 
-                        class="tech-btn tech-btn-primary flex items-center gap-2">
-                        <svg id="refreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
-                        <span id="refreshText">Actualiser les données</span>
-                    </button>
                 </div>
             </div>
             <!-- Loading Progress -->
@@ -768,21 +761,6 @@
                     </tr>
                 </tbody>
             </table>
-            </div>
-        </div>
-
-        <!-- Debug Logs -->
-        <div class="tech-card mb-6">
-            <button onclick="toggleLogs()" class="w-full p-4 text-left flex items-center justify-between hover:bg-mono-700 rounded-lg transition-colors">
-                <span id="debugLogsTitle" class="font-display text-sm text-mono-200 tracking-wider">🔧 LOGS DE DEBUG</span>
-                <svg id="logsArrow" class="w-5 h-5 text-mono-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </button>
-            <div id="logsContainer" class="hidden border-t border-mono-600">
-                <div class="p-4 max-h-96 overflow-y-auto bg-mono-900 rounded-b-lg">
-                    <pre id="logs" class="log-entry text-mono-200 whitespace-pre-wrap"></pre>
-                </div>
             </div>
         </div>
 
@@ -1016,28 +994,10 @@
             return diffDays;
         }
 
-        // Ajouter un log
+        // Ajouter un log (désactivé)
         function addLog(message, type = 'info') {
-            const logsEl = document.getElementById('logs');
-            const timestamp = new Date().toLocaleTimeString('fr-FR');
-            const colorClass = {
-                info: 'log-info',
-                success: 'log-success',
-                warning: 'log-warning',
-                error: 'log-error',
-                calc: 'log-calc'
-            }[type] || 'log-info';
-            
-            logsEl.innerHTML += `<span class="${colorClass}">[${timestamp}] ${message}</span>\n`;
-            logsEl.scrollTop = logsEl.scrollHeight;
-        }
-
-        // Basculer l'affichage des logs
-        function toggleLogs() {
-            const container = document.getElementById('logsContainer');
-            const arrow = document.getElementById('logsArrow');
-            container.classList.toggle('hidden');
-            arrow.classList.toggle('rotate-180');
+            // Logs désactivés
+            return;
         }
 
         // =====================================================
