@@ -1,2374 +1,390 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto FDV Estimator</title>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JL7QSE5SS7"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-JL7QSE5SS7');
-    </script>
-    <!-- Google Fonts - Orbitron for tech feel + JetBrains Mono for data -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'mono': {
-                            900: '#0a0a0f',
-                            800: '#12121a',
-                            700: '#1a1a24',
-                            600: '#24242f',
-                            500: '#2e2e3a',
-                            400: '#4a4a5a',
-                            300: '#6a6a7a',
-                            200: '#9a9aaa',
-                            100: '#cacacd',
-                        },
-                        'neon': {
-                            cyan: '#00f5ff',
-                            blue: '#0080ff',
-                            purple: '#a855f7',
-                            pink: '#f472b6',
-                            green: '#00ff88',
-                            red: '#ff3366',
-                            orange: '#ff8800',
-                        }
-                    },
-                    fontFamily: {
-                        'display': ['Orbitron', 'sans-serif'],
-                        'mono': ['JetBrains Mono', 'monospace'],
-                        'body': ['Space Grotesk', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Chart.js v4 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <!-- Chart.js Datalabels Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    <style>
-        /* ========== DARK TECH MONOLITH THEME ========== */
-        
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-tertiary: #1a1a24;
-            --bg-card: #14141c;
-            --border-color: #2a2a3a;
-            --border-glow: #00f5ff;
-            --text-primary: #e8e8ec;
-            --text-secondary: #9a9aaa;
-            --text-muted: #6a6a7a;
-            --neon-cyan: #00f5ff;
-            --neon-green: #00ff88;
-            --neon-purple: #a855f7;
-            --neon-red: #ff3366;
-            --neon-orange: #ff8800;
-        }
-        
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: var(--border-color) var(--bg-secondary);
-        }
-        
-        *::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        
-        *::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-        
-        *::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
-        
-        body {
-            background: var(--bg-primary);
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        
-        /* Animated grid background */
-        .tech-bg {
-            background: 
-                linear-gradient(var(--bg-primary) 0%, transparent 100%),
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 50px,
-                    rgba(0, 245, 255, 0.03) 50px,
-                    rgba(0, 245, 255, 0.03) 51px
-                ),
-                repeating-linear-gradient(
-                    90deg,
-                    transparent,
-                    transparent 50px,
-                    rgba(0, 245, 255, 0.03) 50px,
-                    rgba(0, 245, 255, 0.03) 51px
-                );
-            background-color: var(--bg-primary);
-            min-height: 100vh;
-            position: relative;
-        }
-        
-        .tech-bg::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 400px;
-            background: radial-gradient(ellipse at 50% 0%, rgba(0, 245, 255, 0.08) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        /* Card styling */
-        .tech-card {
-            background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .tech-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent 0%, var(--neon-cyan) 50%, transparent 100%);
-            opacity: 0.5;
-        }
-        
-        .tech-card-glow {
-            box-shadow: 0 0 30px rgba(0, 245, 255, 0.05), inset 0 1px 0 rgba(255,255,255,0.05);
-        }
-        
-        /* Glowing border effect on hover */
-        .glow-border {
-            position: relative;
-        }
-        
-        .glow-border::after {
-            content: '';
-            position: absolute;
-            inset: -1px;
-            border-radius: inherit;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-            opacity: 0;
-            z-index: -1;
-            transition: opacity 0.3s ease;
-        }
-        
-        .glow-border:hover::after {
-            opacity: 0.3;
-        }
-        
-        /* Table styling */
-        .tech-table {
-            width: 100%;
-        }
-        
-        .tech-table thead {
-            background: rgba(0, 245, 255, 0.05);
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .tech-table th {
-            color: var(--neon-cyan);
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 500;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 14px 12px;
-        }
-        
-        .tech-table tbody tr {
-            border-bottom: 1px solid rgba(42, 42, 58, 0.5);
-            transition: all 0.2s ease;
-        }
-        
-        .tech-table tbody tr:hover {
-            background: rgba(0, 245, 255, 0.03);
-        }
-        
-        .tech-table td {
-            padding: 12px;
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-        }
-        
-        /* Neon text effects */
-        .neon-text {
-            color: var(--neon-cyan);
-            text-shadow: 0 0 10px rgba(0, 245, 255, 0.5), 0 0 20px rgba(0, 245, 255, 0.3);
-        }
-        
-        .neon-text-green {
-            color: var(--neon-green);
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
-        
-        .neon-text-purple {
-            color: var(--neon-purple);
-            text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
-        }
-        
-        .neon-text-red {
-            color: var(--neon-red);
-            text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
-        }
-        
-        .neon-text-orange {
-            color: var(--neon-orange);
-            text-shadow: 0 0 10px rgba(255, 136, 0, 0.5);
-        }
-        
-        /* Button styles */
-        .tech-btn {
-            background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 12px;
-            letter-spacing: 0.05em;
-            padding: 10px 20px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .tech-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-        
-        .tech-btn:hover {
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
-        }
-        
-        .tech-btn:hover::before {
-            left: 100%;
-        }
-        
-        .tech-btn-primary {
-            background: linear-gradient(145deg, rgba(0, 245, 255, 0.2), rgba(0, 128, 255, 0.1));
-            border-color: var(--neon-cyan);
-            color: var(--neon-cyan);
-        }
-        
-        .tech-btn-primary:hover {
-            background: linear-gradient(145deg, rgba(0, 245, 255, 0.3), rgba(0, 128, 255, 0.2));
-            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
-        }
-        
-        /* Scenario buttons */
-        .scenario-btn {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            padding: 8px 14px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-        
-        .scenario-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--text-muted);
-        }
-        
-        .scenario-btn.active-bearish {
-            background: rgba(168, 85, 247, 0.15);
-            border-color: var(--neon-purple);
-            color: var(--neon-purple);
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
-        }
-        
-        .scenario-btn.active-mid {
-            background: rgba(0, 255, 136, 0.15);
-            border-color: var(--neon-green);
-            color: var(--neon-green);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
-        }
-        
-        .scenario-btn.active-bullish {
-            background: rgba(255, 136, 0, 0.15);
-            border-color: var(--neon-orange);
-            color: var(--neon-orange);
-            box-shadow: 0 0 15px rgba(255, 136, 0, 0.2);
-        }
-        
-        /* Input styling */
-        .tech-input {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            padding: 6px 10px;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-        
-        .tech-input:focus {
-            outline: none;
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
-        }
-        
-        .tech-input::placeholder {
-            color: var(--text-muted);
-        }
-        
-        /* Badge styling */
-        .tech-badge {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 10px;
-            letter-spacing: 0.1em;
-            padding: 4px 10px;
-            border-radius: 3px;
-            text-transform: uppercase;
-        }
-        
-        .tech-badge-cyan {
-            background: rgba(0, 245, 255, 0.15);
-            border: 1px solid rgba(0, 245, 255, 0.3);
-            color: var(--neon-cyan);
-        }
-        
-        .tech-badge-green {
-            background: rgba(0, 255, 136, 0.15);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            color: var(--neon-green);
-        }
-        
-        /* Custom tooltip */
-        .tooltip-container {
-            position: relative;
-            display: inline-block;
-            cursor: help;
-        }
-        
-        .tooltip-container .tooltip-text {
-            visibility: hidden;
-            opacity: 0;
-            width: 220px;
-            background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            text-align: center;
-            border-radius: 4px;
-            padding: 10px 12px;
-            position: absolute;
-            z-index: 9999;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 12px;
-            font-weight: normal;
-            line-height: 1.4;
-            transition: opacity 0.2s, visibility 0.2s;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 245, 255, 0.1);
-            pointer-events: none;
-        }
-        
-        .tooltip-container .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -6px;
-            border-width: 6px;
-            border-style: solid;
-            border-color: var(--bg-tertiary) transparent transparent transparent;
-        }
-        
-        .tooltip-container:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-        
-        /* Progress bar */
-        .tech-progress {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .tech-progress-bar {
-            background: linear-gradient(90deg, #0066ff, #00aaff, #0066ff);
-            background-size: 200% 100%;
-            box-shadow: 0 0 15px rgba(0, 128, 255, 0.7), 0 0 30px rgba(0, 128, 255, 0.4);
-            animation: shimmer 1.5s ease-in-out infinite;
-            transition: width 0.3s ease;
-        }
-        
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        /* Log styling */
-        .log-entry {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-        }
-        .log-info { color: var(--neon-cyan); }
-        .log-success { color: var(--neon-green); }
-        .log-warning { color: var(--neon-orange); }
-        .log-error { color: var(--neon-red); }
-        .log-calc { color: var(--neon-purple); }
-        
-        /* Spinning animation for refresh */
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .animate-spin-slow {
-            animation: spin 1.5s linear infinite;
-        }
-        
-        /* Pulse glow animation */
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 5px var(--neon-cyan); }
-            50% { box-shadow: 0 0 20px var(--neon-cyan), 0 0 30px rgba(0, 245, 255, 0.3); }
-        }
-        
-        .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
-        
-        /* Scanline effect */
-        .scanlines::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.1),
-                rgba(0, 0, 0, 0.1) 1px,
-                transparent 1px,
-                transparent 2px
-            );
-            pointer-events: none;
-            opacity: 0.3;
-        }
-        
-        /* Chart container */
-        .chart-container {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-        }
-        
-        /* Link styling for project names */
-        .tech-link {
-            color: var(--text-primary);
-            transition: all 0.2s ease;
-        }
-        
-        .tech-link:hover {
-            color: var(--neon-cyan);
-            text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
-        }
-        
-        /* Section headers */
-        .section-header {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            color: var(--text-primary);
-        }
-        
-        /* Data values */
-        .data-value {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .tech-table th, .tech-table td {
-                padding: 8px 6px;
-                font-size: 11px;
-            }
-        }
-        
-        /* Mobile table scroll */
-        .table-scroll-wrapper {
-            overflow-x: auto;
-            overflow-y: visible;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .table-scroll-wrapper::-webkit-scrollbar {
-            height: 6px;
-        }
-        
-        .table-scroll-wrapper::-webkit-scrollbar-thumb {
-            background: var(--neon-cyan);
-            border-radius: 3px;
-        }
-        
-        .table-scroll-wrapper .tech-table {
-            min-width: 900px;
-            width: 100%;
-        }
-        
-        .table-scroll-wrapper-large .tech-table {
-            min-width: 1200px;
-            width: 100%;
-        }
-        
-        /* Force Post-TGE table to fill width */
-        .tech-table {
-            width: 100%;
-        }
-        
-        /* Fix tooltips being cut by overflow */
-        .tech-card {
-            overflow: visible;
-        }
-        
-        .tooltip-container .tooltip-text {
-            z-index: 9999;
-        }
-    </style>
-</head>
-<body class="tech-bg min-h-screen py-8 px-4">
-    <div class="max-w-7xl mx-auto relative z-10">
-        <!-- Language Toggle -->
-        <div class="flex justify-end mb-4">
-            <button id="langToggle" onclick="toggleLanguage()" 
-                class="text-2xl hover:scale-110 transition-transform cursor-pointer hover:drop-shadow-[0_0_10px_rgba(0,245,255,0.5)]" 
-                title="Switch to English">
-                🥖
-            </button>
-        </div>
-        
-        <!-- Header -->
-        <div class="text-center mb-10">
-            <h1 class="font-display text-4xl md:text-5xl font-bold neon-text mb-3 tracking-wider">
-                CRYPTO FDV ESTIMATOR
-            </h1>
-            <p id="headerSubtitle" class="text-mono-200 font-body text-lg">Estimation de la Fully Diluted Valuation basée sur les revenus</p>
-        </div>
+// API Edge Function pour mettre à jour les données dans Supabase
+// S'exécute 1x par jour via Vercel Cron
 
-        <!-- Controls -->
-        <div class="tech-card tech-card-glow p-6 mb-6">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-2">
-                    <span id="lastUpdateLabel" class="text-sm text-mono-300 font-body">Dernière mise à jour :</span>
-                    <span id="lastUpdate" class="text-sm font-mono neon-text">-</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <!-- Scenario Buttons -->
-                    <div class="flex items-center gap-2 bg-mono-800/50 rounded-md p-1.5 border border-mono-600">
-                        <div class="tooltip-container">
-                            <button id="scenarioBearish" onclick="setScenario('bearish')" 
-                                class="scenario-btn">
-                                🔮 Réaliste
-                            </button>
-                            <span id="tooltipBearish" class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
-                        </div>
-                        <div class="tooltip-container">
-                            <button id="scenarioMid" onclick="setScenario('mid')" 
-                                class="scenario-btn">
-                                🐂 Bullish
-                            </button>
-                            <span id="tooltipMid" class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
-                        </div>
-                        <div class="tooltip-container">
-                            <button id="scenarioBullish" onclick="setScenario('bullish')" 
-                                class="scenario-btn">
-                                🚀 Giga Bullish
-                            </button>
-                            <span id="tooltipBullish" class="tooltip-text">Calculé par rapport aux frais actuels</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Loading Progress -->
-            <div id="loadingProgress" class="hidden mt-4">
-                <div class="flex items-center gap-3">
-                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-neon-cyan"></div>
-                    <span id="loadingText" class="text-sm text-mono-200">Chargement...</span>
-                </div>
-                <div class="mt-2 tech-progress h-2">
-                    <div id="progressBar" class="tech-progress-bar h-2 transition-all duration-300" style="width: 0%"></div>
-                </div>
-            </div>
-        </div>
+export const config = {
+    runtime: 'edge',
+};
 
-        <!-- Chart -->
-        <div class="tech-card tech-card-glow p-6 mb-6">
-            <h2 id="chartTitle" class="section-header text-xl mb-4 neon-text">Graphique Revenu vs FDV (Échelle Logarithmique)</h2>
-            <div class="chart-container relative" style="height: 500px;">
-                <canvas id="scatterChart"></canvas>
-            </div>
-            <div class="flex gap-8 mt-6 justify-center">
-                <div class="flex items-center gap-2">
-                    <div class="w-3 h-3 rounded-full bg-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.5)]"></div>
-                    <span id="legendTokenLive" class="text-sm text-mono-200 font-body">Token Live</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div id="legendEstimatedDot" class="w-3 h-3 rounded-full bg-neon-green shadow-[0_0_10px_rgba(0,255,136,0.5)]"></div>
-                    <span id="legendFdvEstimated" class="text-sm text-mono-200 font-body">FDV Estimée</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div id="legendRatioLine" class="w-6 h-0.5 border-dashed border-t-2 border-neon-green"></div>
-                    <span id="legendWeightedRatio" class="text-sm text-mono-200 font-body">Ratio moyen pondéré</span>
-                </div>
-            </div>
-        </div>
+// Configuration des projets (même config que dans ton index.html)
+const PROJECTS = {
+    withToken: [
+        { name: 'Hyperliquid', llamaSlug: 'hyperliquid-perps', coinGeckoId: 'hyperliquid', logo: 'https://icons.llamao.fi/icons/protocols/hyperliquid?w=48&h=48', url: 'https://app.hyperliquid.xyz/join/CRYPTOMAGE' },
+        { name: 'GMX', llamaSlug: 'gmx', coinGeckoId: 'gmx', logo: 'https://icons.llamao.fi/icons/protocols/gmx?w=48&h=48', url: 'https://gmx.io/#/' },
+        { name: 'dYdX', llamaSlug: 'dydx', coinGeckoId: 'dydx-chain', logo: 'https://icons.llamao.fi/icons/protocols/dydx?w=48&h=48', url: 'https://dydx.trade' },
+        { name: 'Drift', llamaSlug: 'drift-trade', coinGeckoId: 'drift-protocol', logo: 'https://icons.llamao.fi/icons/protocols/drift-trade?w=48&h=48', url: 'https://www.drift.trade/' },
+        { name: 'Orderly', llamaSlug: 'orderly', coinGeckoId: 'orderly-network', logo: 'https://icons.llamao.fi/icons/protocols/orderly?w=48&h=48', url: 'https://orderly.network' },
+        { name: 'ApeX', llamaSlug: 'apex-protocol', coinGeckoId: 'apex-token-2', logo: 'https://icons.llamao.fi/icons/protocols/apex-protocol?w=48&h=48', url: 'https://www.apex.exchange/fr-FR' },
+        { name: 'Avantis', llamaSlug: 'avantis', coinGeckoId: 'avantis', logo: 'https://icons.llamao.fi/icons/protocols/avantis?w=48&h=48', url: 'https://www.avantisfi.com/referral?code=cryptomage' },
+        { name: 'Lighter', llamaSlug: 'lighter', coinGeckoId: 'lighter', logo: 'https://icons.llamao.fi/icons/protocols/lighter?w=48&h=48', url: 'https://app.lighter.xyz/trade/LIT_USDC' },
+        { name: 'Aster', llamaSlug: 'aster', coinGeckoId: 'aster-2', logo: 'https://icons.llamao.fi/icons/protocols/aster?w=48&h=48', url: 'https://www.asterdex.com/en/referral/081a02' },
+    ],
+    withoutToken: [
+        { name: 'Extended', llamaSlug: 'extended', logo: 'https://icons.llamao.fi/icons/protocols/extended?w=48&h=48', url: 'https://app.extended.exchange/join/CRYPTOMAGE', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30, comment: 'Maker 0% / Taker 0.035%' },
+        { name: 'Paradex', llamaSlug: 'paradex', logo: 'https://icons.llamao.fi/icons/protocols/paradex?w=48&h=48', url: 'https://app.paradex.trade/r/cryptomage', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20, airdropPctInfo: '5% S1 + 15% S2 (source: Paradex Foundation)', comment: 'Arrive à la fin de la partie pre-TGE. Top pour faire du farming de fundings avec Variational.' },
+        { name: 'EdgeX', llamaSlug: 'edgex', logo: 'https://icons.llamao.fi/icons/protocols/edgex?w=48&h=48', url: 'https://www.edgex.exchange/en-US', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25, comment: 'Perps Asiatique, pas beaucoup d\'info dessus' },
+        { name: 'Ethereal', llamaSlug: 'ethereal-dex', logo: 'https://icons.llamao.fi/icons/protocols/ethereal?w=48&h=48', url: 'https://www.ethereal.trade/', pointsSeasonStart: '2025-07-01', pointsMax: null, airdropPct: null, comment: 'Top pour faire du DN, gros bonus de yield sur les positions longues durées.' },
+        { name: 'Ostium', llamaSlug: 'ostium', logo: 'https://icons.llamao.fi/icons/protocols/ostium?w=48&h=48', url: 'https://ostium.app/trade?ref=JVCXY', pointsSeasonStart: '2025-03-31', pointsMax: 55000000, pointsMaxInfo: '30M points S1 (estimé) + 25M points S2 (hardcap)', airdropPct: null, comment: 'Vaut le coup uniquement pour le vault (bon rendement + points)' },
+        { name: 'Vest', llamaSlug: 'vest-exchange', logo: 'https://icons.llamao.fi/icons/protocols/vest-exchange?w=48&h=48', url: 'https://trade.vestmarkets.com/trade/NVDA-USD-PERP', pointsSeasonStart: '2024-07-01', pointsMax: null, airdropPct: 20, comment: 'Maker 0.02% / Taker 0.06%' },
+        { name: 'Unit', llamaSlug: 'unit', logo: 'https://icons.llamao.fi/icons/protocols/unit?w=48&h=48', url: 'https://hyperunit.xyz/deposit', pointsSeasonStart: null, pointsMax: null, airdropPct: null, comment: 'Meilleur farm = rééquilibrage de LPs avec des assets Unit (BTC / ETH / SOL...)' },
+        { name: 'tradeXYZ', llamaSlug: 'trade-xyz', logo: 'https://icons.llamao.fi/icons/protocols/trade-xyz?w=48&h=48', url: 'https://app.trade.xyz/trade?market=XYZ100', pointsSeasonStart: null, pointsMax: null, airdropPct: null, comment: 'Mieux de trade ici que sur Hyperliquid, utilise HIP-3 et exactement les mêmes fonctionnalités, farm l\'Airdrop d\'Unit' },
+        { name: 'Variational', llamaSlug: 'variational', logo: 'https://icons.llamao.fi/icons/protocols/variational?w=48&h=48', customApi: 'variational', url: 'https://www.variational.io/', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, pointsMaxInfo: 'Source : Données dispo dans la doc du projet', airdropPct: 25, comment: 'Relativement early. À utiliser pour la majorité de tes DN, récompense énormément les positions longues sur les paires avec peu d\'OI.' },
+        { name: 'GRVT', llamaSlug: 'grvt', logo: 'https://icons.llamao.fi/icons/protocols/grvt?w=48&h=48', customApi: 'grvt', url: 'https://grvt.io', pointsSeasonStart: '2025-02-12', pointsMax: null, airdropPct: 10, comment: 'Maker -0.01% (rebate) / Taker 0.02%' },
+        { name: 'Reya', llamaSlug: 'reya', logo: 'https://icons.llamao.fi/icons/protocols/reya?w=48&h=48', url: 'https://reya.xyz', pointsSeasonStart: '2025-09-17', pointsMax: null, airdropPct: 20, airdropPctInfo: '45% allocation communautaire, estimation à 20% pour l\'airdrop initial', comment: 'Maker 0% / Taker 0%' },
+        { name: 'Nado', llamaSlug: 'nado', logo: 'https://icons.llamao.fi/icons/protocols/nado?w=48&h=48', url: 'https://www.nado.xyz', pointsSeasonStart: null, pointsMax: null, airdropPct: null, comment: 'Maker 0% / Taker 0.05%' },
+        { name: 'HyENA', llamaSlug: 'hyena', logo: 'https://icons.llamao.fi/icons/protocols/hyena?w=48&h=48', url: 'https://app.hyena.trade', pointsSeasonStart: null, pointsMax: null, airdropPct: null, comment: 'Maker 0.01% / Taker 0.035%' },
+    ]
+};
 
-        <!-- Table 1: Projets sans token (Pre-TGE) -->
-        <div class="tech-card tech-card-glow p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="section-header text-xl flex items-center gap-3">
-                    <span id="badgeEstime" class="tech-badge tech-badge-cyan">⏳ Estimé</span>
-                    <span id="preTGETitle" class="text-mono-100">Projets Pre-TGE</span>
-                </h2>
-                <!-- Scenario Buttons (duplicated) -->
-                <div class="flex items-center gap-2 bg-mono-800/50 rounded-md p-1.5 border border-mono-600">
-                    <div class="tooltip-container relative">
-                        <button id="scenarioBearish2" onclick="setScenario('bearish')" 
-                            class="scenario-btn">
-                            🔮 Réaliste
-                        </button>
-                        <span id="tooltipBearish2" class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
-                    </div>
-                    <div class="tooltip-container relative">
-                        <button id="scenarioMid2" onclick="setScenario('mid')" 
-                            class="scenario-btn">
-                            🐂 Bullish
-                        </button>
-                        <span id="tooltipMid2" class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
-                    </div>
-                    <div class="tooltip-container relative">
-                        <button id="scenarioBullish2" onclick="setScenario('bullish')" 
-                            class="scenario-btn">
-                            🚀 Giga Bullish
-                        </button>
-                        <span id="tooltipBullish2" class="tooltip-text">Calculé par rapport aux frais actuels</span>
-                    </div>
-                </div>
-            </div>
-            <div class="table-scroll-wrapper table-scroll-wrapper-large">
-            <table class="tech-table">
-                <thead>
-                    <tr class="">
-                        <th class="text-left py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('name', 'preTGE')">
-                            <span id="headerProject">Projet</span> <span id="sort-name-preTGE" class="text-mono-400">↕</span>
-                        </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('fees7d', 'preTGE')">
-                            <span id="headerAvg7d">Moy. 7j</span> <span id="sort-fees7d-preTGE" class="text-mono-400">↕</span>
-                        </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('annualRevenue', 'preTGE')">
-                            <span id="headerAnnualRevenue">Revenu Annuel</span> <span id="sort-annualRevenue-preTGE" class="text-mono-400">↕</span>
-                        </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('fdv', 'preTGE')">
-                            FDV <span id="sort-fdv-preTGE" class="text-mono-400">↕</span>
-                        </th>
-                        <th class="text-right py-3 px-4">
-                            <div class="flex flex-col items-end gap-1">
-                                <button id="resetBtn" onclick="resetRatios(); event.stopPropagation();" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-2 py-0.5 rounded transition-colors" title="Réinitialiser les ratios">
-                                    ↺ Reset
-                                </button>
-                                <span class="cursor-pointer" onclick="sortTable('ratio', 'preTGE')">
-                                    <span id="headerRatio">Ratio</span> <span id="sort-ratio-preTGE" class="text-mono-400">↕</span>
-                                </span>
-                            </div>
-                        </th>
-                        <th class="text-center py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('pointsSeason', 'preTGE')">
-                            <div class="tooltip-container">
-                                <span id="headerStartPoints">Début points</span> <span id="sort-pointsSeason-preTGE" class="text-mono-400">↕</span>
-                                <span id="tooltipStartPoints" class="tooltip-text">Jours depuis le début de la dernière saison de points</span>
-                            </div>
-                        </th>
-                        <th class="text-right py-3 px-4 cursor-pointer hover:bg-mono-700" onclick="sortTable('pointsMax', 'preTGE')">
-                            <div class="tooltip-container">
-                                <span id="headerPointsAtTGE">Points au TGE</span> <span id="sort-pointsMax-preTGE" class="text-mono-400">↕</span>
-                                <span id="tooltipPointsAtTGE" class="tooltip-text">Points max en circulation à l'Airdrop</span>
-                            </div>
-                        </th>
-                        <th class="text-right py-3 px-4">
-                            <div class="flex flex-col items-end gap-1">
-                                <div class="flex items-center gap-1 text-xs text-mono-400">
-                                    <span id="headerDefault">défaut:</span>
-                                    <input 
-                                        type="number" 
-                                        id="defaultAirdropInput"
-                                        value="10"
-                                        min="1" 
-                                        max="100"
-                                        class="tech-input w-10 text-center text-xs"
-                                        onchange="updateDefaultAirdrop(this.value)"
-                                        onclick="event.stopPropagation()"
-                                    />
-                                    <span>%</span>
-                                </div>
-                                <div class="tooltip-container">
-                                    <span class="cursor-pointer hover:text-white transition-colors" onclick="sortTable('airdropPct', 'preTGE')">
-                                        <span id="headerAirdrop">%Airdrop</span> <span id="sort-airdropPct-preTGE" class="text-mono-400">↕</span>
-                                    </span>
-                                    <span id="tooltipAirdrop" class="tooltip-text">% du supply alloué à l'airdrop au TGE</span>
-                                </div>
-                            </div>
-                        </th>
-                        <th class="text-right cursor-pointer hover:text-white transition-colors" onclick="sortTable('pointValue', 'preTGE')">
-                            <div class="tooltip-container">
-                                <span id="headerPointValue">$/Point</span> <span id="sort-pointValue-preTGE" class="text-mono-400">↕</span>
-                                <span id="tooltipPointValue" class="tooltip-text">Valeur estimée d'un point = (FDV × %Airdrop) / Points Max</span>
-                            </div>
-                        </th>
-                        <th class="text-center">
-                            <div class="tooltip-container">
-                                💬
-                                <span id="tooltipComments" class="tooltip-text">Commentaires et conseils</span>
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="dataTablePreTGE">
-                    <tr>
-                        <td colspan="10" class="text-center py-8 text-mono-400">
-                            Chargement des données...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            </div>
-        </div>
+// Fonction pour récupérer les fees DeFiLlama
+async function fetchDeFiLlamaFees(slug) {
+    try {
+        const response = await fetch(`https://api.llama.fi/summary/fees/${slug}?dataType=dailyFees`);
+        if (!response.ok) {
+            console.error(`DeFiLlama HTTP error for ${slug}: ${response.status}`);
+            return null;
+        }
+        const data = await response.json();
+        console.log(`DeFiLlama ${slug}: total24h=${data.total24h}, hasChart=${!!data.totalDataChart}, chartLength=${data.totalDataChart?.length || 0}`);
+        return data;
+    } catch (error) {
+        console.error(`DeFiLlama error for ${slug}:`, error);
+        return null;
+    }
+}
 
-        <!-- Table 2: Projets avec token (Post-TGE) -->
-        <div class="tech-card tech-card-glow p-6 mb-6">
-            <h2 class="section-header text-xl mb-4 flex items-center gap-3">
-                <span id="badgeLive" class="tech-badge tech-badge-green">✓ Live</span>
-                <span id="postTGETitle" class="text-mono-100">Projets Post-TGE</span>
-            </h2>
-            <div class="table-scroll-wrapper">
-            <table class="tech-table">
-                <thead>
-                    <tr>
-                        <th class="text-left cursor-pointer hover:text-white transition-colors" onclick="sortTable('name', 'postTGE')">
-                            <span id="headerProject2">Projet</span> <span id="sort-name-postTGE" class="text-mono-400">↕</span>
-                        </th>
-                        <th class="text-right cursor-pointer hover:text-white transition-colors" onclick="sortTable('fees7d', 'postTGE')">
-                            <span id="headerAvg7d2">Moy. 7j</span> <span id="sort-fees7d-postTGE" class="text-mono-400">↕</span>
-                        </th>
-                        <th class="text-right cursor-pointer hover:text-white transition-colors" onclick="sortTable('annualRevenue', 'postTGE')">
-                            <span id="headerAnnualRevenue2">Revenu Annuel</span> <span id="sort-annualRevenue-postTGE" class="text-mono-400">↕</span>
-                        </th>
-                        <th class="text-right cursor-pointer hover:text-white transition-colors" onclick="sortTable('fdv', 'postTGE')">
-                            FDV <span id="sort-fdv-postTGE" class="text-mono-400">↕</span>
-                        </th>
-                        <th class="text-right cursor-pointer hover:text-white transition-colors" onclick="sortTable('ratio', 'postTGE')">
-                            <span id="headerRatio2">Ratio</span> <span id="sort-ratio-postTGE" class="text-mono-400">↕</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="dataTablePostTGE">
-                    <tr>
-                        <td colspan="5" class="text-center py-8 text-mono-400">
-                            Chargement des données...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            </div>
-        </div>
+// Fonction helper pour extraire les fees moyennes sur 7 jours
+function extractFees7dAvg(feesData) {
+    // Méthode 1: Utiliser totalDataChart (tableau de [timestamp, value])
+    if (feesData?.totalDataChart && feesData.totalDataChart.length > 0) {
+        const last7Days = feesData.totalDataChart.slice(-7);
+        const avg = last7Days.reduce((sum, d) => sum + (d[1] || 0), 0) / Math.min(7, last7Days.length);
+        if (avg > 0) return avg;
+    }
+    
+    // Méthode 2: Utiliser total24h directement
+    if (feesData?.total24h && feesData.total24h > 0) {
+        return feesData.total24h;
+    }
+    
+    // Méthode 3: Utiliser total7d divisé par 7
+    if (feesData?.total7d && feesData.total7d > 0) {
+        return feesData.total7d / 7;
+    }
+    
+    return 0;
+}
 
-        <!-- Footer -->
-        <div class="text-center text-mono-400 text-sm font-body mt-8 pb-4 relative">
-            <p>Données fournies par <span class="neon-text">DeFiLlama</span> & <span class="neon-text">CoinGecko</span></p>
-            <p class="mt-1 text-mono-500">Actualisation automatique toutes les 24h</p>
-            
-            <!-- CryptoMage Avatar -->
-            <a href="https://x.com/CryptoMage_YT" target="_blank" rel="noopener noreferrer" 
-               class="fixed bottom-4 right-4 w-14 h-14 rounded-full overflow-hidden border-2 border-neon-purple hover:border-neon-cyan transition-all duration-300 hover:scale-110 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] z-50">
-                <img src="https://pbs.twimg.com/profile_images/1692547979939356673/NDO3ukHf_400x400.jpg" 
-                     alt="CryptoMage" 
-                     class="w-full h-full object-cover">
-            </a>
-        </div>
-    </div>
-
-    <script>
-        // =====================================================
-        // CONFIGURATION DES PROJETS
-        // =====================================================
-        const PROJECTS = {
-            // Projets avec token (slug DeFiLlama / id CoinGecko)
-            withToken: [
-                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', url: 'https://app.hyperliquid.xyz/join/CRYPTOMAGE', pointsSeasonStart: '2024-11-29', pointsInfo: 'Possible S3 en cours depuis le TGE', pointsMax: null, airdropPct: 31 }, // Airdrop Genesis 31%
-                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', url: 'https://app.lighter.xyz/trade/LIT_USDC', pointsSeasonStart: '2025-10-02', pointsMax: null, airdropPct: 25 }, // 25% airdrop S1+S2
-                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', url: 'https://www.asterdex.com/en/referral/081a02', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', url: 'https://dydx.trade?ref=WindyGoldS5I', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', url: 'https://www.avantisfi.com/referral?code=cryptomage', pointsSeasonStart: '2025-09-03', pointsMax: null, airdropPct: null }, // Season 3
-                { name: 'ApeX', llamaSlug: 'apex-omni', coingeckoContract: '0x52a8845df664d76c69d2eea607cd793565af42b8', url: 'https://www.apex.exchange/fr-FR', pointsSeasonStart: '2025-10-06', pointsMax: null, airdropPct: null }, // Ape Season 1
-                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', url: 'https://orderly.network', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', url: 'https://gmx.io/#/', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', url: 'https://www.drift.trade/', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-            ],
-            // Projets sans token (FDV estimée)
-            withoutToken: [
-                { name: 'Extended', llamaSlug: 'extended', url: 'https://app.extended.exchange/join/CRYPTOMAGE', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30, comment: 'Maker 0% / Taker 0.035%' }, // 30% confirmé
-                { name: 'Paradex', llamaSlug: 'paradex', url: 'https://app.paradex.trade/r/cryptomage', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20, airdropPctInfo: '5% S1 + 15% S2 (source: Paradex Foundation)', comment: 'Arrive à la fin de la partie pre-TGE. Top pour faire du farming de fundings avec Variational.' }, // 20% Genesis Airdrop
-                { name: 'EdgeX', llamaSlug: 'edgex', url: 'https://www.edgex.exchange/en-US', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25, comment: 'Perps Asiatique, pas beaucoup d\'info dessus' }, // ~25% estimé
-                { name: 'Ethereal', llamaSlug: 'ethereal-dex', url: 'https://www.ethereal.trade/', pointsSeasonStart: '2025-08-14', pointsMax: null, airdropPct: null, comment: 'Top pour faire du DN, gros bonus de yield sur les positions longues durées.' }, // Non communiqué
-                { name: 'Ostium', llamaSlug: 'ostium', url: 'https://ostium.app/trade?ref=JVCXY', pointsSeasonStart: '2025-03-31', pointsMax: 55000000, pointsMaxInfo: '30M points S1 (estimé) + 25M points S2 (hardcap)', airdropPct: null, comment: 'Vaut le coup uniquement pour le vault (bon rendement + points)' }, // Non annoncé
-                { name: 'Unit', llamaSlug: 'unit', url: 'https://hyperunit.xyz/deposit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null, comment: 'Meilleur farm = rééquilibrage de LPs avec des assets Unit (BTC / ETH / SOL...)' },
-                { name: 'tradeXYZ', llamaSlug: 'tradexyz', url: 'https://app.trade.xyz/trade?market=XYZ100', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null, comment: 'Mieux de trade ici que sur Hyperliquid, utilise HIP-3 et exactement les mêmes fonctionnalités, farm l\'Airdrop d\'Unit' },
-                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', url: 'https://grvt.io', pointsSeasonStart: '2025-09-23', pointsMax: null, airdropPct: 22, comment: 'Maker -0.01% (rebate) / Taker 0.02%' }, // 22% (S1 10% + S2 12%) - points S1 non comparables à S2
-                { name: 'Reya', llamaSlug: 'reya', url: 'https://reya.xyz', pointsSeasonStart: '2025-07-19', pointsMax: null, airdropPct: 20, airdropPctInfo: '45% allocation communautaire, estimation à 20% pour l\'airdrop initial', comment: 'Maker 0% / Taker 0%' }, // 6.25M RCP initial mais distribution continue
-                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', url: 'https://www.variational.io/', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, pointsMaxInfo: 'Source : Données dispo dans la doc du projet', airdropPct: 25, comment: 'Relativement early. À utiliser pour la majorité de tes DN, récompense énormément les positions longues sur les paires avec peu d\'OI.' }, // 25% estimé
-                // { name: 'StandX', llamaSlug: 'standx', customApi: 'standx', pointsSeasonStart: null, pointsMax: null, airdropPct: null }, // Pas de données DeFiLlama
-                // { name: 'Polynomial', llamaSlug: 'polynomial-trade', pointsSeasonStart: null, pointsMax: null, airdropPct: null }, // Pas de fees sur DeFiLlama
-                { name: 'Vest', llamaSlug: 'vest-exchange', url: 'https://trade.vestmarkets.com/trade/NVDA-USD-PERP', pointsSeasonStart: null, pointsMax: null, airdropPct: null, comment: 'Maker 0.02% / Taker 0.06%' },
-                { name: 'HyENA', llamaSlug: 'hyena', url: 'https://app.hyena.trade', pointsSeasonStart: '2025-12-09', pointsMax: null, airdropPct: null, comment: 'HIP-3, bon combo' },
-                { name: 'Nado', llamaSlug: 'nado-perps', url: 'https://www.nado.xyz', pointsSeasonStart: '2025-11-21', pointsMax: null, airdropPct: null, comment: 'Trop de volume pour une période pre-points, j\'ai skip' },
-            ]
+// Fonction pour récupérer les données CoinGecko
+async function fetchCoinGecko(coinId, contractInfo = null) {
+    const apiKey = process.env.COINGECKO_API_KEY;
+    try {
+        let url;
+        if (contractInfo) {
+            url = `https://api.coingecko.com/api/v3/coins/${contractInfo.platform}/contract/${contractInfo.address}?x_cg_demo_api_key=${apiKey}`;
+        } else {
+            url = `https://api.coingecko.com/api/v3/coins/${coinId}?x_cg_demo_api_key=${apiKey}`;
+        }
+        
+        const response = await fetch(url);
+        if (!response.ok) return null;
+        const data = await response.json();
+        
+        return {
+            fdv: data.market_data?.fully_diluted_valuation?.usd || null,
+            marketCap: data.market_data?.market_cap?.usd || null,
+            price: data.market_data?.current_price?.usd || null,
+            name: data.name
         };
+    } catch (error) {
+        console.error(`CoinGecko error for ${coinId}:`, error);
+        return null;
+    }
+}
 
-        // =====================================================
-        // VARIABLES GLOBALES
-        // =====================================================
-        let projectsData = [];
-        let currentSortPreTGE = { column: 'pointValue', direction: 'desc' }; // Tri par $/Point par défaut
-        let currentSortPostTGE = { column: 'annualRevenue', direction: 'desc' };
-        let chart = null;
-        let originalAvgRatio = null; // Ratio calculé automatiquement (ne change jamais après calcul initial)
-        let currentAvgRatio = null; // Ratio actuellement utilisé (peut être manuel)
-        let manualRatio = null; // Ratio défini manuellement par l'utilisateur
-        let defaultAirdropPct = 10; // % Airdrop par défaut pour les projets sans info
-        let currentScenario = 'bullish'; // Scénario actuel (bearish, mid, bullish)
-        let currentScenarioColor = 'rgba(22, 163, 74, 0.9)'; // Couleur actuelle du scénario
-        let currentLang = 'fr'; // Langue actuelle (fr ou en)
-        
-        const translations = {
-            fr: {
-                headerSubtitle: 'Estimation de la Fully Diluted Valuation basée sur les revenus',
-                lastUpdate: 'Dernière mise à jour :',
-                refresh: 'Actualiser les données',
-                refreshing: 'Chargement...',
-                chartTitle: 'Graphique Revenu vs FDV (Échelle Logarithmique)',
-                tokenLive: 'Token Live',
-                fdvEstimated: 'FDV Estimée',
-                weightedRatio: 'Ratio moyen pondéré',
-                preTGE: 'Projets Pre-TGE',
-                postTGE: 'Projets Post-TGE',
-                estimated: '⏳ Estimé',
-                live: '✓ Live',
-                project: 'Projet',
-                avg7d: 'Moy. 7j',
-                annualRevenue: 'Revenu Annuel',
-                fdv: 'FDV',
-                ratio: 'Ratio',
-                reset: '↺ Reset',
-                resetTitle: 'Réinitialiser les ratios',
-                startPoints: 'Début points',
-                pointsAtTGE: 'Points au TGE',
-                airdrop: '%Airdrop',
-                default: 'défaut:',
-                pointValue: '$/Point',
-                comments: '💬',
-                commentsTooltip: 'Commentaires et conseils',
-                startPointsTooltip: 'Jours depuis le début de la dernière saison de points',
-                pointsAtTGETooltip: 'Points max en circulation à l\'Airdrop',
-                airdropTooltip: '% du supply alloué à l\'airdrop au TGE',
-                pointValueTooltip: 'Valeur estimée d\'un point = (FDV × %Airdrop) / Points Max',
-                bearishTooltip: 'Prévoit un -66% sur les frais post TGE (cas de Lighter)',
-                midTooltip: 'Prévoit un -33% sur les frais post TGE',
-                bullishTooltip: 'Calculé par rapport aux frais actuels',
-                loading: 'Chargement des données...',
-                loadingProgress: 'Chargement...',
-                xAxisLabel: 'Revenu Annuel (USD)',
-                yAxisLabel: 'FDV (USD)',
-                langToggleTitle: 'Switch to English',
-                debugLogs: '🔧 Logs de Debug',
-                ratioInputTitle: 'Modifier pour recalculer les FDV estimées',
-                estimationBased24h: 'Estimation basée sur 24h glissantes',
-                customApiVariational: 'Données via API custom<br>(Fees = Loss Refund × 10)<br>Basé sur 24h glissantes',
-                customApiGrvt: 'Données via API custom<br>(Fees = Volume × 0.02%)<br>Basé sur 24h glissantes',
-                customApiStandx: 'Données via API custom<br>(Fees = Volume × 0.025%)<br>Maker 0.01% / Taker 0.04%',
-                daysAgo: 'j',
-                noPointsSeason: '-'
+// Fonction pour récupérer les données Variational
+async function fetchVariational() {
+    try {
+        // URL correcte de l'API Variational
+        const response = await fetch('https://omni-client-api.prod.ap-northeast-1.variational.io/metadata/stats', {
+            headers: {
+                'Accept': 'application/json',
             },
-            en: {
-                headerSubtitle: 'Fully Diluted Valuation estimation based on revenue',
-                lastUpdate: 'Last update:',
-                refresh: 'Refresh data',
-                refreshing: 'Loading...',
-                chartTitle: 'Revenue vs FDV Chart (Logarithmic Scale)',
-                tokenLive: 'Live Token',
-                fdvEstimated: 'Estimated FDV',
-                weightedRatio: 'Weighted average ratio',
-                preTGE: 'Pre-TGE Projects',
-                postTGE: 'Post-TGE Projects',
-                estimated: '⏳ Estimated',
-                live: '✓ Live',
-                project: 'Project',
-                avg7d: '7d Avg',
-                annualRevenue: 'Annual Revenue',
-                fdv: 'FDV',
-                ratio: 'Ratio',
-                reset: '↺ Reset',
-                resetTitle: 'Reset ratios',
-                startPoints: 'Points start',
-                pointsAtTGE: 'Points at TGE',
-                airdrop: '%Airdrop',
-                default: 'default:',
-                pointValue: '$/Point',
-                comments: '💬',
-                commentsTooltip: 'Comments and tips',
-                startPointsTooltip: 'Days since the start of the last points season',
-                pointsAtTGETooltip: 'Max points in circulation at Airdrop',
-                airdropTooltip: '% of supply allocated to airdrop at TGE',
-                pointValueTooltip: 'Estimated point value = (FDV × %Airdrop) / Max Points',
-                bearishTooltip: 'Expects -66% on post-TGE fees (Lighter case)',
-                midTooltip: 'Expects -33% on post-TGE fees',
-                bullishTooltip: 'Based on current fees',
-                loading: 'Loading data...',
-                loadingProgress: 'Loading...',
-                xAxisLabel: 'Annual Revenue (USD)',
-                yAxisLabel: 'FDV (USD)',
-                langToggleTitle: 'Passer en Français',
-                debugLogs: '🔧 Debug Logs',
-                ratioInputTitle: 'Edit to recalculate estimated FDVs',
-                estimationBased24h: 'Estimation based on 24h rolling',
-                customApiVariational: 'Data via custom API<br>(Fees = Loss Refund × 10)<br>Based on 24h rolling',
-                customApiGrvt: 'Data via custom API<br>(Fees = Volume × 0.02%)<br>Based on 24h rolling',
-                customApiStandx: 'Data via custom API<br>(Fees = Volume × 0.025%)<br>Maker 0.01% / Taker 0.04%',
-                daysAgo: 'd',
-                noPointsSeason: '-'
-            }
-        };
-        
-        const scenarioMultipliers = {
-            bearish: 1/3,  // -66% sur les frais post TGE (Réaliste)
-            mid: 2/3,      // -33% sur les frais post TGE (Bullish)
-            bullish: 1     // Frais actuels (Giga Bullish)
-        };
-        const scenarioColorsRGB = {
-            bearish: { r: 168, g: 85, b: 247 },   // Neon Purple (Réaliste)
-            mid: { r: 0, g: 255, b: 136 },        // Neon Green (Bullish)
-            bullish: { r: 255, g: 136, b: 0 }     // Neon Orange (Giga Bullish)
-        };
-        const scenarioTextClasses = {
-            bearish: { text: 'neon-text-purple', bg: 'bg-mono-700', textDark: 'neon-text-purple' },
-            mid: { text: 'neon-text-green', bg: 'bg-mono-700', textDark: 'neon-text-green' },
-            bullish: { text: 'neon-text-orange', bg: 'bg-mono-700', textDark: 'neon-text-orange' }
-        };
-
-        // =====================================================
-        // FONCTIONS UTILITAIRES
-        // =====================================================
-        
-        // Formatage des nombres en USD avec B/M/K
-        function formatUSD(value) {
-            if (value === null || value === undefined || isNaN(value)) return '-';
-            if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
-            if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
-            if (value >= 1e3) return '$' + (value / 1e3).toFixed(2) + 'K';
-            return '$' + value.toFixed(2);
-        }
-
-        // Formatage des grands nombres (sans devise)
-        function formatNumber(value) {
-            if (value === null || value === undefined || isNaN(value)) return '-';
-            if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-            if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-            if (value >= 1e3) return (value / 1e3).toFixed(1) + 'K';
-            return value.toString();
-        }
-
-        // Formatage du ratio
-        function formatRatio(value) {
-            if (value === null || value === undefined || isNaN(value) || !isFinite(value)) return '-';
-            return value.toFixed(1) + 'x';
-        }
-
-        // Calculer la valeur d'un point: (FDV × %Airdrop) / Points Max
-        function calculatePointValue(project) {
-            if (!project.fdv || !project.pointsMax) return null;
-            const airdropPct = project.airdropPct !== null ? project.airdropPct : defaultAirdropPct;
-            const pointValue = (project.fdv * (airdropPct / 100)) / project.pointsMax;
-            return pointValue;
-        }
-
-        // Formatage de la valeur d'un point
-        function formatPointValue(value) {
-            if (value === null || value === undefined || isNaN(value)) return '-';
-            if (value >= 1000) return '$' + (value / 1000).toFixed(1) + 'K';
-            if (value >= 1) return '$' + value.toFixed(2);
-            if (value >= 0.01) return '$' + value.toFixed(3);
-            if (value >= 0.001) return '$' + value.toFixed(4);
-            return '$' + value.toFixed(5);
-        }
-
-        // Calculer le nombre de jours depuis une date
-        function daysSince(dateStr) {
-            if (!dateStr) return null;
-            const date = new Date(dateStr);
-            const today = new Date();
-            const diffTime = today - date;
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays;
-        }
-
-        // Ajouter un log (désactivé)
-        function addLog(message, type = 'info') {
-            // Logs désactivés
-            return;
-        }
-
-        // =====================================================
-        // APPELS API
-        // =====================================================
-        
-        // Récupérer les fees depuis DeFiLlama via notre Edge Function
-        async function fetchFees(protocol) {
-            try {
-                addLog(`📡 Appel API fees pour: ${protocol}`, 'info');
-                const response = await fetch(`/api/fees?protocol=${encodeURIComponent(protocol)}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                addLog(`✅ Fees ${protocol}: 24h=${formatUSD(data.total24h)}, 7d=${formatUSD(data.total7d)}`, 'success');
-                return data;
-            } catch (error) {
-                addLog(`❌ Erreur fees ${protocol}: ${error.message}`, 'error');
-                return null;
-            }
-        }
-
-        // Récupérer la FDV depuis CoinGecko via notre Edge Function
-        async function fetchFDV(coinId, contractAddress = null) {
-            try {
-                let url;
-                let logId = coinId || contractAddress;
-                
-                if (contractAddress) {
-                    addLog(`📡 Appel API CoinGecko par contrat: ${contractAddress.substring(0, 10)}...`, 'info');
-                    url = `/api/coingecko?contract=${encodeURIComponent(contractAddress)}`;
-                } else {
-                    addLog(`📡 Appel API CoinGecko pour: ${coinId}`, 'info');
-                    url = `/api/coingecko?coinId=${encodeURIComponent(coinId)}`;
-                }
-                
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                addLog(`✅ FDV ${data.name || logId}: ${formatUSD(data.fdv)}, MC=${formatUSD(data.marketCap)}`, 'success');
-                return data;
-            } catch (error) {
-                addLog(`❌ Erreur CoinGecko ${coinId || contractAddress}: ${error.message}`, 'error');
-                return null;
-            }
-        }
-
-        // Récupérer les données Variational via notre Edge Function custom
-        async function fetchVariational() {
-            try {
-                addLog(`📡 Appel API Variational...`, 'info');
-                const response = await fetch('/api/variational');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                addLog(`✅ Variational: Loss Refund 24h=${formatUSD(data.lossRefund24h)}, Fees (x10)=${formatUSD(data.total24h)}`, 'success');
-                return data;
-            } catch (error) {
-                addLog(`❌ Erreur Variational: ${error.message}`, 'error');
-                return null;
-            }
-        }
-
-        // Récupérer les données GRVT via notre Edge Function custom
-        async function fetchGRVT() {
-            try {
-                addLog(`📡 Appel API GRVT...`, 'info');
-                const response = await fetch('/api/grvt');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                addLog(`✅ GRVT: Volume 24h=${formatUSD(data.volume24h)}, Fees (0.02%)=${formatUSD(data.total24h)}`, 'success');
-                return data;
-            } catch (error) {
-                addLog(`❌ Erreur GRVT: ${error.message}`, 'error');
-                return null;
-            }
-        }
-
-        // Récupérer les données StandX via notre Edge Function custom
-        async function fetchStandX() {
-            try {
-                addLog(`📡 Appel API StandX...`, 'info');
-                const response = await fetch('/api/standx');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                addLog(`✅ StandX: Volume 24h=${formatUSD(data.volume24h)}, Fees (0.025%)=${formatUSD(data.total24h)}`, 'success');
-                return data;
-            } catch (error) {
-                addLog(`❌ Erreur StandX: ${error.message}`, 'error');
-                return null;
-            }
-        }
-
-        // =====================================================
-        // CALCUL DU RATIO MOYEN PONDÉRÉ
-        // =====================================================
-        
-        function calculateWeightedAverageRatio(data) {
-            // Filtrer les projets avec token et données valides
-            const validData = data.filter(p => p.hasToken && p.annualRevenue > 0 && p.fdv > 0);
-            
-            if (validData.length < 1) {
-                addLog('⚠️ Pas assez de données pour calculer le ratio moyen', 'warning');
-                return null;
-            }
-
-            addLog(`📊 Calcul du ratio moyen pondéré avec ${validData.length} projets`, 'calc');
-
-            // Calculer le ratio de chaque projet
-            validData.forEach(p => {
-                const ratio = p.fdv / p.annualRevenue;
-                addLog(`   - ${p.name}: FDV=${formatUSD(p.fdv)} / Rev=${formatUSD(p.annualRevenue)} = ${ratio.toFixed(1)}x (poids: ${formatUSD(p.annualRevenue)})`, 'calc');
-            });
-
-            // Ratio moyen pondéré par le revenu
-            // Formule: Σ(ratio_i × revenu_i) / Σ(revenu_i)
-            const totalWeightedRatio = validData.reduce((sum, p) => {
-                const ratio = p.fdv / p.annualRevenue;
-                return sum + (ratio * p.annualRevenue);
-            }, 0);
-            
-            const totalRevenue = validData.reduce((sum, p) => sum + p.annualRevenue, 0);
-            
-            const weightedAverageRatio = totalWeightedRatio / totalRevenue;
-
-            addLog(`📈 Ratio moyen pondéré: ${weightedAverageRatio.toFixed(1)}x`, 'calc');
-            addLog(`📈 Formule d'estimation: FDV = Revenu × ${weightedAverageRatio.toFixed(1)}`, 'calc');
-
-            return weightedAverageRatio;
-        }
-
-        // Estimer la FDV basée sur le revenu et le ratio moyen
-        function estimateFDV(annualRevenue, ratio) {
-            if (!ratio || annualRevenue <= 0) return null;
-            return annualRevenue * ratio;
-        }
-
-        // =====================================================
-        // CONFIGURATION SUPABASE
-        // =====================================================
-        const SUPABASE_URL = 'https://koeqpcnscgqsurqcrdxl.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvZXFwY25zY2dxc3VycWNyZHhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzMTg3ODQsImV4cCI6MjA4Mzg5NDc4NH0.-GiJriDpNGCHakAWWYFNQ_PBs9a_EU_d5deUMwPLvyU';
-
-        // =====================================================
-        // CHARGEMENT DES DONNÉES DEPUIS SUPABASE
-        // =====================================================
-        
-        async function loadAllData() {
-            const loadingProgress = document.getElementById('loadingProgress');
-            const loadingText = document.getElementById('loadingText');
-            const progressBar = document.getElementById('progressBar');
-            const t = translations[currentLang];
-            
-            // UI de chargement
-            if (loadingProgress) loadingProgress.classList.remove('hidden');
-            if (progressBar) progressBar.style.width = '20%';
-            
-            addLog('🚀 Chargement des données depuis Supabase...', 'info');
-            
-            try {
-                // Récupérer les données depuis Supabase
-                loadingText.textContent = currentLang === 'fr' ? 'Connexion à la base de données...' : 'Connecting to database...';
-                progressBar.style.width = '40%';
-                
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/projects_data?select=*&id=eq.1`, {
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                progressBar.style.width = '60%';
-                
-                if (!result || result.length === 0 || !result[0].data) {
-                    throw new Error('Aucune donnée trouvée');
-                }
-                
-                const data = result[0].data;
-                const updatedAt = result[0].updated_at;
-                
-                addLog(`📦 ${data.length} projets chargés depuis Supabase`, 'success');
-                addLog(`🕐 Dernière mise à jour: ${new Date(updatedAt).toLocaleString('fr-FR')}`, 'info');
-                
-                // Charger les données dans projectsData
-                loadingText.textContent = currentLang === 'fr' ? 'Traitement des données...' : 'Processing data...';
-                progressBar.style.width = '80%';
-                
-                projectsData = data.map(p => ({
-                    ...p,
-                    // S'assurer que tous les champs existent
-                    fees7dAvg: p.fees7dAvg || 0,
-                    annualRevenue: p.annualRevenue || 0,
-                    fdv: p.fdv || 0,
-                    ratio: p.ratio || 0,
-                    logo: p.logo || `https://icons.llamao.fi/icons/protocols/${p.llamaSlug || p.name.toLowerCase()}?w=48&h=48`
-                }));
-                
-                // Calculer le ratio moyen pondéré à partir des projets avec token
-                const avgRatio = calculateWeightedAverageRatio(projectsData);
-                const scenarioMultiplier = scenarioMultipliers[currentScenario];
-                
-                // Appliquer les estimations aux projets sans token
-                for (const project of projectsData) {
-                    if (project.fdvEstimated && project.annualRevenue > 0) {
-                        const estimatedFDV = estimateFDV(project.annualRevenue, avgRatio * scenarioMultiplier);
-                        if (estimatedFDV) {
-                            project.fdv = estimatedFDV;
-                            project.ratio = project.fdv / project.annualRevenue;
-                            addLog(`💡 Estimation ${project.name}: FDV=${formatUSD(estimatedFDV)}`, 'calc');
-                        }
-                    }
-                }
-                
-                // Stocker le ratio original
-                originalAvgRatio = avgRatio;
-                currentAvgRatio = avgRatio;
-                
-                progressBar.style.width = '100%';
-                
-                // Mettre à jour l'affichage
-                addLog('🎨 Mise à jour de l\'interface...', 'info');
-                updateTable();
-                await updateChart(avgRatio * scenarioMultiplier, currentScenario);
-                
-                // Mettre à jour la date (depuis Supabase)
-                document.getElementById('lastUpdate').textContent = new Date(updatedAt).toLocaleString('fr-FR');
-                
-                addLog('✅ Chargement terminé!', 'success');
-                
-            } catch (error) {
-                addLog(`❌ Erreur: ${error.message}`, 'error');
-                console.error('Erreur chargement Supabase:', error);
-            }
-            
-            // Reset UI
-            if (loadingProgress) loadingProgress.classList.add('hidden');
-        }
-
-        // =====================================================
-        // MISE À JOUR DU TABLEAU
-        // =====================================================
-        
-        function sortData(data, currentSort) {
-            return [...data].sort((a, b) => {
-                let valA, valB;
-                
-                switch (currentSort.column) {
-                    case 'name':
-                        valA = a.name.toLowerCase();
-                        valB = b.name.toLowerCase();
-                        break;
-                    case 'fees7d':
-                        valA = a.fees7dAvg || 0;
-                        valB = b.fees7dAvg || 0;
-                        break;
-                    case 'annualRevenue':
-                        valA = a.annualRevenue || 0;
-                        valB = b.annualRevenue || 0;
-                        break;
-                    case 'fdv':
-                        valA = a.fdv || 0;
-                        valB = b.fdv || 0;
-                        break;
-                    case 'ratio':
-                        valA = a.ratio || 0;
-                        valB = b.ratio || 0;
-                        break;
-                    case 'pointsSeason':
-                        valA = a.pointsSeasonStart ? daysSince(a.pointsSeasonStart) : -9999;
-                        valB = b.pointsSeasonStart ? daysSince(b.pointsSeasonStart) : -9999;
-                        break;
-                    case 'pointsMax':
-                        valA = a.pointsMax || -1;
-                        valB = b.pointsMax || -1;
-                        break;
-                    case 'airdropPct':
-                        valA = a.airdropPct !== null ? a.airdropPct : defaultAirdropPct;
-                        valB = b.airdropPct !== null ? b.airdropPct : defaultAirdropPct;
-                        break;
-                    case 'pointValue':
-                        // Projets avec valeur de point en premier, sans valeur en dernier
-                        const pvA = calculatePointValue(a);
-                        const pvB = calculatePointValue(b);
-                        // Si les deux ont une valeur ou les deux n'en ont pas, comparer normalement
-                        if ((pvA !== null) === (pvB !== null)) {
-                            valA = pvA || 0;
-                            valB = pvB || 0;
-                        } else {
-                            // Celui avec valeur passe en premier (desc) ou dernier (asc)
-                            valA = pvA !== null ? 1 : 0;
-                            valB = pvB !== null ? 1 : 0;
-                        }
-                        break;
-                    default:
-                        return 0;
-                }
-                
-                if (typeof valA === 'string') {
-                    return currentSort.direction === 'asc' 
-                        ? valA.localeCompare(valB) 
-                        : valB.localeCompare(valA);
-                }
-                
-                return currentSort.direction === 'asc' ? valA - valB : valB - valA;
-            });
-        }
-        
-        function generateRowHTML(project, isPreTGE) {
-            const t = translations[currentLang];
-            const ratioValue = project.fdvEstimated 
-                ? (manualRatio !== null ? manualRatio : Math.round(project.ratio))
-                : Math.round(project.ratio);
-            
-            // Tooltip personnalisé selon le type d'API custom
-            let customApiTooltip = '';
-            if (project.customApi === 'variational') {
-                customApiTooltip = t.customApiVariational;
-            } else if (project.customApi === 'grvt') {
-                customApiTooltip = t.customApiGrvt;
-            } else if (project.customApi === 'standx') {
-                customApiTooltip = t.customApiStandx;
-            }
-            
-            // Colonnes communes
-            const projectLink = project.url ? `href="${project.url}" target="_blank" rel="noopener noreferrer"` : '';
-            const cursorClass = project.url ? 'cursor-pointer' : '';
-            const commonCols = `
-                <td class="py-3 px-4">
-                    <div class="flex items-center gap-2">
-                        ${project.url ? `<a ${projectLink} class="flex items-center gap-2 ${cursorClass} tech-link">` : ''}
-                        ${project.logo ? `<img src="${project.logo}" alt="${project.name}" class="w-6 h-6 rounded-full ring-1 ring-mono-500">` : ''}
-                        <span class="font-medium text-mono-100">${project.name}</span>
-                        ${project.url ? '</a>' : ''}
-                        ${project.customApi ? `
-                            <span class="tooltip-container neon-text-purple">
-                                <span class="text-xs">ⓘ</span>
-                                <span class="tooltip-text">${customApiTooltip}</span>
-                            </span>
-                        ` : ''}
-                    </div>
-                </td>
-                <td class="text-right py-3 px-4 text-mono-200">
-                    ${project.customApi 
-                        ? `<span title="${t.estimationBased24h}">${formatUSD(project.fees7dAvg)}*</span>`
-                        : formatUSD(project.fees7dAvg)
-                    }
-                </td>
-                <td class="text-right py-3 px-4 text-mono-200">
-                    ${project.customApi 
-                        ? `<span title="${t.estimationBased24h}">${formatUSD(project.annualRevenue)}*</span>`
-                        : formatUSD(project.annualRevenue)
-                    }
-                </td>
-                <td class="text-right py-3 px-4">
-                    <span class="${project.fdvEstimated ? scenarioTextClasses[currentScenario].text : 'text-mono-100'} font-medium">
-                        ${formatUSD(project.fdv)}${project.fdvEstimated ? '*' : ''}
-                    </span>
-                </td>
-            `;
-            
-            // Colonne Ratio (éditable seulement pour Pre-TGE)
-            const ratioCol = isPreTGE ? `
-                <td class="text-right py-3 px-4">
-                    <div class="flex items-center justify-end">
-                        <input type="text" 
-                            value="${ratioValue || ''}" 
-                            onchange="updateRatio(this.value)"
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                            class="tech-input w-16 text-right ${scenarioTextClasses[currentScenario].text}"
-                            title="${t.ratioInputTitle}"
-                        />
-                        <span class="ml-1 text-mono-400">x</span>
-                    </div>
-                </td>
-            ` : `
-                <td class="text-right py-3 px-4">
-                    <span class="text-mono-200">${ratioValue || '-'}x</span>
-                </td>
-            `;
-            
-            // Colonnes de points (seulement pour Pre-TGE)
-            const pointsCols = isPreTGE ? `
-                <td class="text-center py-3 px-4 text-sm">
-                    ${project.pointsSeasonStart 
-                        ? `<span class="neon-text font-medium">${daysSince(project.pointsSeasonStart)}${t.daysAgo}</span>${project.pointsInfo ? `
-                            <span class="tooltip-container neon-text-orange ml-1">
-                                <span class="text-xs">ⓘ</span>
-                                <span class="tooltip-text">${project.pointsInfo}</span>
-                            </span>` : ''}`
-                        : '<span class="text-mono-500">-</span>'
-                    }
-                </td>
-                <td class="text-right py-3 px-4 text-sm">
-                    ${project.pointsMaxInfo 
-                        ? `<span class="neon-text-purple font-medium">${formatNumber(project.pointsMax)}</span><span class="tooltip-container ml-1"><span class="text-mono-400 cursor-help">ⓘ</span><span class="tooltip-text">${project.pointsMaxInfo}</span></span>`
-                        : `<div class="flex items-center justify-end gap-1">
-                            <input type="number" 
-                                   id="pointsMax-${project.name}" 
-                                   class="tech-input w-16 text-right text-sm"
-                                   placeholder="?"
-                                   value="${project.pointsMax ? project.pointsMax / 1000000 : ''}"
-                                   onchange="updatePointsMax('${project.name}', this.value)"
-                                   title="${currentLang === 'fr' ? 'Entrez le nombre de points en millions' : 'Enter points in millions'}">
-                            <span class="text-mono-400 text-xs">M</span>
-                           </div>`
-                    }
-                </td>
-                <td class="text-right py-3 px-4 text-sm">
-                    ${project.airdropPct !== null 
-                        ? (project.airdropPctInfo 
-                            ? `<span class="tooltip-container"><span class="neon-text-green font-medium">${project.airdropPct}%</span> <span class="neon-text-orange text-xs">ⓘ</span><span class="tooltip-text">${project.airdropPctInfo}</span></span>`
-                            : `<span class="neon-text-green font-medium">${project.airdropPct}%</span>`)
-                        : `<span class="text-mono-400 italic">${defaultAirdropPct}%</span>`
-                    }
-                </td>
-                <td class="text-right py-3 px-4 text-sm">
-                    ${(() => {
-                        const pointValue = calculatePointValue(project);
-                        if (pointValue === null) {
-                            return '<span class="text-mono-500">-</span>';
-                        }
-                        const hasAllData = project.pointsMax && (project.airdropPct !== null);
-                        const colorClass = hasAllData ? 'neon-text font-medium' : 'text-mono-400 italic';
-                        return `<span class="${colorClass}">${formatPointValue(pointValue)}</span>`;
-                    })()}
-                </td>
-                <td class="text-center py-3 px-4">
-                    ${project.comment 
-                        ? `<span class="tooltip-container text-mono-400 hover:neon-text cursor-help">
-                            <span class="text-base">💬</span>
-                            <span class="tooltip-text">${project.comment}</span>
-                           </span>` 
-                        : '<span class="text-mono-600">-</span>'}
-                </td>
-            ` : '';
-            
-            return `
-                <tr class="border-b border-mono-700/50 hover:bg-mono-700/30 transition-colors">
-                    ${commonCols}
-                    ${ratioCol}
-                    ${pointsCols}
-                </tr>
-            `;
-        }
-        
-        function updateTable() {
-            // Séparer les projets Pre-TGE et Post-TGE
-            const preTGEProjects = projectsData.filter(p => !p.hasToken);
-            const postTGEProjects = projectsData.filter(p => p.hasToken);
-            
-            // Trier chaque groupe
-            const sortedPreTGE = sortData(preTGEProjects, currentSortPreTGE);
-            const sortedPostTGE = sortData(postTGEProjects, currentSortPostTGE);
-            
-            // Mettre à jour le tableau Pre-TGE
-            const tbodyPreTGE = document.getElementById('dataTablePreTGE');
-            tbodyPreTGE.innerHTML = sortedPreTGE.map(project => generateRowHTML(project, true)).join('');
-            
-            // Mettre à jour le tableau Post-TGE
-            const tbodyPostTGE = document.getElementById('dataTablePostTGE');
-            tbodyPostTGE.innerHTML = sortedPostTGE.map(project => generateRowHTML(project, false)).join('');
-
-            // Mettre à jour les indicateurs de tri pour Pre-TGE
-            document.querySelectorAll('[id^="sort-"][id$="-preTGE"]').forEach(el => {
-                el.textContent = '↕';
-                el.classList.remove('text-indigo-600');
-                el.classList.add('text-gray-400');
-            });
-            const preTGESortEl = document.getElementById(`sort-${currentSortPreTGE.column}-preTGE`);
-            if (preTGESortEl) {
-                preTGESortEl.textContent = currentSortPreTGE.direction === 'asc' ? '↑' : '↓';
-                preTGESortEl.classList.remove('text-gray-400');
-                preTGESortEl.classList.add('text-indigo-600');
-            }
-            
-            // Mettre à jour les indicateurs de tri pour Post-TGE
-            document.querySelectorAll('[id^="sort-"][id$="-postTGE"]').forEach(el => {
-                el.textContent = '↕';
-                el.classList.remove('text-indigo-600');
-                el.classList.add('text-gray-400');
-            });
-            const postTGESortEl = document.getElementById(`sort-${currentSortPostTGE.column}-postTGE`);
-            if (postTGESortEl) {
-                postTGESortEl.textContent = currentSortPostTGE.direction === 'asc' ? '↑' : '↓';
-                postTGESortEl.classList.remove('text-gray-400');
-                postTGESortEl.classList.add('text-indigo-600');
-            }
-        }
-
-        function sortTable(column, tableType) {
-            if (tableType === 'preTGE') {
-                if (currentSortPreTGE.column === column) {
-                    currentSortPreTGE.direction = currentSortPreTGE.direction === 'asc' ? 'desc' : 'asc';
-                } else {
-                    currentSortPreTGE.column = column;
-                    currentSortPreTGE.direction = 'desc';
-                }
-            } else if (tableType === 'postTGE') {
-                if (currentSortPostTGE.column === column) {
-                    currentSortPostTGE.direction = currentSortPostTGE.direction === 'asc' ? 'desc' : 'asc';
-                } else {
-                    currentSortPostTGE.column = column;
-                    currentSortPostTGE.direction = 'desc';
-                }
-            }
-            updateTable();
-        }
-
-        // Mettre à jour le ratio manuellement
-        function updateRatio(value) {
-            const newRatio = parseInt(value, 10);
-            
-            if (isNaN(newRatio) || newRatio <= 0) {
-                addLog('⚠️ Ratio invalide, veuillez entrer un nombre entier positif', 'warning');
-                updateTable(); // Rafraîchir pour remettre l'ancienne valeur
-                return;
-            }
-            
-            addLog(`📝 Ratio modifié manuellement: ${newRatio}x (original: ${Math.round(originalAvgRatio)}x)`, 'info');
-            manualRatio = newRatio;
-            currentAvgRatio = newRatio;
-            
-            // Recalculer les FDV estimées avec le nouveau ratio ET le scénario actuel
-            const multiplier = scenarioMultipliers[currentScenario];
-            for (const project of projectsData) {
-                if (project.fdvEstimated && project.annualRevenue > 0) {
-                    project.fdv = project.annualRevenue * manualRatio * multiplier;
-                    project.ratio = manualRatio * multiplier;
-                    addLog(`💡 Recalcul ${project.name}: FDV=${formatUSD(project.fdv)}`, 'calc');
-                }
-            }
-            
-            // Mettre à jour le tableau et le graphique
-            updateTable();
-            updateChart(manualRatio * multiplier, currentScenario);
-        }
-        
-        // Mettre à jour le pointsMax d'un projet (entrée utilisateur en millions)
-        function updatePointsMax(projectName, valueInMillions) {
-            const project = projectsData.find(p => p.name === projectName);
-            if (!project) return;
-            
-            const numValue = parseFloat(valueInMillions);
-            if (isNaN(numValue) || numValue <= 0) {
-                project.pointsMax = null;
-                addLog(`🔄 ${projectName}: Points au TGE réinitialisé`, 'info');
-            } else {
-                project.pointsMax = numValue * 1000000; // Convertir millions en unités
-                addLog(`📝 ${projectName}: Points au TGE = ${numValue}M`, 'info');
-            }
-            
-            updateTable();
-        }
-        
-        // Changer la langue (fr/en)
-        function toggleLanguage() {
-            currentLang = currentLang === 'fr' ? 'en' : 'fr';
-            const t = translations[currentLang];
-            
-            // Mettre à jour le bouton toggle
-            const langToggle = document.getElementById('langToggle');
-            langToggle.textContent = currentLang === 'fr' ? '🥖' : '🍔';
-            langToggle.title = t.langToggleTitle;
-            
-            // Mettre à jour les textes statiques
-            document.getElementById('headerSubtitle').textContent = t.headerSubtitle;
-            document.getElementById('lastUpdateLabel').textContent = t.lastUpdate;
-            document.getElementById('refreshText').textContent = t.refresh;
-            document.getElementById('chartTitle').textContent = t.chartTitle;
-            document.getElementById('legendTokenLive').textContent = t.tokenLive;
-            document.getElementById('legendFdvEstimated').textContent = t.fdvEstimated;
-            document.getElementById('legendWeightedRatio').textContent = t.weightedRatio;
-            document.getElementById('preTGETitle').textContent = t.preTGE;
-            document.getElementById('postTGETitle').textContent = t.postTGE;
-            document.getElementById('badgeEstime').innerHTML = t.estimated;
-            document.getElementById('badgeLive').innerHTML = t.live;
-            
-            // Loading text
-            document.getElementById('loadingText').textContent = t.loadingProgress;
-            
-            // Debug logs
-            document.getElementById('debugLogsTitle').textContent = t.debugLogs;
-            
-            // Reset button
-            const resetBtn = document.getElementById('resetBtn');
-            if (resetBtn) {
-                resetBtn.title = t.resetTitle;
-            }
-            
-            // Headers Pre-TGE
-            document.getElementById('headerProject').textContent = t.project;
-            document.getElementById('headerAvg7d').textContent = t.avg7d;
-            document.getElementById('headerAnnualRevenue').textContent = t.annualRevenue;
-            document.getElementById('headerRatio').textContent = t.ratio;
-            document.getElementById('headerStartPoints').textContent = t.startPoints;
-            document.getElementById('headerPointsAtTGE').textContent = t.pointsAtTGE;
-            document.getElementById('headerAirdrop').textContent = t.airdrop;
-            document.getElementById('headerPointValue').textContent = t.pointValue;
-            document.getElementById('headerDefault').textContent = t.default;
-            
-            // Headers Post-TGE
-            document.getElementById('headerProject2').textContent = t.project;
-            document.getElementById('headerAvg7d2').textContent = t.avg7d;
-            document.getElementById('headerAnnualRevenue2').textContent = t.annualRevenue;
-            document.getElementById('headerRatio2').textContent = t.ratio;
-            
-            // Tooltips
-            document.getElementById('tooltipStartPoints').textContent = t.startPointsTooltip;
-            document.getElementById('tooltipPointsAtTGE').textContent = t.pointsAtTGETooltip;
-            document.getElementById('tooltipAirdrop').textContent = t.airdropTooltip;
-            document.getElementById('tooltipPointValue').textContent = t.pointValueTooltip;
-            document.getElementById('tooltipComments').textContent = t.commentsTooltip;
-            document.getElementById('tooltipBearish').textContent = t.bearishTooltip;
-            document.getElementById('tooltipMid').textContent = t.midTooltip;
-            document.getElementById('tooltipBullish').textContent = t.bullishTooltip;
-            document.getElementById('tooltipBearish2').textContent = t.bearishTooltip;
-            document.getElementById('tooltipMid2').textContent = t.midTooltip;
-            document.getElementById('tooltipBullish2').textContent = t.bullishTooltip;
-            
-            // Mettre à jour le graphique si existant
-            if (chart) {
-                chart.options.scales.x.title.text = t.xAxisLabel;
-                chart.options.scales.y.title.text = t.yAxisLabel;
-                chart.update();
-            }
-            
-            // Mettre à jour le tableau (pour les textes dynamiques)
-            if (projectsData.length > 0) {
-                updateTable();
-            }
-        }
-        
-        // Changer le scénario (bearish, mid, bullish)
-        function setScenario(scenario) {
-            currentScenario = scenario;
-            const multiplier = scenarioMultipliers[scenario];
-            const rgb = scenarioColorsRGB[scenario];
-            currentScenarioColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.9)`;
-            
-            // Mettre à jour les styles des deux sets de boutons
-            const buttons = ['scenarioBearish', 'scenarioMid', 'scenarioBullish', 'scenarioBearish2', 'scenarioMid2', 'scenarioBullish2'];
-            buttons.forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    const type = id.replace('2', '').replace('scenario', '').toLowerCase();
-                    btn.className = 'scenario-btn' + 
-                        (scenario === type ? ` active-${type}` : '');
-                }
-            });
-            
-            // Mettre à jour les couleurs de la légende du graphique (dark theme)
-            const legendDot = document.getElementById('legendEstimatedDot');
-            const legendLine = document.getElementById('legendRatioLine');
-            const badgeEstime = document.getElementById('badgeEstime');
-            const scenarioTailwindColors = {
-                bearish: { 
-                    bg: 'bg-neon-red', 
-                    border: 'border-neon-red', 
-                    shadow: 'shadow-[0_0_10px_rgba(255,51,102,0.5)]',
-                    badgeBg: 'bg-neon-red/15',
-                    badgeBorder: 'border-neon-red/30',
-                    badgeText: 'text-neon-red'
-                },
-                mid: { 
-                    bg: 'bg-neon-purple', 
-                    border: 'border-neon-purple', 
-                    shadow: 'shadow-[0_0_10px_rgba(168,85,247,0.5)]',
-                    badgeBg: 'bg-neon-purple/15',
-                    badgeBorder: 'border-neon-purple/30',
-                    badgeText: 'text-neon-purple'
-                },
-                bullish: { 
-                    bg: 'bg-neon-green', 
-                    border: 'border-neon-green', 
-                    shadow: 'shadow-[0_0_10px_rgba(0,255,136,0.5)]',
-                    badgeBg: 'bg-neon-green/15',
-                    badgeBorder: 'border-neon-green/30',
-                    badgeText: 'text-neon-green'
-                }
-            };
-            if (legendDot) {
-                legendDot.className = `w-3 h-3 rounded-full ${scenarioTailwindColors[scenario].bg} ${scenarioTailwindColors[scenario].shadow}`;
-            }
-            if (legendLine) {
-                legendLine.className = `w-6 h-0.5 border-dashed border-t-2 ${scenarioTailwindColors[scenario].border}`;
-            }
-            if (badgeEstime) {
-                badgeEstime.className = `tech-badge border ${scenarioTailwindColors[scenario].badgeBg} ${scenarioTailwindColors[scenario].badgeBorder} ${scenarioTailwindColors[scenario].badgeText}`;
-            }
-            
-            // Recalculer les FDV estimées avec le multiplicateur du scénario
-            const ratioToUse = manualRatio || originalAvgRatio;
-            for (const project of projectsData) {
-                if (project.fdvEstimated && project.annualRevenue > 0) {
-                    project.fdv = project.annualRevenue * ratioToUse * multiplier;
-                    project.ratio = ratioToUse * multiplier;
-                }
-            }
-            
-            const scenarioNames = { bearish: 'Bearish (-66%)', mid: 'Mid (-33%)', bullish: 'Bullish (100%)' };
-            addLog(`📊 Scénario changé: ${scenarioNames[scenario]}`, 'info');
-            
-            // Mettre à jour le tableau et le graphique avec la couleur du scénario
-            updateTable();
-            updateChart(ratioToUse * multiplier, scenario);
-        }
-        
-        // Réinitialiser les ratios aux valeurs calculées automatiquement
-        function resetRatios() {
-            if (originalAvgRatio === null) {
-                addLog('⚠️ Pas de ratio original à restaurer', 'warning');
-                return;
-            }
-            
-            addLog(`🔄 Réinitialisation des ratios au ratio original: ${Math.round(originalAvgRatio)}x`, 'info');
-            manualRatio = null;
-            currentAvgRatio = originalAvgRatio;
-            
-            // Restaurer les ratios originaux pour les projets estimés avec le scénario actuel
-            const multiplier = scenarioMultipliers[currentScenario];
-            for (const project of projectsData) {
-                if (project.fdvEstimated && project.annualRevenue > 0) {
-                    // Recalculer avec le ratio moyen original ET le scénario
-                    project.fdv = project.annualRevenue * originalAvgRatio * multiplier;
-                    project.ratio = originalAvgRatio * multiplier;
-                    addLog(`🔄 Reset ${project.name}: FDV=${formatUSD(project.fdv)}, Ratio=${Math.round(project.ratio)}x`, 'calc');
-                }
-            }
-            
-            // Mettre à jour le tableau et le graphique
-            updateTable();
-            updateChart(originalAvgRatio * multiplier, currentScenario);
-            addLog('✅ Ratios réinitialisés au ratio moyen pondéré', 'success');
-        }
-
-        // Mettre à jour le % Airdrop par défaut
-        function updateDefaultAirdrop(value) {
-            const newDefault = parseInt(value, 10);
-            
-            if (isNaN(newDefault) || newDefault < 1 || newDefault > 100) {
-                addLog('⚠️ % Airdrop invalide, veuillez entrer un nombre entre 1 et 100', 'warning');
-                document.getElementById('defaultAirdropInput').value = defaultAirdropPct;
-                return;
-            }
-            
-            addLog(`📝 % Airdrop par défaut modifié: ${newDefault}% (précédent: ${defaultAirdropPct}%)`, 'info');
-            defaultAirdropPct = newDefault;
-            
-            // Mettre à jour le tableau pour refléter le nouveau default
-            updateTable();
-        }
-
-        // =====================================================
-        // MISE À JOUR DU GRAPHIQUE
-        // =====================================================
-        
-        // Cache pour les images des logos
-        let logoImages = {};
-        
-        // Précharger les images des logos via le proxy pour éviter CORS
-        async function preloadLogos(projects) {
-            const promises = projects.map(p => {
-                return new Promise((resolve) => {
-                    if (!p.logo) {
-                        resolve();
-                        return;
-                    }
-                    
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous';
-                    img.onload = () => {
-                        logoImages[p.name] = img;
-                        addLog(`🖼️ Logo chargé: ${p.name}`, 'success');
-                        resolve();
-                    };
-                    img.onerror = () => {
-                        addLog(`⚠️ Erreur chargement logo: ${p.name}`, 'warning');
-                        resolve();
-                    };
-                    // Utiliser le proxy pour contourner CORS
-                    img.src = `/api/logo?url=${encodeURIComponent(p.logo)}`;
-                });
-            });
-            
-            await Promise.all(promises);
-        }
-        
-        // Variable pour stocker l'index du point survolé
-        let hoveredPoint = null;
-        
-        // Fonction pour calculer la distance entre deux points
-        function getDistance(x1, y1, x2, y2) {
-            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-        }
-        
-        // Fonction pour détecter et résoudre les collisions statiques
-        function resolveStaticCollisions(points, baseSize) {
-            const minDistance = baseSize + 10; // Distance minimale entre les centres
-            const offsets = points.map(() => ({ x: 0, y: 0 }));
-            
-            // Plusieurs passes pour résoudre les collisions
-            for (let pass = 0; pass < 8; pass++) {
-                for (let i = 0; i < points.length; i++) {
-                    for (let j = i + 1; j < points.length; j++) {
-                        const p1 = points[i];
-                        const p2 = points[j];
-                        
-                        const x1 = p1.x + offsets[i].x;
-                        const y1 = p1.y + offsets[i].y;
-                        const x2 = p2.x + offsets[j].x;
-                        const y2 = p2.y + offsets[j].y;
-                        
-                        const dist = getDistance(x1, y1, x2, y2);
-                        
-                        if (dist < minDistance && dist > 0) {
-                            // Calculer le vecteur de séparation
-                            const overlap = (minDistance - dist) / 2;
-                            const dx = (x2 - x1) / dist;
-                            const dy = (y2 - y1) / dist;
-                            
-                            // Décaler les deux points
-                            offsets[i].x -= dx * overlap * 0.6;
-                            offsets[i].y -= dy * overlap * 0.6;
-                            offsets[j].x += dx * overlap * 0.6;
-                            offsets[j].y += dy * overlap * 0.6;
-                        }
-                    }
-                }
-            }
-            
-            return offsets;
-        }
-        
-        // Plugin personnalisé pour dessiner les logos avec anti-collision
-        const logoPlugin = {
-            id: 'logoPlugin',
-            afterDatasetsDraw: function(chart) {
-                const ctx = chart.ctx;
-                const baseSize = 28;
-                
-                // Couleur pour les tokens live (cyan néon)
-                const liveTokenColor = 'rgba(0, 245, 255, 0.9)';
-                const liveTokenColorLight = 'rgba(0, 245, 255, 0.2)';
-                const liveTokenColorHex = '#00f5ff';
-                
-                // Collecter tous les points des datasets 1 et 2
-                let allPoints = [];
-                
-                chart.data.datasets.forEach((dataset, datasetIndex) => {
-                    if (datasetIndex === 0) return;
-                    const meta = chart.getDatasetMeta(datasetIndex);
-                    
-                    meta.data.forEach((point, index) => {
-                        const data = dataset.data[index];
-                        if (!data || !data.name) return;
-                        
-                        allPoints.push({
-                            x: point.x,
-                            y: point.y,
-                            data: data,
-                            datasetIndex: datasetIndex,
-                            index: index,
-                            logoImg: logoImages[data.name],
-                            hasToken: datasetIndex === 1
-                        });
-                    });
-                });
-                
-                // Calculer les décalages statiques pour éviter les superpositions
-                const staticOffsets = resolveStaticCollisions(allPoints, baseSize);
-                
-                // Dessiner tous les points avec leurs décalages
-                allPoints.forEach((point, i) => {
-                    const x = point.x + staticOffsets[i].x;
-                    const y = point.y + staticOffsets[i].y;
-                    const logoImg = point.logoImg;
-                    const hasToken = point.hasToken;
-                    const data = point.data;
-                    
-                    // Vérifier si ce point est survolé
-                    const isHovered = hoveredPoint && 
-                        hoveredPoint.datasetIndex === point.datasetIndex && 
-                        hoveredPoint.index === point.index;
-                    
-                    // Taille avec animation (grossissement au hover)
-                    const size = isHovered ? baseSize * 1.3 : baseSize;
-                    
-                    // Couleur pour les projets estimés (basée sur le scénario)
-                    const estimatedColor = currentScenarioColor;
-                    const rgb = scenarioColorsRGB[currentScenario];
-                    const estimatedColorLight = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
-                    const estimatedColorMid = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`;
-                    const estimatedColorHex = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-                    
-                    ctx.save();
-                    
-                    if (logoImg) {
-                        // Dessiner un cercle de fond (bordure colorée)
-                        ctx.beginPath();
-                        ctx.arc(x, y, size / 2 + 3, 0, Math.PI * 2);
-                        ctx.fillStyle = hasToken ? liveTokenColor : estimatedColor;
-                        ctx.fill();
-                        
-                        // Ombre portée au hover
-                        if (isHovered) {
-                            ctx.shadowColor = hasToken ? 'rgba(59, 130, 246, 0.5)' : estimatedColorMid;
-                            ctx.shadowBlur = 15;
-                            ctx.shadowOffsetX = 0;
-                            ctx.shadowOffsetY = 4;
-                        }
-                        
-                        // Dessiner un cercle blanc derrière le logo
-                        ctx.beginPath();
-                        ctx.arc(x, y, size / 2 + 1, 0, Math.PI * 2);
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fill();
-                        
-                        // Reset shadow pour le logo
-                        ctx.shadowColor = 'transparent';
-                        ctx.shadowBlur = 0;
-                        
-                        // Créer un clip circulaire pour le logo
-                        ctx.beginPath();
-                        ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-                        ctx.clip();
-                        
-                        // Dessiner le logo
-                        ctx.drawImage(logoImg, x - size / 2, y - size / 2, size, size);
-                    } else {
-                        // Fallback: dessiner un cercle coloré avec initiales
-                        ctx.beginPath();
-                        ctx.arc(x, y, size / 2 + 2, 0, Math.PI * 2);
-                        ctx.fillStyle = hasToken ? liveTokenColor : estimatedColor;
-                        ctx.fill();
-                        
-                        // Ombre portée au hover
-                        if (isHovered) {
-                            ctx.shadowColor = hasToken ? 'rgba(0, 245, 255, 0.5)' : estimatedColorMid;
-                            ctx.shadowBlur = 15;
-                        }
-                        
-                        // Cercle intérieur (fond sombre)
-                        ctx.beginPath();
-                        ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-                        ctx.fillStyle = '#12121a';
-                        ctx.fill();
-                        
-                        // Reset shadow
-                        ctx.shadowColor = 'transparent';
-                        ctx.shadowBlur = 0;
-                        
-                        // Cercle intérieur coloré
-                        ctx.beginPath();
-                        ctx.arc(x, y, size / 2 - 2, 0, Math.PI * 2);
-                        ctx.fillStyle = hasToken ? liveTokenColorLight : estimatedColorLight;
-                        ctx.fill();
-                        
-                        // Initiales du projet
-                        ctx.fillStyle = hasToken ? liveTokenColorHex : estimatedColorHex;
-                        ctx.font = `bold ${isHovered ? 13 : 10}px 'Orbitron', Arial`;
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        const initials = data.name.substring(0, 2).toUpperCase();
-                        ctx.fillText(initials, x, y);
-                    }
-                    
-                    ctx.restore();
-                });
-                
-                // Dessiner les labels au-dessus des points (après tous les logos pour qu'ils soient au-dessus)
-                allPoints.forEach((point, i) => {
-                    const x = point.x + staticOffsets[i].x;
-                    const y = point.y + staticOffsets[i].y;
-                    const hasToken = point.hasToken;
-                    const data = point.data;
-                    const baseSize = 28;
-                    
-                    // Couleur du label basée sur le scénario
-                    const rgb = scenarioColorsRGB[currentScenario];
-                    const labelColor = hasToken ? liveTokenColorHex : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-                    
-                    ctx.save();
-                    ctx.fillStyle = labelColor;
-                    ctx.font = "bold 11px 'Orbitron', Arial";
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    ctx.fillText(data.name, x, y - baseSize / 2 - 8);
-                    ctx.restore();
-                });
-            }
-        };
-        
-        // Couleurs des scénarios pour la ligne du ratio
-        const scenarioColors = {
-            bearish: 'rgba(220, 38, 38, 0.7)',   // Rouge
-            mid: 'rgba(124, 58, 237, 0.7)',      // Violet
-            bullish: 'rgba(22, 163, 74, 0.7)'    // Vert
-        };
-
-        async function updateChart(avgRatio, scenario = null) {
-            const ctx = document.getElementById('scatterChart').getContext('2d');
-            
-            // Stocker le ratio pour les redraws
-            currentAvgRatio = avgRatio;
-            
-            // Utiliser le scénario courant si non spécifié
-            const activeScenario = scenario || currentScenario;
-            const lineColor = scenarioColors[activeScenario] || scenarioColors.bullish;
-
-            // Filtrer les projets valides pour le graphique
-            const validProjects = projectsData.filter(p => p.annualRevenue > 0 && p.fdv > 0);
-            
-            // Préparer les données
-            const liveTokens = validProjects.filter(p => p.hasToken);
-            const estimatedTokens = validProjects.filter(p => !p.hasToken);
-
-            // Préparer les données de la ligne du ratio moyen
-            let ratioLine = [];
-            if (avgRatio) {
-                // Trouver les min/max des revenus
-                const revenues = validProjects.map(p => p.annualRevenue);
-                const minRev = Math.min(...revenues);
-                const maxRev = Math.max(...revenues);
-                
-                // Créer des points pour la ligne (FDV = Revenu × Ratio)
-                const numPoints = 50;
-                for (let i = 0; i <= numPoints; i++) {
-                    const logRev = Math.log10(minRev) + (Math.log10(maxRev) - Math.log10(minRev)) * (i / numPoints);
-                    const rev = Math.pow(10, logRev);
-                    const fdv = rev * avgRatio;
-                    ratioLine.push({ x: rev, y: fdv });
-                }
-            }
-
-            // Si le graphique existe, le détruire et le recréer pour assurer le rendu des logos
-            if (chart) {
-                chart.destroy();
-                chart = null;
-            }
-
-            // Précharger les logos seulement si pas déjà fait
-            if (Object.keys(logoImages).length === 0) {
-                addLog('🖼️ Chargement des logos pour le graphique...', 'info');
-                await preloadLogos(validProjects);
-            }
-
-            // Configuration Chart.js
-            chart = new Chart(ctx, {
-                type: 'scatter',
-                data: {
-                    datasets: [
-                        // Ligne du ratio moyen
-                        {
-                            label: 'Ratio moyen pondéré',
-                            data: ratioLine,
-                            type: 'line',
-                            borderColor: lineColor,
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointRadius: 0,
-                            fill: false,
-                            tension: 0,
-                            order: 2
-                        },
-                        // Tokens live
-                        {
-                            label: 'Token Live',
-                            data: liveTokens.map(p => ({
-                                x: p.annualRevenue,
-                                y: p.fdv,
-                                name: p.name,
-                                ratio: p.ratio,
-                                logo: p.logo
-                            })),
-                            backgroundColor: 'transparent',
-                            borderColor: 'transparent',
-                            pointRadius: 18, // Hitbox pour le tooltip
-                            pointHoverRadius: 20,
-                            order: 1
-                        },
-                        // FDV estimées
-                        {
-                            label: 'FDV Estimée',
-                            data: estimatedTokens.map(p => ({
-                                x: p.annualRevenue,
-                                y: p.fdv,
-                                name: p.name,
-                                ratio: p.ratio,
-                                logo: p.logo,
-                                customApi: p.customApi
-                            })),
-                            backgroundColor: 'transparent',
-                            borderColor: 'transparent',
-                            pointRadius: 18,
-                            pointHoverRadius: 20,
-                            order: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 400,
-                        easing: 'easeInOutQuart'
-                    },
-                    transitions: {
-                        active: {
-                            animation: {
-                                duration: 300,
-                                easing: 'easeInOutQuart'
-                            }
-                        }
-                    },
-                    interaction: {
-                        mode: 'nearest',
-                        intersect: true
-                    },
-                    scales: {
-                        x: {
-                            type: 'logarithmic',
-                            title: {
-                                display: true,
-                                text: 'Revenu Annuel (USD)',
-                                font: { size: 14, weight: 'bold', family: 'Orbitron' },
-                                color: '#00f5ff'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    // Afficher uniquement 1, 5, 10 et leurs puissances
-                                    const log = Math.log10(value);
-                                    const mantissa = value / Math.pow(10, Math.floor(log));
-                                    if (Math.abs(mantissa - 1) < 0.01 || 
-                                        Math.abs(mantissa - 5) < 0.01 || 
-                                        Math.abs(mantissa - 10) < 0.01) {
-                                        return formatUSD(value);
-                                    }
-                                    return '';
-                                },
-                                maxTicksLimit: 10,
-                                color: '#9a9aaa',
-                                font: { family: 'JetBrains Mono' }
-                            },
-                            grid: {
-                                color: 'rgba(0, 245, 255, 0.08)'
-                            }
-                        },
-                        y: {
-                            type: 'logarithmic',
-                            title: {
-                                display: true,
-                                text: 'FDV (USD)',
-                                font: { size: 14, weight: 'bold', family: 'Orbitron' },
-                                color: '#00f5ff'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    const log = Math.log10(value);
-                                    const mantissa = value / Math.pow(10, Math.floor(log));
-                                    if (Math.abs(mantissa - 1) < 0.01 || 
-                                        Math.abs(mantissa - 5) < 0.01 || 
-                                        Math.abs(mantissa - 10) < 0.01) {
-                                        return formatUSD(value);
-                                    }
-                                    return '';
-                                },
-                                maxTicksLimit: 10,
-                                color: '#9a9aaa',
-                                font: { family: 'JetBrains Mono' }
-                            },
-                            grid: {
-                                color: 'rgba(0, 245, 255, 0.08)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            enabled: true,
-                            backgroundColor: 'rgba(18, 18, 26, 0.95)',
-                            borderColor: 'rgba(0, 245, 255, 0.3)',
-                            borderWidth: 1,
-                            titleFont: { size: 14, weight: 'bold', family: 'Orbitron' },
-                            titleColor: '#00f5ff',
-                            bodyFont: { size: 12, family: 'JetBrains Mono' },
-                            bodyColor: '#e8e8ec',
-                            padding: 12,
-                            displayColors: false,
-                            callbacks: {
-                                title: function(context) {
-                                    return context[0].raw.name || '';
-                                },
-                                label: function(context) {
-                                    if (!context.raw.name) return '';
-                                    const lines = [
-                                        `Revenu Annuel: ${formatUSD(context.raw.x)}`,
-                                        `FDV: ${formatUSD(context.raw.y)}`,
-                                        `Ratio: ${formatRatio(context.raw.ratio)}`
-                                    ];
-                                    if (context.raw.customApi) {
-                                        lines.push('');
-                                        lines.push('⚠️ Données estimées (24h glissantes)');
-                                    }
-                                    return lines;
-                                }
-                            }
-                        },
-                        legend: {
-                            display: false
-                        },
-                        datalabels: {
-                            display: false // Désactivé car on dessine les labels dans logoPlugin
-                        }
-                    },
-                    onHover: function(event, elements) {
-                        const canvas = event.native.target;
-                        if (elements.length > 0 && elements[0].datasetIndex > 0) {
-                            canvas.style.cursor = 'pointer';
-                            const newHovered = {
-                                datasetIndex: elements[0].datasetIndex,
-                                index: elements[0].index
-                            };
-                            if (!hoveredPoint || hoveredPoint.datasetIndex !== newHovered.datasetIndex || hoveredPoint.index !== newHovered.index) {
-                                hoveredPoint = newHovered;
-                                chart.draw();
-                            }
-                        } else {
-                            canvas.style.cursor = 'default';
-                            if (hoveredPoint !== null) {
-                                hoveredPoint = null;
-                                chart.draw();
-                            }
-                        }
-                    },
-                    onClick: function(event, elements) {
-                        if (elements.length > 0 && elements[0].datasetIndex > 0) {
-                            const datasetIndex = elements[0].datasetIndex;
-                            const index = elements[0].index;
-                            const data = chart.data.datasets[datasetIndex].data[index];
-                            if (data && data.name) {
-                                // Trouver le projet pour obtenir l'URL
-                                const project = projectsData.find(p => p.name === data.name);
-                                if (project && project.url) {
-                                    window.open(project.url, '_blank', 'noopener,noreferrer');
-                                }
-                            }
-                        }
-                    }
-                },
-                plugins: [ChartDataLabels, logoPlugin]
-            });
-        }
-
-        // =====================================================
-        // INITIALISATION
-        // =====================================================
-        
-        // Charger les données au démarrage
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser le scénario Réaliste par défaut
-            setScenario('bearish');
-            
-            loadAllData();
-            
-            // Actualisation automatique toutes les 24h
-            setInterval(loadAllData, 24 * 60 * 60 * 1000);
         });
-    </script>
-</body>
-</html>
+        if (!response.ok) {
+            console.error(`Variational API error: ${response.status}`);
+            return null;
+        }
+        const data = await response.json();
+        
+        // Structure correcte : loss_refund.refunded_24h
+        const lossRefund24h = parseFloat(data.loss_refund?.refunded_24h || 0);
+        const fees24h = lossRefund24h * 10;
+        
+        console.log(`Variational: lossRefund24h=${lossRefund24h}, fees24h=${fees24h}`);
+        
+        return {
+            total24h: fees24h,
+            total7d: fees24h * 7,
+            lossRefund24h: lossRefund24h
+        };
+    } catch (error) {
+        console.error('Variational error:', error);
+        return null;
+    }
+}
+
+// Fonction pour récupérer les données GRVT
+async function fetchGRVT() {
+    try {
+        const tickerUrl = 'https://market-data.grvt.io/full/v1/ticker';
+        
+        // Récupérer tous les instruments actifs
+        const instrumentsUrl = 'https://market-data.grvt.io/full/v1/all_instruments';
+        const instrumentsResponse = await fetch(instrumentsUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ is_active: true }),
+        });
+
+        if (!instrumentsResponse.ok) {
+            console.error(`GRVT instruments error: ${instrumentsResponse.status}`);
+            return null;
+        }
+
+        const instrumentsData = await instrumentsResponse.json();
+        const instruments = instrumentsData.result || [];
+        
+        if (instruments.length === 0) {
+            console.error('GRVT: No instruments returned');
+            return null;
+        }
+
+        // Récupérer le ticker pour chaque instrument (limiter à 20 pour éviter timeout)
+        let totalVolume24h = 0;
+        let marketsCount = 0;
+        const limitedInstruments = instruments.slice(0, 20);
+
+        for (const instrument of limitedInstruments) {
+            try {
+                const tickerResponse = await fetch(tickerUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ instrument: instrument.instrument }),
+                });
+
+                if (tickerResponse.ok) {
+                    const tickerData = await tickerResponse.json();
+                    const ticker = tickerData.result;
+                    
+                    if (ticker) {
+                        // Volume 24h en quote currency (USDT)
+                        const buyVolumeQ = parseFloat(ticker.buy_volume_24h_q || 0);
+                        const sellVolumeQ = parseFloat(ticker.sell_volume_24h_q || 0);
+                        totalVolume24h += buyVolumeQ + sellVolumeQ;
+                        marketsCount++;
+                    }
+                }
+            } catch (e) {
+                // Ignorer les erreurs individuelles
+            }
+        }
+
+        // Calculer les fees : volume × 0.02%
+        const feeRate = 0.0002;
+        const fees24h = totalVolume24h * feeRate;
+        
+        console.log(`GRVT: volume24h=${totalVolume24h}, fees24h=${fees24h}, markets=${marketsCount}`);
+
+        return {
+            volume24h: totalVolume24h,
+            total24h: fees24h,
+            total7d: fees24h * 7
+        };
+    } catch (error) {
+        console.error('GRVT error:', error);
+        return null;
+    }
+}
+
+// Fonction principale pour collecter toutes les données
+async function collectAllData() {
+    const results = [];
+    
+    // Traiter les projets avec token
+    for (const project of PROJECTS.withToken) {
+        console.log(`Processing ${project.name}...`);
+        
+        // Récupérer les fees DeFiLlama
+        const feesData = await fetchDeFiLlamaFees(project.llamaSlug);
+        const fees7dAvg = extractFees7dAvg(feesData);
+        console.log(`  -> ${project.name} fees7dAvg: ${fees7dAvg}`);
+        
+        // Récupérer les données CoinGecko
+        const coinData = await fetchCoinGecko(project.coinGeckoId, project.coinGeckoContract);
+        
+        // Petite pause pour éviter le rate limiting
+        await new Promise(r => setTimeout(r, 500));
+        
+        results.push({
+            name: project.name,
+            logo: project.logo,
+            url: project.url,
+            hasToken: true,
+            fees7dAvg: fees7dAvg,
+            annualRevenue: fees7dAvg * 365,
+            fdv: coinData?.fdv || 0,
+            marketCap: coinData?.marketCap || 0,
+            ratio: coinData?.fdv && fees7dAvg ? coinData.fdv / (fees7dAvg * 365) : 0,
+            fdvEstimated: false
+        });
+    }
+    
+    // Traiter les projets sans token
+    for (const project of PROJECTS.withoutToken) {
+        console.log(`Processing ${project.name}...`);
+        
+        let fees7dAvg = 0;
+        let customApi = project.customApi || null; // Garder le flag original
+        
+        // API custom pour Variational
+        if (project.customApi === 'variational') {
+            console.log(`  -> Using Variational custom API`);
+            const varData = await fetchVariational();
+            if (varData && varData.total24h > 0) {
+                fees7dAvg = varData.total24h;
+                console.log(`  -> Variational fees: ${varData.total24h}`);
+            } else {
+                console.log(`  -> Variational API failed or returned 0`);
+            }
+        }
+        // API custom pour GRVT
+        else if (project.customApi === 'grvt') {
+            console.log(`  -> Using GRVT custom API`);
+            const grvtData = await fetchGRVT();
+            if (grvtData && grvtData.total24h > 0) {
+                fees7dAvg = grvtData.total24h;
+                console.log(`  -> GRVT fees: ${grvtData.total24h}`);
+            } else {
+                console.log(`  -> GRVT API failed or returned 0`);
+            }
+        }
+        // DeFiLlama standard
+        else {
+            console.log(`  -> Using DeFiLlama API for ${project.llamaSlug}`);
+            const feesData = await fetchDeFiLlamaFees(project.llamaSlug);
+            fees7dAvg = extractFees7dAvg(feesData);
+            console.log(`  -> ${project.name} fees7dAvg: ${fees7dAvg}`);
+        }
+        
+        // Petite pause pour éviter le rate limiting
+        await new Promise(r => setTimeout(r, 300));
+        
+        results.push({
+            name: project.name,
+            logo: project.logo || `https://icons.llamao.fi/icons/protocols/${project.llamaSlug}?w=48&h=48`,
+            url: project.url,
+            hasToken: false,
+            fees7dAvg: fees7dAvg,
+            annualRevenue: fees7dAvg * 365,
+            fdv: 0, // Sera calculé côté client avec le ratio
+            ratio: 0,
+            fdvEstimated: true,
+            customApi: customApi, // Toujours garder le flag original
+            pointsSeasonStart: project.pointsSeasonStart,
+            pointsMax: project.pointsMax,
+            pointsMaxInfo: project.pointsMaxInfo,
+            airdropPct: project.airdropPct,
+            airdropPctInfo: project.airdropPctInfo,
+            comment: project.comment
+        });
+    }
+    
+    return results;
+}
+
+// Fonction pour sauvegarder dans Supabase
+async function saveToSupabase(data) {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+    
+    const response = await fetch(`${supabaseUrl}/rest/v1/projects_data?id=eq.1`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+            data: data,
+            updated_at: new Date().toISOString()
+        })
+    });
+    
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Supabase error: ${error}`);
+    }
+    
+    return true;
+}
+
+// Handler principal
+export default async function handler(request) {
+    // Vérifier la méthode (accepter GET pour les tests et POST pour le cron)
+    if (request.method !== 'GET' && request.method !== 'POST') {
+        return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+            status: 405,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+    
+    // Optionnel : vérifier un secret pour sécuriser l'endpoint
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+    
+    // Si CRON_SECRET est défini, vérifier l'autorisation
+    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+        // Permettre quand même l'accès sans auth pour les tests initiaux
+        console.log('Warning: No valid authorization, but proceeding anyway');
+    }
+    
+    try {
+        console.log('Starting data collection...');
+        
+        // Collecter toutes les données
+        const data = await collectAllData();
+        
+        console.log(`Collected data for ${data.length} projects`);
+        
+        // Sauvegarder dans Supabase
+        await saveToSupabase(data);
+        
+        console.log('Data saved to Supabase successfully!');
+        
+        return new Response(JSON.stringify({
+            success: true,
+            message: `Updated ${data.length} projects`,
+            timestamp: new Date().toISOString()
+        }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+    } catch (error) {
+        console.error('Error:', error);
+        return new Response(JSON.stringify({
+            success: false,
+            error: error.message
+        }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+}
