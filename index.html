@@ -353,33 +353,33 @@
         const PROJECTS = {
             // Projets avec token (slug DeFiLlama / id CoinGecko)
             withToken: [
-                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', pointsSeasonStart: '2024-11-29', pointsInfo: 'Possible S3 en cours depuis le TGE', pointsMax: null, airdropPct: 31 }, // Airdrop Genesis 31%
-                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', pointsSeasonStart: '2025-10-02', pointsMax: null, airdropPct: 25 }, // 25% airdrop S1+S2
-                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', pointsSeasonStart: '2025-09-03', pointsMax: null, airdropPct: null }, // Season 3
-                { name: 'ApeX', llamaSlug: 'apex-omni', coingeckoContract: '0x52a8845df664d76c69d2eea607cd793565af42b8', pointsSeasonStart: '2025-10-06', pointsMax: null, airdropPct: null }, // Ape Season 1
-                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'Hyperliquid', llamaSlug: 'hyperliquid', coingeckoId: 'hyperliquid', url: 'https://app.hyperliquid.xyz/join/CRYPTOMAGE', pointsSeasonStart: '2024-11-29', pointsInfo: 'Possible S3 en cours depuis le TGE', pointsMax: null, airdropPct: 31 }, // Airdrop Genesis 31%
+                { name: 'Lighter', llamaSlug: 'lighter', coingeckoId: 'lighter', url: 'https://app.lighter.xyz/trade/LIT_USDC', pointsSeasonStart: '2025-10-02', pointsMax: null, airdropPct: 25 }, // 25% airdrop S1+S2
+                { name: 'Aster', llamaSlug: 'aster', coingeckoId: 'aster-2', url: 'https://www.asterdex.com/en/referral/081a02', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'dYdX', llamaSlug: 'dydx', coingeckoId: 'dydx-chain', url: 'https://dydx.trade?ref=WindyGoldS5I', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'Avantis', llamaSlug: 'avantis', coingeckoId: 'avantis', url: 'https://www.avantisfi.com/referral?code=cryptomage', pointsSeasonStart: '2025-09-03', pointsMax: null, airdropPct: null }, // Season 3
+                { name: 'ApeX', llamaSlug: 'apex-omni', coingeckoContract: '0x52a8845df664d76c69d2eea607cd793565af42b8', url: 'https://www.apex.exchange/fr-FR', pointsSeasonStart: '2025-10-06', pointsMax: null, airdropPct: null }, // Ape Season 1
+                { name: 'Orderly', llamaSlug: 'orderly', coingeckoId: 'orderly-network', url: 'https://orderly.network', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'GMX', llamaSlug: 'gmx', coingeckoId: 'gmx', url: 'https://gmx.io/#/', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'Drift', llamaSlug: 'drift', coingeckoId: 'drift-protocol', url: 'https://www.drift.trade/', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
             ],
             // Projets sans token (FDV estimée)
             withoutToken: [
-                { name: 'Extended', llamaSlug: 'extended', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30 }, // 30% confirmé
-                { name: 'Paradex', llamaSlug: 'paradex', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20, airdropPctInfo: '5% S1 + 15% S2 (source: Paradex Foundation)' }, // 20% Genesis Airdrop
-                { name: 'EdgeX', llamaSlug: 'edgex', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25 }, // ~25% estimé
-                { name: 'Ethereal', llamaSlug: 'ethereal-dex', pointsSeasonStart: '2025-08-14', pointsMax: null, airdropPct: null }, // Non communiqué
-                { name: 'Ostium', llamaSlug: 'ostium', pointsSeasonStart: '2025-03-31', pointsMax: 55000000, pointsMaxInfo: '30M points S1 (estimé) + 25M points S2 (hardcap)', airdropPct: null }, // Non annoncé
-                { name: 'Unit', llamaSlug: 'unit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null },
-                { name: 'tradeXYZ', llamaSlug: 'tradexyz', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null },
-                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', pointsSeasonStart: '2025-09-23', pointsMax: null, airdropPct: 22 }, // 22% (S1 10% + S2 12%) - points S1 non comparables à S2
-                { name: 'Reya', llamaSlug: 'reya', pointsSeasonStart: '2025-07-19', pointsMax: null, airdropPct: 45 }, // 45% communauté - 6.25M RCP initial mais distribution continue
-                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, pointsMaxInfo: 'Source : Données dispo dans la doc du projet', airdropPct: 25 }, // 25% estimé
+                { name: 'Extended', llamaSlug: 'extended', url: 'https://app.extended.exchange/join/CRYPTOMAGE', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30 }, // 30% confirmé
+                { name: 'Paradex', llamaSlug: 'paradex', url: 'https://app.paradex.trade/r/cryptomage', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20, airdropPctInfo: '5% S1 + 15% S2 (source: Paradex Foundation)' }, // 20% Genesis Airdrop
+                { name: 'EdgeX', llamaSlug: 'edgex', url: 'https://www.edgex.exchange/en-US', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25 }, // ~25% estimé
+                { name: 'Ethereal', llamaSlug: 'ethereal-dex', url: 'https://www.ethereal.trade/', pointsSeasonStart: '2025-08-14', pointsMax: null, airdropPct: null }, // Non communiqué
+                { name: 'Ostium', llamaSlug: 'ostium', url: 'https://ostium.app/trade?ref=JVCXY', pointsSeasonStart: '2025-03-31', pointsMax: 55000000, pointsMaxInfo: '30M points S1 (estimé) + 25M points S2 (hardcap)', airdropPct: null }, // Non annoncé
+                { name: 'Unit', llamaSlug: 'unit', url: 'https://hyperunit.xyz/deposit', pointsSeasonStart: '2025-06-01', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null },
+                { name: 'tradeXYZ', llamaSlug: 'tradexyz', url: 'https://app.trade.xyz/trade?market=XYZ100', pointsSeasonStart: '2025-10-13', pointsInfo: 'Possible campagne de points cachée', pointsMax: null, airdropPct: null },
+                { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', url: 'https://grvt.io', pointsSeasonStart: '2025-09-23', pointsMax: null, airdropPct: 22 }, // 22% (S1 10% + S2 12%) - points S1 non comparables à S2
+                { name: 'Reya', llamaSlug: 'reya', url: 'https://reya.xyz', pointsSeasonStart: '2025-07-19', pointsMax: null, airdropPct: 20, airdropPctInfo: '45% allocation communautaire, estimation à 20% pour l\'airdrop initial' }, // 6.25M RCP initial mais distribution continue
+                { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', url: 'https://www.variational.io/', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, pointsMaxInfo: 'Source : Données dispo dans la doc du projet', airdropPct: 25 }, // 25% estimé
                 // { name: 'StandX', llamaSlug: 'standx', customApi: 'standx', pointsSeasonStart: null, pointsMax: null, airdropPct: null }, // Pas de données DeFiLlama
                 // { name: 'Polynomial', llamaSlug: 'polynomial-trade', pointsSeasonStart: null, pointsMax: null, airdropPct: null }, // Pas de fees sur DeFiLlama
-                { name: 'Vest', llamaSlug: 'vest-exchange', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
-                { name: 'HyENA', llamaSlug: 'hyena', pointsSeasonStart: '2025-12-09', pointsMax: null, airdropPct: null },
-                { name: 'Nado', llamaSlug: 'nado-perps', pointsSeasonStart: '2025-11-21', pointsMax: null, airdropPct: null },
+                { name: 'Vest', llamaSlug: 'vest-exchange', url: 'https://trade.vestmarkets.com/trade/NVDA-USD-PERP', pointsSeasonStart: null, pointsMax: null, airdropPct: null },
+                { name: 'HyENA', llamaSlug: 'hyena', url: 'https://app.hyena.trade', pointsSeasonStart: '2025-12-09', pointsMax: null, airdropPct: null },
+                { name: 'Nado', llamaSlug: 'nado-perps', url: 'https://www.nado.xyz', pointsSeasonStart: '2025-11-21', pointsMax: null, airdropPct: null },
             ]
         };
 
@@ -730,6 +730,7 @@
                     coingeckoId: project.coingeckoId || null,
                     hasToken: project.hasToken,
                     customApi: project.customApi || false, // Flag pour APIs custom
+                    url: project.url || null, // URL du projet
                     pointsSeasonStart: project.pointsSeasonStart || null, // Date de début de la saison de points
                     pointsInfo: project.pointsInfo || null, // Info supplémentaire sur les points
                     pointsMax: project.pointsMax || null, // Max de points en circulation à l'Airdrop
@@ -919,11 +920,15 @@
             }
             
             // Colonnes communes
+            const projectLink = project.url ? `href="${project.url}" target="_blank" rel="noopener noreferrer"` : '';
+            const cursorClass = project.url ? 'cursor-pointer hover:opacity-80' : '';
             const commonCols = `
                 <td class="py-3 px-4">
                     <div class="flex items-center gap-2">
+                        ${project.url ? `<a ${projectLink} class="flex items-center gap-2 ${cursorClass}">` : ''}
                         ${project.logo ? `<img src="${project.logo}" alt="${project.name}" class="w-6 h-6 rounded-full">` : ''}
-                        <span class="font-medium text-gray-800">${project.name}</span>
+                        <span class="font-medium text-gray-800 ${project.url ? 'hover:text-indigo-600 hover:underline' : ''}">${project.name}</span>
+                        ${project.url ? '</a>' : ''}
                         ${project.customApi ? `
                             <span class="tooltip-container text-purple-600">
                                 <span class="text-xs">ⓘ</span>
@@ -1699,6 +1704,20 @@
                             if (hoveredPoint !== null) {
                                 hoveredPoint = null;
                                 chart.draw();
+                            }
+                        }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0 && elements[0].datasetIndex > 0) {
+                            const datasetIndex = elements[0].datasetIndex;
+                            const index = elements[0].index;
+                            const data = chart.data.datasets[datasetIndex].data[index];
+                            if (data && data.name) {
+                                // Trouver le projet pour obtenir l'URL
+                                const project = projectsData.find(p => p.name === data.name);
+                                if (project && project.url) {
+                                    window.open(project.url, '_blank', 'noopener,noreferrer');
+                                }
                             }
                         }
                     }
