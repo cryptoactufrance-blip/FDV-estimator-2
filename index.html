@@ -418,9 +418,16 @@
         }
         
         .tech-progress-bar {
-            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
-            box-shadow: 0 0 10px var(--neon-cyan);
+            background: linear-gradient(90deg, #0066ff, #00aaff, #0066ff);
+            background-size: 200% 100%;
+            box-shadow: 0 0 15px rgba(0, 128, 255, 0.7), 0 0 30px rgba(0, 128, 255, 0.4);
+            animation: shimmer 1.5s ease-in-out infinite;
             transition: width 0.3s ease;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
         
         /* Log styling */
