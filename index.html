@@ -1219,7 +1219,13 @@
         }
 
         // =====================================================
-        // CHARGEMENT DES DONNÉES
+        // CONFIGURATION SUPABASE
+        // =====================================================
+        const SUPABASE_URL = 'https://koeqpcnscgqsurqcrdxl.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvZXFwY25zY2dxc3VycWNyZHhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzMTg3ODQsImV4cCI6MjA4Mzg5NDc4NH0.-GiJriDpNGCHakAWWYFNQ_PBs9a_EU_d5deUMwPLvyU';
+
+        // =====================================================
+        // CHARGEMENT DES DONNÉES DEPUIS SUPABASE
         // =====================================================
         
         async function loadAllData() {
@@ -1229,159 +1235,106 @@
             const loadingProgress = document.getElementById('loadingProgress');
             const loadingText = document.getElementById('loadingText');
             const progressBar = document.getElementById('progressBar');
+            const t = translations[currentLang];
             
             // UI de chargement
             refreshBtn.disabled = true;
             refreshBtn.classList.add('opacity-50', 'cursor-not-allowed');
             refreshIcon.classList.add('animate-spin');
-            refreshText.textContent = 'Chargement...';
+            refreshText.textContent = t.refreshing;
             loadingProgress.classList.remove('hidden');
+            progressBar.style.width = '20%';
             
             // Effacer les logs précédents
             document.getElementById('logs').innerHTML = '';
-            addLog('🚀 Début du chargement des données...', 'info');
+            addLog('🚀 Chargement des données depuis Supabase...', 'info');
             
-            projectsData = [];
-            const allProjects = [
-                ...PROJECTS.withToken.map(p => ({ ...p, hasToken: true })),
-                ...PROJECTS.withoutToken.map(p => ({ ...p, hasToken: false }))
-            ];
-            
-            const totalSteps = allProjects.length + PROJECTS.withToken.length;
-            let currentStep = 0;
-
-            // 1. Récupérer les fees pour tous les projets
-            addLog('📥 Étape 1: Récupération des fees (DeFiLlama)...', 'info');
-            
-            for (const project of allProjects) {
-                loadingText.textContent = `Chargement fees: ${project.name}...`;
+            try {
+                // Récupérer les données depuis Supabase
+                loadingText.textContent = currentLang === 'fr' ? 'Connexion à la base de données...' : 'Connecting to database...';
+                progressBar.style.width = '40%';
                 
-                let feesData;
-                
-                // Cas spécial pour les APIs custom
-                if (project.customApi === 'variational') {
-                    feesData = await fetchVariational();
-                } else if (project.customApi === 'grvt') {
-                    feesData = await fetchGRVT();
-                } else if (project.customApi === 'standx') {
-                    feesData = await fetchStandX();
-                } else {
-                    feesData = await fetchFees(project.llamaSlug);
-                }
-                
-                const daily7dAvg = feesData?.total7d ? feesData.total7d / 7 : 0;
-                const annualRevenue = daily7dAvg * 365;
-                
-                projectsData.push({
-                    name: project.name,
-                    llamaSlug: project.llamaSlug,
-                    coingeckoId: project.coingeckoId || null,
-                    hasToken: project.hasToken,
-                    customApi: project.customApi || false, // Flag pour APIs custom
-                    url: project.url || null, // URL du projet
-                    pointsSeasonStart: project.pointsSeasonStart || null, // Date de début de la saison de points
-                    pointsInfo: project.pointsInfo || null, // Info supplémentaire sur les points
-                    pointsMax: project.pointsMax || null, // Max de points en circulation à l'Airdrop
-                    pointsMaxInfo: project.pointsMaxInfo || null, // Info supplémentaire sur le max de points
-                    airdropPct: project.airdropPct || null, // % du supply alloué à l'airdrop au TGE (null = utilise default)
-                    airdropPctInfo: project.airdropPctInfo || null, // Info supplémentaire sur le % airdrop
-                    comment: project.comment || null, // Commentaire sur le projet
-                    fees24h: feesData?.total24h || 0,
-                    fees7d: feesData?.total7d || 0,
-                    fees7dAvg: daily7dAvg,
-                    annualRevenue: annualRevenue,
-                    fdv: null,
-                    fdvEstimated: false,
-                    ratio: null,
-                    logo: feesData?.logo || null
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/projects_data?select=*&id=eq.1`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
                 });
                 
-                currentStep++;
-                progressBar.style.width = `${(currentStep / totalSteps) * 100}%`;
-                
-                // Petite pause pour éviter le rate limiting
-                await new Promise(r => setTimeout(r, 100));
-            }
-
-            // 2. Récupérer les FDV pour les projets avec token
-            addLog('📥 Étape 2: Récupération des FDV (CoinGecko)...', 'info');
-            
-            for (const project of PROJECTS.withToken) {
-                loadingText.textContent = `Chargement FDV: ${project.name}...`;
-                
-                // Support both coingeckoId and coingeckoContract
-                let fdvData;
-                if (project.coingeckoContract) {
-                    fdvData = await fetchFDV(null, project.coingeckoContract);
-                } else if (project.coingeckoId) {
-                    fdvData = await fetchFDV(project.coingeckoId);
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
                 }
                 
-                const projectData = projectsData.find(p => p.llamaSlug === project.llamaSlug);
-                if (projectData && fdvData) {
-                    projectData.fdv = fdvData.fdv;
-                    // Utiliser le logo CoinGecko si pas de logo DeFiLlama
-                    if (!projectData.logo && fdvData.image) {
-                        projectData.logo = fdvData.image;
-                    }
-                    if (projectData.fdv > 0 && projectData.annualRevenue > 0) {
-                        projectData.ratio = projectData.fdv / projectData.annualRevenue;
+                const result = await response.json();
+                progressBar.style.width = '60%';
+                
+                if (!result || result.length === 0 || !result[0].data) {
+                    throw new Error('Aucune donnée trouvée');
+                }
+                
+                const data = result[0].data;
+                const updatedAt = result[0].updated_at;
+                
+                addLog(`📦 ${data.length} projets chargés depuis Supabase`, 'success');
+                addLog(`🕐 Dernière mise à jour: ${new Date(updatedAt).toLocaleString('fr-FR')}`, 'info');
+                
+                // Charger les données dans projectsData
+                loadingText.textContent = currentLang === 'fr' ? 'Traitement des données...' : 'Processing data...';
+                progressBar.style.width = '80%';
+                
+                projectsData = data.map(p => ({
+                    ...p,
+                    // S'assurer que tous les champs existent
+                    fees7dAvg: p.fees7dAvg || 0,
+                    annualRevenue: p.annualRevenue || 0,
+                    fdv: p.fdv || 0,
+                    ratio: p.ratio || 0,
+                    logo: p.logo || `https://icons.llamao.fi/icons/protocols/${p.llamaSlug || p.name.toLowerCase()}?w=48&h=48`
+                }));
+                
+                // Calculer le ratio moyen pondéré à partir des projets avec token
+                const avgRatio = calculateWeightedAverageRatio(projectsData);
+                const scenarioMultiplier = scenarioMultipliers[currentScenario];
+                
+                // Appliquer les estimations aux projets sans token
+                for (const project of projectsData) {
+                    if (project.fdvEstimated && project.annualRevenue > 0) {
+                        const estimatedFDV = estimateFDV(project.annualRevenue, avgRatio * scenarioMultiplier);
+                        if (estimatedFDV) {
+                            project.fdv = estimatedFDV;
+                            project.ratio = project.fdv / project.annualRevenue;
+                            addLog(`💡 Estimation ${project.name}: FDV=${formatUSD(estimatedFDV)}`, 'calc');
+                        }
                     }
                 }
                 
-                currentStep++;
-                progressBar.style.width = `${(currentStep / totalSteps) * 100}%`;
+                // Stocker le ratio original
+                originalAvgRatio = avgRatio;
+                currentAvgRatio = avgRatio;
                 
-                // Petite pause pour éviter le rate limiting
-                await new Promise(r => setTimeout(r, 300));
+                progressBar.style.width = '100%';
+                
+                // Mettre à jour l'affichage
+                addLog('🎨 Mise à jour de l\'interface...', 'info');
+                updateTable();
+                await updateChart(avgRatio * scenarioMultiplier, currentScenario);
+                
+                // Mettre à jour la date (depuis Supabase)
+                document.getElementById('lastUpdate').textContent = new Date(updatedAt).toLocaleString('fr-FR');
+                
+                addLog('✅ Chargement terminé!', 'success');
+                
+            } catch (error) {
+                addLog(`❌ Erreur: ${error.message}`, 'error');
+                console.error('Erreur chargement Supabase:', error);
             }
-
-            // 3. Calculer le ratio moyen et estimer les FDV
-            addLog('📥 Étape 3: Calcul des estimations...', 'info');
-            loadingText.textContent = 'Calcul du ratio moyen...';
-            
-            const avgRatio = calculateWeightedAverageRatio(projectsData);
-            const scenarioMultiplier = scenarioMultipliers[currentScenario];
-            
-            // Appliquer les estimations aux projets sans token (avec multiplicateur du scénario)
-            for (const project of projectsData) {
-                if (!project.hasToken && project.annualRevenue > 0) {
-                    const estimatedFDV = estimateFDV(project.annualRevenue, avgRatio * scenarioMultiplier);
-                    if (estimatedFDV) {
-                        project.fdv = estimatedFDV;
-                        project.fdvEstimated = true;
-                        project.ratio = project.fdv / project.annualRevenue;
-                        addLog(`💡 Estimation ${project.name}: FDV=${formatUSD(estimatedFDV)}, Ratio=${formatRatio(project.ratio)}`, 'calc');
-                    }
-                }
-            }
-            
-            // Stocker le ratio original (ne sera jamais modifié)
-            originalAvgRatio = avgRatio;
-            currentAvgRatio = avgRatio;
-
-            // Identifier les projets exclus
-            const excluded = projectsData.filter(p => p.annualRevenue <= 0);
-            if (excluded.length > 0) {
-                addLog(`⚠️ Projets exclus du graphique (revenus ≤ 0): ${excluded.map(p => p.name).join(', ')}`, 'warning');
-            }
-
-            // 4. Mettre à jour l'affichage
-            addLog('🎨 Mise à jour de l\'interface...', 'info');
-            updateTable();
-            await updateChart(avgRatio * scenarioMultipliers[currentScenario], currentScenario);
-            
-            // Mettre à jour la date
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('fr-FR');
             
             // Reset UI
             refreshBtn.disabled = false;
             refreshBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             refreshIcon.classList.remove('animate-spin');
-            refreshText.textContent = 'Actualiser les données';
+            refreshText.textContent = t.refresh;
             loadingProgress.classList.add('hidden');
-            
-            addLog('✅ Chargement terminé!', 'success');
         }
 
         // =====================================================
