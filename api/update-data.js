@@ -11,27 +11,27 @@ const PROJECTS = {
         { name: 'Hyperliquid', llamaSlug: 'hyperliquid-perps', coinGeckoId: 'hyperliquid', logo: 'https://icons.llamao.fi/icons/protocols/hyperliquid?w=48&h=48', url: 'https://app.hyperliquid.xyz/join/CRYPTOMAGE' },
         { name: 'GMX', llamaSlug: 'gmx', coinGeckoId: 'gmx', logo: 'https://icons.llamao.fi/icons/protocols/gmx?w=48&h=48', url: 'https://gmx.io/#/' },
         { name: 'dYdX', llamaSlug: 'dydx', coinGeckoId: 'dydx-chain', logo: 'https://icons.llamao.fi/icons/protocols/dydx?w=48&h=48', url: 'https://dydx.trade' },
-        { name: 'Drift', llamaSlug: 'drift-protocol', coinGeckoId: 'drift-protocol', logo: 'https://icons.llamao.fi/icons/protocols/drift-protocol?w=48&h=48', url: 'https://www.drift.trade/' },
+        { name: 'Drift', llamaSlug: 'drift-protocol', coinGeckoId: 'drift-protocol', logo: 'https://assets.coingecko.com/coins/images/32082/small/drift.png', url: 'https://www.drift.trade/' },
         { name: 'Orderly', llamaSlug: 'orderly-network', coinGeckoId: 'orderly-network', logo: 'https://icons.llamao.fi/icons/protocols/orderly-network?w=48&h=48', url: 'https://orderly.network' },
-        { name: 'ApeX', llamaSlug: 'apex-protocol-omni', coinGeckoId: 'apex-protocol-2', logo: 'https://icons.llamao.fi/icons/protocols/apex-protocol-omni?w=48&h=48', url: 'https://www.apex.exchange/fr-FR' },
+        { name: 'ApeX', llamaSlug: 'apex-protocol-omni', coinGeckoId: 'apex-protocol-2', logo: 'https://assets.coingecko.com/coins/images/28766/small/apex.png', url: 'https://www.apex.exchange/fr-FR' },
         { name: 'Avantis', llamaSlug: 'avantis', coinGeckoId: 'avantis', logo: 'https://icons.llamao.fi/icons/protocols/avantis?w=48&h=48', url: 'https://www.avantisfi.com/referral?code=cryptomage' },
         { name: 'Lighter', llamaSlug: 'lighter', coinGeckoContract: { platform: 'arbitrum-one', address: '0xe5edc9a1c478fd0e5068923118e2f1a9d52dcd4c' }, logo: 'https://icons.llamao.fi/icons/protocols/lighter?w=48&h=48', url: 'https://app.lighter.xyz/trade/LIT_USDC' },
-        { name: 'Aster', llamaSlug: 'aster-dex', coinGeckoId: 'asterfi', logo: 'https://icons.llamao.fi/icons/protocols/aster-dex?w=48&h=48', url: 'https://www.asterdex.com/en/referral/081a02' },
+        { name: 'Aster', llamaSlug: 'aster-dex', coinGeckoId: 'asterfi', logo: 'https://assets.coingecko.com/coins/images/53553/small/aster.jpg', url: 'https://www.asterdex.com/en/referral/081a02' },
         { name: 'Nado', llamaSlug: 'nado', coinGeckoContract: { platform: 'sonic', address: '0x0e84f0404f7c407e42766dd793ec0f4a8fb4b132' }, logo: 'https://icons.llamao.fi/icons/protocols/nado?w=48&h=48', url: 'https://www.nado.xyz' },
         { name: 'HyENA', llamaSlug: 'hyena', coinGeckoContract: { platform: 'hyperliquid', address: '0xfd01722b0ab17a946bc0a3c7e394e8b2ec7b5881' }, logo: 'https://icons.llamao.fi/icons/protocols/hyena?w=48&h=48', url: 'https://app.hyena.trade' },
     ],
     withoutToken: [
-        { name: 'Extended', llamaSlug: 'extended', url: 'https://app.extended.exchange/join/CRYPTOMAGE', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30, comment: 'Maker 0% / Taker 0.035%' },
-        { name: 'Paradex', llamaSlug: 'paradex', url: 'https://app.paradex.trade/r/cryptomage', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20, airdropPctInfo: '5% S1 + 15% S2 (source: Paradex Foundation)', comment: 'Arrive à la fin de la partie pre-TGE. Top pour faire du farming de fundings avec Variational.' },
-        { name: 'EdgeX', llamaSlug: 'edgex', url: 'https://www.edgex.exchange/en-US', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25, comment: 'Perps Asiatique, pas beaucoup d\'info dessus' },
-        { name: 'Ethereal', llamaSlug: 'ethereal-exchange', url: 'https://www.ethereal.trade/', pointsSeasonStart: '2025-07-01', pointsMax: null, airdropPct: null, comment: 'Top pour faire du DN, gros bonus de yield sur les positions longues durées.' },
-        { name: 'Ostium', llamaSlug: 'ostium', url: 'https://ostium.app/trade?ref=JVCXY', pointsSeasonStart: '2025-03-31', pointsMax: 55000000, pointsMaxInfo: '30M points S1 (estimé) + 25M points S2 (hardcap)', airdropPct: null, comment: 'Vaut le coup uniquement pour le vault (bon rendement + points)' },
-        { name: 'Vest', llamaSlug: 'vest-exchange', url: 'https://trade.vestmarkets.com/trade/NVDA-USD-PERP', pointsSeasonStart: '2024-07-01', pointsMax: null, airdropPct: 20, comment: 'Maker 0.02% / Taker 0.06%' },
-        { name: 'Unit', llamaSlug: 'unit-hyperliquid', url: 'https://hyperunit.xyz/deposit', pointsSeasonStart: '2025-12-01', pointsMax: null, airdropPct: null, comment: 'Meilleur farm = rééquilibrage de LPs avec des assets Unit (BTC / ETH / SOL...)' },
-        { name: 'tradeXYZ', llamaSlug: 'trade-xyz', url: 'https://app.trade.xyz/trade?market=XYZ100', pointsSeasonStart: null, pointsMax: null, airdropPct: null, comment: 'Mieux de trade ici que sur Hyperliquid, utilise HIP-3 et exactement les mêmes fonctionnalités, farm l\'Airdrop d\'Unit' },
-        { name: 'Variational', llamaSlug: 'variational', customApi: 'variational', url: 'https://www.variational.io/', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, pointsMaxInfo: 'Source : Données dispo dans la doc du projet', airdropPct: 25, comment: 'Relativement early. À utiliser pour la majorité de tes DN, récompense énormément les positions longues sur les paires avec peu d\'OI.' },
-        { name: 'GRVT', llamaSlug: 'grvt', customApi: 'grvt', url: 'https://grvt.io', pointsSeasonStart: '2025-02-12', pointsMax: null, airdropPct: 10, comment: 'Maker -0.01% (rebate) / Taker 0.02%' },
-        { name: 'Reya', llamaSlug: 'reya-network', url: 'https://reya.xyz', pointsSeasonStart: '2025-09-17', pointsMax: 150000000, pointsMaxInfo: '150M points sur tout le programme', airdropPct: 20, airdropPctInfo: '45% allocation communautaire, estimation à 20% pour l\'airdrop initial', comment: 'Maker 0% / Taker 0%' },
+        { name: 'Extended', llamaSlug: 'extended', logo: 'https://icons.llamao.fi/icons/protocols/extended?w=48&h=48', url: 'https://app.extended.exchange/join/CRYPTOMAGE', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30, comment: 'Maker 0% / Taker 0.035%' },
+        { name: 'Paradex', llamaSlug: 'paradex', logo: 'https://icons.llamao.fi/icons/protocols/paradex?w=48&h=48', url: 'https://app.paradex.trade/r/cryptomage', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20, airdropPctInfo: '5% S1 + 15% S2 (source: Paradex Foundation)', comment: 'Arrive à la fin de la partie pre-TGE. Top pour faire du farming de fundings avec Variational.' },
+        { name: 'EdgeX', llamaSlug: 'edgex', logo: 'https://icons.llamao.fi/icons/protocols/edgex?w=48&h=48', url: 'https://www.edgex.exchange/en-US', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25, comment: 'Perps Asiatique, pas beaucoup d\'info dessus' },
+        { name: 'Ethereal', llamaSlug: 'ethereal-exchange', logo: 'https://pbs.twimg.com/profile_images/1818987145082093568/bLNgL__L_400x400.jpg', url: 'https://www.ethereal.trade/', pointsSeasonStart: '2025-07-01', pointsMax: null, airdropPct: null, comment: 'Top pour faire du DN, gros bonus de yield sur les positions longues durées.' },
+        { name: 'Ostium', llamaSlug: 'ostium', logo: 'https://icons.llamao.fi/icons/protocols/ostium?w=48&h=48', url: 'https://ostium.app/trade?ref=JVCXY', pointsSeasonStart: '2025-03-31', pointsMax: 55000000, pointsMaxInfo: '30M points S1 (estimé) + 25M points S2 (hardcap)', airdropPct: null, comment: 'Vaut le coup uniquement pour le vault (bon rendement + points)' },
+        { name: 'Vest', llamaSlug: 'vest-exchange', logo: 'https://icons.llamao.fi/icons/protocols/vest-exchange?w=48&h=48', url: 'https://trade.vestmarkets.com/trade/NVDA-USD-PERP', pointsSeasonStart: '2024-07-01', pointsMax: null, airdropPct: 20, comment: 'Maker 0.02% / Taker 0.06%' },
+        { name: 'Unit', llamaSlug: 'unit-hyperliquid', logo: 'https://pbs.twimg.com/profile_images/1859605679914860544/2KNqLs2g_400x400.jpg', url: 'https://hyperunit.xyz/deposit', pointsSeasonStart: '2025-12-01', pointsMax: null, airdropPct: null, comment: 'Meilleur farm = rééquilibrage de LPs avec des assets Unit (BTC / ETH / SOL...)' },
+        { name: 'tradeXYZ', llamaSlug: 'trade-xyz', logo: 'https://pbs.twimg.com/profile_images/1867596606637957120/L0RXRGCZ_400x400.jpg', url: 'https://app.trade.xyz/trade?market=XYZ100', pointsSeasonStart: null, pointsMax: null, airdropPct: null, comment: 'Mieux de trade ici que sur Hyperliquid, utilise HIP-3 et exactement les mêmes fonctionnalités, farm l\'Airdrop d\'Unit' },
+        { name: 'Variational', llamaSlug: 'variational', logo: 'https://icons.llamao.fi/icons/protocols/variational?w=48&h=48', customApi: 'variational', url: 'https://www.variational.io/', pointsSeasonStart: '2025-12-17', pointsMax: 9000000, pointsMaxInfo: 'Source : Données dispo dans la doc du projet', airdropPct: 25, comment: 'Relativement early. À utiliser pour la majorité de tes DN, récompense énormément les positions longues sur les paires avec peu d\'OI.' },
+        { name: 'GRVT', llamaSlug: 'grvt', logo: 'https://icons.llamao.fi/icons/protocols/grvt?w=48&h=48', customApi: 'grvt', url: 'https://grvt.io', pointsSeasonStart: '2025-02-12', pointsMax: null, airdropPct: 10, comment: 'Maker -0.01% (rebate) / Taker 0.02%' },
+        { name: 'Reya', llamaSlug: 'reya-network', logo: 'https://pbs.twimg.com/profile_images/1770076004000198657/K06TFzzU_400x400.jpg', url: 'https://reya.xyz', pointsSeasonStart: '2025-09-17', pointsMax: 150000000, pointsMaxInfo: '150M points sur tout le programme', airdropPct: 20, airdropPctInfo: '45% allocation communautaire, estimation à 20% pour l\'airdrop initial', comment: 'Maker 0% / Taker 0%' },
     ]
 };
 
@@ -78,13 +78,27 @@ async function fetchCoinGecko(coinId, contractInfo = null) {
 // Fonction pour récupérer les données Variational
 async function fetchVariational() {
     try {
-        const response = await fetch('https://api.variational.io/v2/stats');
-        if (!response.ok) return null;
+        // URL correcte de l'API Variational
+        const response = await fetch('https://omni-client-api.prod.ap-northeast-1.variational.io/metadata/stats', {
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            console.error(`Variational API error: ${response.status}`);
+            return null;
+        }
         const data = await response.json();
         
-        const lossRefund24h = data.loss_refund_24h_usd || 0;
+        // Structure correcte : loss_refund.refunded_24h
+        const lossRefund24h = parseFloat(data.loss_refund?.refunded_24h || 0);
+        const fees24h = lossRefund24h * 10;
+        
+        console.log(`Variational: lossRefund24h=${lossRefund24h}, fees24h=${fees24h}`);
+        
         return {
-            total24h: lossRefund24h * 10,
+            total24h: fees24h,
+            total7d: fees24h * 7,
             lossRefund24h: lossRefund24h
         };
     } catch (error) {
@@ -96,24 +110,75 @@ async function fetchVariational() {
 // Fonction pour récupérer les données GRVT
 async function fetchGRVT() {
     try {
-        const response = await fetch('https://market-data.grvt.io/full/v1/market_data_24hr');
-        if (!response.ok) return null;
-        const data = await response.json();
+        const tickerUrl = 'https://market-data.grvt.io/full/v1/ticker';
         
-        let totalVolume = 0;
-        if (data.result) {
-            for (const market of data.result) {
-                if (market.volume_24hr_base_value) {
-                    const volume = parseFloat(market.volume_24hr_base_value);
-                    const price = parseFloat(market.mark_price_value || 0);
-                    totalVolume += (volume * price) / 1e18;
+        // Récupérer tous les instruments actifs
+        const instrumentsUrl = 'https://market-data.grvt.io/full/v1/all_instruments';
+        const instrumentsResponse = await fetch(instrumentsUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ is_active: true }),
+        });
+
+        if (!instrumentsResponse.ok) {
+            console.error(`GRVT instruments error: ${instrumentsResponse.status}`);
+            return null;
+        }
+
+        const instrumentsData = await instrumentsResponse.json();
+        const instruments = instrumentsData.result || [];
+        
+        if (instruments.length === 0) {
+            console.error('GRVT: No instruments returned');
+            return null;
+        }
+
+        // Récupérer le ticker pour chaque instrument (limiter à 20 pour éviter timeout)
+        let totalVolume24h = 0;
+        let marketsCount = 0;
+        const limitedInstruments = instruments.slice(0, 20);
+
+        for (const instrument of limitedInstruments) {
+            try {
+                const tickerResponse = await fetch(tickerUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ instrument: instrument.instrument }),
+                });
+
+                if (tickerResponse.ok) {
+                    const tickerData = await tickerResponse.json();
+                    const ticker = tickerData.result;
+                    
+                    if (ticker) {
+                        // Volume 24h en quote currency (USDT)
+                        const buyVolumeQ = parseFloat(ticker.buy_volume_24h_q || 0);
+                        const sellVolumeQ = parseFloat(ticker.sell_volume_24h_q || 0);
+                        totalVolume24h += buyVolumeQ + sellVolumeQ;
+                        marketsCount++;
+                    }
                 }
+            } catch (e) {
+                // Ignorer les erreurs individuelles
             }
         }
+
+        // Calculer les fees : volume × 0.02%
+        const feeRate = 0.0002;
+        const fees24h = totalVolume24h * feeRate;
         
+        console.log(`GRVT: volume24h=${totalVolume24h}, fees24h=${fees24h}, markets=${marketsCount}`);
+
         return {
-            volume24h: totalVolume,
-            total24h: totalVolume * 0.0002
+            volume24h: totalVolume24h,
+            total24h: fees24h,
+            total7d: fees24h * 7
         };
     } catch (error) {
         console.error('GRVT error:', error);
@@ -162,30 +227,40 @@ async function collectAllData() {
         console.log(`Processing ${project.name}...`);
         
         let fees7dAvg = 0;
-        let customApi = null;
+        let customApi = project.customApi || null; // Garder le flag original
         
         // API custom pour Variational
         if (project.customApi === 'variational') {
+            console.log(`  -> Using Variational custom API`);
             const varData = await fetchVariational();
-            if (varData) {
+            if (varData && varData.total24h > 0) {
                 fees7dAvg = varData.total24h;
-                customApi = 'variational';
+                console.log(`  -> Variational fees: ${varData.total24h}`);
+            } else {
+                console.log(`  -> Variational API failed or returned 0`);
             }
         }
         // API custom pour GRVT
         else if (project.customApi === 'grvt') {
+            console.log(`  -> Using GRVT custom API`);
             const grvtData = await fetchGRVT();
-            if (grvtData) {
+            if (grvtData && grvtData.total24h > 0) {
                 fees7dAvg = grvtData.total24h;
-                customApi = 'grvt';
+                console.log(`  -> GRVT fees: ${grvtData.total24h}`);
+            } else {
+                console.log(`  -> GRVT API failed or returned 0`);
             }
         }
         // DeFiLlama standard
         else {
+            console.log(`  -> Using DeFiLlama API for ${project.llamaSlug}`);
             const feesData = await fetchDeFiLlamaFees(project.llamaSlug);
-            if (feesData?.totalDataChart) {
+            if (feesData?.totalDataChart && feesData.totalDataChart.length > 0) {
                 const last7Days = feesData.totalDataChart.slice(-7);
                 fees7dAvg = last7Days.reduce((sum, d) => sum + (d[1] || 0), 0) / 7;
+                console.log(`  -> DeFiLlama fees7dAvg: ${fees7dAvg}`);
+            } else {
+                console.log(`  -> DeFiLlama returned no data for ${project.llamaSlug}`);
             }
         }
         
@@ -194,7 +269,7 @@ async function collectAllData() {
         
         results.push({
             name: project.name,
-            logo: `https://icons.llamao.fi/icons/protocols/${project.llamaSlug}?w=48&h=48`,
+            logo: project.logo || `https://icons.llamao.fi/icons/protocols/${project.llamaSlug}?w=48&h=48`,
             url: project.url,
             hasToken: false,
             fees7dAvg: fees7dAvg,
@@ -202,7 +277,7 @@ async function collectAllData() {
             fdv: 0, // Sera calculé côté client avec le ratio
             ratio: 0,
             fdvEstimated: true,
-            customApi: customApi,
+            customApi: customApi, // Toujours garder le flag original
             pointsSeasonStart: project.pointsSeasonStart,
             pointsMax: project.pointsMax,
             pointsMaxInfo: project.pointsMaxInfo,
