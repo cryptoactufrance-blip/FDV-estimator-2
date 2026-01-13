@@ -366,7 +366,7 @@
             // Projets sans token (FDV estimée)
             withoutToken: [
                 { name: 'Extended', llamaSlug: 'extended', pointsSeasonStart: '2025-04-29', pointsMax: 70000000, pointsMaxInfo: 'Basé sur les annonces Discord hebdo + 1.2M points/semaine jusqu\'à fin Q2 26', airdropPct: 30 }, // 30% confirmé
-                { name: 'Paradex', llamaSlug: 'paradex', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20 }, // 20% Genesis Airdrop
+                { name: 'Paradex', llamaSlug: 'paradex', pointsSeasonStart: '2025-01-03', pointsMax: 310000000, pointsMaxInfo: '100M points S1 + 400k points/semaine S2, fin estimée 31 Jan 2026', airdropPct: 20, airdropPctInfo: '5% S1 + 15% S2 (source: Paradex Foundation)' }, // 20% Genesis Airdrop
                 { name: 'EdgeX', llamaSlug: 'edgex', pointsSeasonStart: '2025-12-11', pointsMax: null, airdropPct: 25 }, // ~25% estimé
                 { name: 'Ethereal', llamaSlug: 'ethereal-dex', pointsSeasonStart: '2025-08-14', pointsMax: null, airdropPct: null }, // Non communiqué
                 { name: 'Ostium', llamaSlug: 'ostium', pointsSeasonStart: '2025-03-31', pointsMax: 55000000, pointsMaxInfo: '30M points S1 (estimé) + 25M points S2 (hardcap)', airdropPct: null }, // Non annoncé
@@ -735,6 +735,7 @@
                     pointsMax: project.pointsMax || null, // Max de points en circulation à l'Airdrop
                     pointsMaxInfo: project.pointsMaxInfo || null, // Info supplémentaire sur le max de points
                     airdropPct: project.airdropPct || null, // % du supply alloué à l'airdrop au TGE (null = utilise default)
+                    airdropPctInfo: project.airdropPctInfo || null, // Info supplémentaire sur le % airdrop
                     fees24h: feesData?.total24h || 0,
                     fees7d: feesData?.total7d || 0,
                     fees7dAvg: daily7dAvg,
@@ -999,7 +1000,9 @@
                 </td>
                 <td class="text-right py-3 px-4 text-sm">
                     ${project.airdropPct !== null 
-                        ? `<span class="text-emerald-700 font-medium">${project.airdropPct}%</span>`
+                        ? (project.airdropPctInfo 
+                            ? `<span class="tooltip-container"><span class="text-emerald-700 font-medium">${project.airdropPct}%</span> <span class="text-amber-600 text-xs">ⓘ</span><span class="tooltip-text">${project.airdropPctInfo}</span></span>`
+                            : `<span class="text-emerald-700 font-medium">${project.airdropPct}%</span>`)
                         : `<span class="text-gray-500 italic">${defaultAirdropPct}%</span>`
                     }
                 </td>
