@@ -274,8 +274,11 @@
                                 <span class="tooltip-text">Valeur estimée d'un point = (FDV × %Airdrop) / Points Max</span>
                             </div>
                         </th>
-                        <th class="text-left py-3 px-4">
-                            Commentaires
+                        <th class="text-center py-3 px-4">
+                            <div class="tooltip-container">
+                                💬
+                                <span class="tooltip-text">Commentaires et conseils</span>
+                            </div>
                         </th>
                     </tr>
                 </thead>
@@ -1026,8 +1029,13 @@
                         return `<span class="${colorClass}">${formatPointValue(pointValue)}</span>`;
                     })()}
                 </td>
-                <td class="py-3 px-4 text-sm text-gray-600 max-w-xs">
-                    ${project.comment ? `<span class="line-clamp-2">${project.comment}</span>` : '<span class="text-gray-400">-</span>'}
+                <td class="text-center py-3 px-4">
+                    ${project.comment 
+                        ? `<span class="tooltip-container text-gray-500 hover:text-gray-700 cursor-help">
+                            <span class="text-base">💬</span>
+                            <span class="tooltip-text">${project.comment}</span>
+                           </span>` 
+                        : '<span class="text-gray-300">-</span>'}
                 </td>
             ` : '';
             
