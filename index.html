@@ -27,12 +27,12 @@
                             900: '#0a0a0f',
                             800: '#12121a',
                             700: '#1a1a24',
-                            600: '#24242f',
-                            500: '#3a3a4a',
-                            400: '#5a5a6a',
-                            300: '#8a8a9a',
-                            200: '#b8b8c8',
-                            100: '#dadadd',
+                            600: '#2e2e3a',
+                            500: '#4a4a5a',
+                            400: '#7a7a8a',
+                            300: '#a0a0b0',
+                            200: '#c8c8d8',
+                            100: '#e8e8ed',
                         },
                         'neon': {
                             cyan: '#00f5ff',
@@ -68,8 +68,8 @@
             --border-color: #2a2a3a;
             --border-glow: #00f5ff;
             --text-primary: #e8e8ec;
-            --text-secondary: #b8b8c8;
-            --text-muted: #8a8a9a;
+            --text-secondary: #c8c8d8;
+            --text-muted: #a0a0b0;
             --neon-cyan: #00f5ff;
             --neon-green: #00ff88;
             --neon-purple: #a855f7;
@@ -2097,9 +2097,9 @@
         
         // Couleurs des scénarios pour la ligne du ratio
         const scenarioColors = {
-            bearish: 'rgba(220, 38, 38, 0.7)',   // Rouge
-            mid: 'rgba(124, 58, 237, 0.7)',      // Violet
-            bullish: 'rgba(22, 163, 74, 0.7)'    // Vert
+            bearish: 'rgba(168, 85, 247, 0.9)',   // Violet (Réaliste)
+            mid: 'rgba(0, 255, 136, 0.9)',        // Vert (Bullish)
+            bullish: 'rgba(255, 136, 0, 0.9)'     // Orange (Giga Bullish)
         };
 
         async function updateChart(avgRatio, scenario = null) {
