@@ -306,24 +306,24 @@
         }
         
         .scenario-btn.active-bearish {
-            background: rgba(255, 51, 102, 0.15);
-            border-color: var(--neon-red);
-            color: var(--neon-red);
-            box-shadow: 0 0 15px rgba(255, 51, 102, 0.2);
-        }
-        
-        .scenario-btn.active-mid {
             background: rgba(168, 85, 247, 0.15);
             border-color: var(--neon-purple);
             color: var(--neon-purple);
             box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
         }
         
-        .scenario-btn.active-bullish {
+        .scenario-btn.active-mid {
             background: rgba(0, 255, 136, 0.15);
             border-color: var(--neon-green);
             color: var(--neon-green);
             box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+        
+        .scenario-btn.active-bullish {
+            background: rgba(255, 136, 0, 0.15);
+            border-color: var(--neon-orange);
+            color: var(--neon-orange);
+            box-shadow: 0 0 15px rgba(255, 136, 0, 0.2);
         }
         
         /* Input styling */
@@ -531,6 +531,7 @@
         /* Mobile table scroll */
         .table-scroll-wrapper {
             overflow-x: auto;
+            overflow-y: visible;
             -webkit-overflow-scrolling: touch;
         }
         
@@ -556,6 +557,15 @@
         /* Force Post-TGE table to fill width */
         .tech-table {
             width: 100%;
+        }
+        
+        /* Fix tooltips being cut by overflow */
+        .tech-card {
+            overflow: visible;
+        }
+        
+        .tooltip-container .tooltip-text {
+            z-index: 9999;
         }
     </style>
 </head>
@@ -591,21 +601,21 @@
                         <div class="tooltip-container">
                             <button id="scenarioBearish" onclick="setScenario('bearish')" 
                                 class="scenario-btn">
-                                🐻 Bearish
+                                🔮 Réaliste
                             </button>
                             <span id="tooltipBearish" class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
                         </div>
                         <div class="tooltip-container">
                             <button id="scenarioMid" onclick="setScenario('mid')" 
                                 class="scenario-btn">
-                                🧙 Mid
+                                🐂 Bullish
                             </button>
                             <span id="tooltipMid" class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
                         </div>
                         <div class="tooltip-container">
                             <button id="scenarioBullish" onclick="setScenario('bullish')" 
                                 class="scenario-btn">
-                                🐂 Bullish
+                                🚀 Giga Bullish
                             </button>
                             <span id="tooltipBullish" class="tooltip-text">Calculé par rapport aux frais actuels</span>
                         </div>
@@ -658,21 +668,21 @@
                     <div class="tooltip-container relative">
                         <button id="scenarioBearish2" onclick="setScenario('bearish')" 
                             class="scenario-btn">
-                            🐻 Bearish
+                            🔮 Réaliste
                         </button>
                         <span id="tooltipBearish2" class="tooltip-text">Prévoit un -66% sur les frais post TGE (cas de Lighter)</span>
                     </div>
                     <div class="tooltip-container relative">
                         <button id="scenarioMid2" onclick="setScenario('mid')" 
                             class="scenario-btn">
-                            🧙 Mid
+                            🐂 Bullish
                         </button>
                         <span id="tooltipMid2" class="tooltip-text">Prévoit un -33% sur les frais post TGE</span>
                     </div>
                     <div class="tooltip-container relative">
                         <button id="scenarioBullish2" onclick="setScenario('bullish')" 
                             class="scenario-btn">
-                            🐂 Bullish
+                            🚀 Giga Bullish
                         </button>
                         <span id="tooltipBullish2" class="tooltip-text">Calculé par rapport aux frais actuels</span>
                     </div>
@@ -970,19 +980,19 @@
         };
         
         const scenarioMultipliers = {
-            bearish: 1/3,  // -66% sur les frais post TGE
-            mid: 2/3,      // -33% sur les frais post TGE
-            bullish: 1     // Frais actuels
+            bearish: 1/3,  // -66% sur les frais post TGE (Réaliste)
+            mid: 2/3,      // -33% sur les frais post TGE (Bullish)
+            bullish: 1     // Frais actuels (Giga Bullish)
         };
         const scenarioColorsRGB = {
-            bearish: { r: 255, g: 51, b: 102 },   // Neon Red
-            mid: { r: 168, g: 85, b: 247 },       // Neon Purple
-            bullish: { r: 0, g: 255, b: 136 }     // Neon Green
+            bearish: { r: 168, g: 85, b: 247 },   // Neon Purple (Réaliste)
+            mid: { r: 0, g: 255, b: 136 },        // Neon Green (Bullish)
+            bullish: { r: 255, g: 136, b: 0 }     // Neon Orange (Giga Bullish)
         };
         const scenarioTextClasses = {
-            bearish: { text: 'neon-text-red', bg: 'bg-mono-700', textDark: 'neon-text-red' },
-            mid: { text: 'neon-text-purple', bg: 'bg-mono-700', textDark: 'neon-text-purple' },
-            bullish: { text: 'neon-text-green', bg: 'bg-mono-700', textDark: 'neon-text-green' }
+            bearish: { text: 'neon-text-purple', bg: 'bg-mono-700', textDark: 'neon-text-purple' },
+            mid: { text: 'neon-text-green', bg: 'bg-mono-700', textDark: 'neon-text-green' },
+            bullish: { text: 'neon-text-orange', bg: 'bg-mono-700', textDark: 'neon-text-orange' }
         };
 
         // =====================================================
@@ -2351,8 +2361,8 @@
         
         // Charger les données au démarrage
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser le scénario Bullish par défaut
-            setScenario('bullish');
+            // Initialiser le scénario Réaliste par défaut
+            setScenario('bearish');
             
             loadAllData();
             
