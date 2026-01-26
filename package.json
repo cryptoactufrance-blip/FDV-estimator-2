@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vercel dev"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@vercel/speed-insights": "^1.0.12"
+  },
   "devDependencies": {}
 }

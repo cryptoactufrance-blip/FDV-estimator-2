@@ -36,5 +36,6 @@
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
       ]
     }
-  ]
+  ],
+  "buildCommand": "npm install"
 }
